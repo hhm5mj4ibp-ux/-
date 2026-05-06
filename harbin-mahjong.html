@@ -669,11 +669,13 @@ function createDeck(){
   return d;
 }
 
+const DEFAULT_ONLINE_API_BASE='https://harbin-mahjong-online.onrender.com';
+
 const UI={
   lang:'ja',
   difficulty:'normal',
   settingsOpen:false,
-  apiBase:'',
+  apiBase:DEFAULT_ONLINE_API_BASE,
 };
 
 const ONLINE={
@@ -849,7 +851,9 @@ function apiUrl(path){
 }
 function loadUiPrefs(){
   try{
-    UI.apiBase=normalizeApiBase(localStorage.getItem('hm_api_base')||'');
+    const raw=localStorage.getItem('hm_api_base');
+    if(raw===null) UI.apiBase=normalizeApiBase(DEFAULT_ONLINE_API_BASE);
+    else UI.apiBase=normalizeApiBase(raw);
   }catch(_e){}
 }
 function saveUiPrefs(){
@@ -865,7 +869,7 @@ function setOnlineServerUrl(){
   renderStartScreen();
 }
 function clearOnlineServerUrl(){
-  UI.apiBase='';
+  UI.apiBase=normalizeApiBase(DEFAULT_ONLINE_API_BASE);
   saveUiPrefs();
   renderStartScreen();
 }
