@@ -1044,7 +1044,7 @@ async function onlineStartRoom(){
   try{
     const data=await onlineRequest(`/api/rooms/${ONLINE.room.id}/start`,{playerId:ONLINE.playerId});
     ONLINE.room=data.room;
-    renderStartScreen();
+    renderOnlineOrStart();
   }catch(e){
     alert(`Online error: ${e.message}`);
   }
@@ -2301,6 +2301,10 @@ function render(){
 // START
 // ======================================================
 function renderStartScreen(){
+  if(ONLINE.room?.game&&ONLINE.private){
+    renderOnlineOrStart();
+    return;
+  }
   const diffBtn = (key,val)=>`<button class="btn btn-lite ${UI.difficulty===val?'active':''}" onclick="setDifficulty('${val}')">${t(key)}</button>`;
   const langBtn = (label,val)=>`<button class="btn btn-lite ${UI.lang===val?'active':''}" onclick="setLanguage('${val}')">${label}</button>`;
   const onlinePlayers = ONLINE.room ? ONLINE.room.players.map(p=>`${p.seat}:${p.name}${p.connected?'●':'○'}`).join(' / ') : '';
