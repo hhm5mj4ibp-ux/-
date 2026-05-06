@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: harbin-mahjong-online
+    runtime: node
+    plan: free
+    autoDeploy: true
+    buildCommand: "echo no-build"
+    startCommand: "node server/online-server.mjs"
+    envVars:
+      - key: PORT
+        value: 10000

@@ -1,0 +1,10 @@
+{
+  "name": "harbin-mahjong",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/online-server.mjs",
+    "start:online": "node server/online-server.mjs"
+  }
+}
