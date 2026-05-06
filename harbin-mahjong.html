@@ -749,6 +749,7 @@ const I18N={
     onlineServer:'対戦サーバーURL',
     onlineSetServer:'サーバーURL設定',
     onlineClearServer:'既定に戻す',
+    onlineAiSeats:'空き席はAIが操作します（2人〜4人で開始）',
   },
   zh:{
     title:'哈尔滨麻将',
@@ -811,6 +812,7 @@ const I18N={
     onlineServer:'对战服务器URL',
     onlineSetServer:'设置服务器URL',
     onlineClearServer:'恢复默认',
+    onlineAiSeats:'空位由电脑代打（2〜4人开始）',
   }
 };
 
@@ -2313,7 +2315,8 @@ function renderStartScreen(){
           ${onlinePlayers}
         </div>
         <div class="menu-row" style="margin-top:8px;">
-          ${isOnlineHost&&ONLINE.room.players.length===4?`<button class="btn btn-new" onclick="onlineStartRoom()">${t('onlineStart')}</button>`:''}
+          ${isOnlineHost&&ONLINE.room.players.length>=2&&ONLINE.room.players.length<=4?`<button class="btn btn-new" onclick="onlineStartRoom()">${t('onlineStart')}</button>`:''}
+          ${ONLINE.room&&ONLINE.room.status!=='playing'?`<div style="margin-top:6px;font-size:10px;color:#a8ebc4">${t('onlineAiSeats')}</div>`:''}
         </div>
       `:`
         <div class="menu-row">

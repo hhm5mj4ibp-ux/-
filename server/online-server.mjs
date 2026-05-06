@@ -8,6 +8,8 @@ const PORT = Number(process.env.PORT || 8787);
 const ROOT = new URL('..', import.meta.url).pathname;
 const ROOM_TTL_MS = 1000 * 60 * 60 * 3;
 const MAX_PLAYERS = 4;
+const MIN_PLAYERS_TO_START = 2;
+const AI_LV = { pon: 0.4, chi: 0.3 };
 
 const rooms = new Map();
 const clients = new Map();
@@ -244,9 +246,195 @@ function addPlayer(room, name = '') {
   return player;
 }
 
+function isHumanSeat(room, seat) {
+  return room.players.some((p) => p.seat === seat);
+}
+
+function claimReactionOrder(fromSeat) {
+  const out = [];
+  let s = fromSeat;
+  for (let i = 0; i < 3; i++) {
+    s = nextPlayer(s);
+    out.push(s);
+  }
+  return out;
+}
+
+function aiFindDiscardTile(hand) {
+  const scores = hand.map((tile) => {
+    let sc = 0;
+    if (countTile(hand, tile) >= 2) sc += 5;
+    if (tile.suit !== 'z') {
+      for (const t of hand) {
+        if (t.suit === tile.suit && Math.abs(t.num - tile.num) === 2) sc += 4;
+      }
+    }
+    if (tile.suit !== 'z') {
+      const adj = [{ suit: tile.suit, num: tile.num - 1 }, { suit: tile.suit, num: tile.num + 1 }];
+      for (const a of adj) {
+        if (a.num >= 1 && a.num <= 9 && hand.some((x) => tileEq(x, a))) sc += 2;
+      }
+    }
+    if (tile.suit === 'z' || tile.num === 1 || tile.num === 9) sc += 1;
+    return sc;
+  });
+  const min = Math.min(...scores);
+  const cands = hand.filter((_, i) => scores[i] === min);
+  return cands[Math.floor(Math.random() * cands.length)];
+}
+
+function aiFindSafeDiscardIndexKouTing(game, seat) {
+  const hand = game.hands[seat];
+  const tried = new Set();
+  const cands = [];
+  for (let i = 0; i < hand.length; i++) {
+    const k = tileKey(hand[i]);
+    if (tried.has(k)) continue;
+    tried.add(k);
+    const nh = hand.filter((_, j) => j !== i);
+    if (getKatanWaits(nh).length > 0) cands.push(i);
+  }
+  if (cands.length) return cands[Math.floor(Math.random() * cands.length)];
+  return 0;
+}
+
+function aiChooseDiscardIndex(game, seat) {
+  if (game.kouTing[seat] && game.lastDraw?.seat === seat) {
+    const t = game.lastDraw.tile;
+    const ix = game.hands[seat].findIndex((x) => tileEq(x, t));
+    if (ix >= 0) return ix;
+  }
+  if (game.kouTing[seat]) return aiFindSafeDiscardIndexKouTing(game, seat);
+  const pick = aiFindDiscardTile(game.hands[seat]);
+  return game.hands[seat].findIndex((t) => tileEq(t, pick));
+}
+
+function applyAiClaimPhase(room) {
+  const game = room.game;
+  if (game.phase !== 'claim' || !game.pending) return false;
+  const from = game.pending.from;
+  const tile = game.pending.tile;
+  const order = claimReactionOrder(from).filter((s) => !game.passed.includes(s));
+
+  for (const seat of order) {
+    if (isHumanSeat(room, seat)) continue;
+    if (canWin(game, seat, tile)) {
+      game.status = 'ended';
+      game.winner = { seat, type: 'ron', tile, from };
+      room.status = 'ended';
+      room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'ron', payload: {} });
+      return true;
+    }
+  }
+
+  for (const seat of order) {
+    if (isHumanSeat(room, seat) || game.kouTing[seat]) continue;
+    if (countTile(game.hands[seat], tile) >= 2) {
+      const needsPon = !game.melds[seat].some((m) => m.type === 'pon' || m.type === 'kan');
+      if (needsPon || Math.random() < AI_LV.pon) {
+        game.hands[seat] = removeTiles(game.hands[seat], [tile, tile]);
+        game.melds[seat].push({ type: 'pon', tiles: [tile, tile, tile], from });
+        game.turn = seat;
+        game.phase = 'discard';
+        game.pending = null;
+        game.passed = [];
+        game.skipDrawAfterCallBy = seat;
+        room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'pon', payload: {} });
+        return true;
+      }
+    }
+  }
+
+  const chiSeat = nextPlayer(from);
+  if (!game.passed.includes(chiSeat) && !isHumanSeat(room, chiSeat) && !game.kouTing[chiSeat]) {
+    const opts = getChiOptions(game.hands[chiSeat], tile);
+    const hasMeld = game.melds[chiSeat].some((m) => m.type === 'pon' || m.type === 'kan');
+    if (opts.length && hasMeld && Math.random() < AI_LV.chi) {
+      const opt = opts[0];
+      game.hands[chiSeat] = removeTiles(game.hands[chiSeat], opt);
+      game.melds[chiSeat].push({ type: 'chi', tiles: sortTiles([...opt, tile]), from });
+      game.turn = chiSeat;
+      game.phase = 'discard';
+      game.pending = null;
+      game.passed = [];
+      game.skipDrawAfterCallBy = chiSeat;
+      room.log.push({ at: Date.now(), playerId: 'ai', seat: chiSeat, type: 'chi', payload: { option: 0 } });
+      return true;
+    }
+  }
+
+  for (const seat of order) {
+    if (isHumanSeat(room, seat)) continue;
+    if (!game.passed.includes(seat)) {
+      game.passed.push(seat);
+      maybeAutoFinishClaim(game);
+      room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'skip', payload: {} });
+      return true;
+    }
+  }
+  return false;
+}
+
+function applyAiDiscardTurn(room, seat) {
+  const game = room.game;
+  const acts = legalActions(game, seat);
+  if (acts.some((a) => a.type === 'tsumo')) {
+    const tile = game.lastDraw?.seat === seat ? game.lastDraw.tile : null;
+    if (tile && canWin(game, seat, tile)) {
+      game.status = 'ended';
+      game.winner = { seat, type: 'tsumo', tile };
+      room.status = 'ended';
+      room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'tsumo', payload: {} });
+      return true;
+    }
+  }
+  const idx = aiChooseDiscardIndex(game, seat);
+  const tile = game.hands[seat][idx];
+  if (!tile) return false;
+  game.hands[seat].splice(idx, 1);
+  game.discards[seat].push(tile);
+  game.lastDiscard = { seat, tile };
+  game.lastDraw = null;
+  game.phase = 'claim';
+  game.pending = { from: seat, tile };
+  game.passed = [];
+  maybeAutoFinishClaim(game);
+  room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'discard', payload: { index: idx } });
+  return true;
+}
+
+function stepAiIfNeeded(room) {
+  const game = room.game;
+  if (!game || game.status !== 'playing') return false;
+
+  if (game.phase === 'discard' && game.turn != null) {
+    const seat = game.turn;
+    if (isHumanSeat(room, seat)) return false;
+    return applyAiDiscardTurn(room, seat);
+  }
+
+  if (game.phase === 'claim' && game.pending) {
+    const waiting = [0, 1, 2, 3].filter((s) => s !== game.pending.from && !game.passed.includes(s));
+    for (const s of waiting) {
+      if (isHumanSeat(room, s)) return false;
+    }
+    return applyAiClaimPhase(room);
+  }
+
+  return false;
+}
+
+function runAiUntilHuman(room) {
+  let guard = 0;
+  while (guard++ < 500 && stepAiIfNeeded(room)) {
+    bump(room);
+  }
+}
+
 function startGame(room, playerId) {
   if (room.hostId !== playerId) throw Object.assign(new Error('host_only'), { status: 403 });
-  if (room.players.length < 4) throw Object.assign(new Error('need_4_players'), { status: 409 });
+  if (room.players.length < MIN_PLAYERS_TO_START) throw Object.assign(new Error('need_more_players'), { status: 409 });
+  if (room.players.length > MAX_PLAYERS) throw Object.assign(new Error('room_full'), { status: 409 });
   if (room.status === 'playing') throw Object.assign(new Error('already_started'), { status: 409 });
 
   const deck = shuffle(createDeck());
@@ -279,6 +467,7 @@ function startGame(room, playerId) {
   };
   room.log.push({ at: Date.now(), type: 'game_started' });
   bump(room);
+  runAiUntilHuman(room);
 }
 
 function updateKouTing(game) {
@@ -415,6 +604,7 @@ function resolveOnlineAction(room, playerId, body) {
 
   room.log.push({ at: Date.now(), playerId, seat, type, payload: body });
   bump(room);
+  runAiUntilHuman(room);
 }
 
 function bump(room) {
