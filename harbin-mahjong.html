@@ -2257,12 +2257,14 @@ function render(){
     </div>
   `;
 
-  const treasureMuted=!p0.isTenpai?'opacity:.58;':'';
+  // 宝牌は山の裏の1枚なので、開局から表向きにするとゲームが壊れる。テンパイ・山切れ・使用後に公開。
+  const treasureFaceKnown=G.treasureUsed||p0.isTenpai||G.wall.length===0;
+  const treasureTileHtml=treasureFaceKnown?tileHTML(G.treasure,'sm'):tileHTML(null,'sm',true);
   const treasureUsedTag=G.treasureUsed
     ? (UI.lang==='zh'?' <span class="treasure-used">（已用）</span>':' <span class="treasure-used">（使用済）</span>')
     : '';
   const treasureInfo=
-    `<div class="treasure-reveal" style="${treasureMuted}">${tr('treasure','宝牌')}: ${tileHTML(G.treasure,'sm')}${treasureUsedTag}</div>`;
+    `<div class="treasure-reveal">${tr('treasure','宝牌')}: ${treasureTileHtml}${treasureUsedTag}</div>`;
 
   const turnLabel=sideName(G.turn);
   const playerLabelByIdx=[sideName(0),sideName(1),sideName(2),sideName(3)];
