@@ -99,7 +99,14 @@ body{
 .side-meld-group{display:flex;flex-direction:column;gap:1px;padding:1px;background:rgba(255,255,255,.15);border-radius:2px;}
 .side-melds{display:flex;flex-direction:column;gap:3px;align-items:center;}
 .side-divider{width:80%;height:1px;background:rgba(255,255,255,.2);margin:1px 0;}
-#center-area{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:rgba(0,0,0,.12);border-radius:8px;padding:4px;gap:4px;border:1px solid rgba(255,255,255,.08);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+#center-area{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:stretch;background:rgba(0,0,0,.12);border-radius:8px;padding:4px;gap:4px;border:1px solid rgba(255,255,255,.08);overflow:hidden;}
+#center-hud{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;width:100%;
+}
+#center-discard-wrap{
+  flex:1;min-height:0;min-width:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+}
 #bottom-area{display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px;min-height:0;flex-shrink:0;}
 #action-bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:3px;padding-bottom:max(4px, env(safe-area-inset-bottom));flex-shrink:0;}
 
@@ -119,7 +126,7 @@ body{
   background:linear-gradient(180deg,#151515 0%,#272727 100%);
   border:2px solid #3f3f3f;
   border-radius:10px;
-  padding:8px 14px;
+  padding:6px 12px;
   min-width:0;
   width:100%;
   max-width:min(260px, 92vw);
@@ -128,10 +135,19 @@ body{
 .center-console .digital{
   font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
   color:#29b8ff;
-  font-size:18px;
+  font-size:clamp(11px,2.6vw,16px);
   text-align:center;
-  letter-spacing:1px;
+  letter-spacing:.35px;
   text-shadow:0 0 8px rgba(41,184,255,.55);
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:2px 10px;
+  white-space:nowrap;
+}
+.center-console .digital .score-cell{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .wind-hud{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;}
 .wind-chip{
@@ -151,7 +167,6 @@ body{
 .center-ring{
   width:min(220px, 94vw);
   height:auto;
-  min-height:100px;
   border:1px solid rgba(255,255,255,.08);
   border-radius:12px;
   background:
@@ -168,7 +183,6 @@ body{
 }
 .dice-discards{
   width:100%;
-  min-height:180px;
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   grid-template-rows:1fr 1fr 1fr;
@@ -212,13 +226,14 @@ body{
   text-align:center;
   margin-bottom:3px;
 }
+.discard-pocket .p-count{color:#a8d4c4;font-size:9px;font-weight:600;}
 .discard-pocket .p-tiles{
   display:flex;
   flex-wrap:wrap;
   gap:3px;
   justify-content:center;
   min-height:48px;
-  max-height:120px;
+  max-height:140px;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
@@ -230,7 +245,7 @@ body{
   flex-wrap:nowrap;
   width:100%;
   max-width:100%;
-  overflow-x:hidden;
+  overflow-x:auto;
   overflow-y:hidden;
   -webkit-overflow-scrolling:touch;
   background:linear-gradient(180deg,rgba(63,37,11,.9),rgba(40,22,6,.95));
@@ -242,7 +257,7 @@ body{
 .human-rack .melds-row{flex-shrink:0;}
 
 /* keep scrolling behavior but hide ugly scrollbars */
-#center-area,
+#center-discard-wrap,
 .discard-pocket .p-tiles,
 .human-rack,
 #top-area .tiles-row,
@@ -250,7 +265,7 @@ body{
   scrollbar-width:none;          /* Firefox */
   -ms-overflow-style:none;       /* old Edge/IE */
 }
-#center-area::-webkit-scrollbar,
+#center-discard-wrap::-webkit-scrollbar,
 .discard-pocket .p-tiles::-webkit-scrollbar,
 .human-rack::-webkit-scrollbar,
 #top-area .tiles-row::-webkit-scrollbar,
@@ -576,16 +591,16 @@ body:not(.fx-hitstop) .table-shell{
   .tile.side{width:28px;height:19px;font-size:9px;}
   .tile.side-xs{width:22px;height:15px;font-size:7px;}
   .wind-chip{min-width:24px;height:20px;padding:0 5px;font-size:10px;}
-  .center-console .digital{font-size:clamp(11px,3.2vw,16px);letter-spacing:.2px;}
+  .center-console .digital{font-size:clamp(10px,3vw,14px);letter-spacing:.2px;}
   .wall-info{font-size:11px;}
   .message{font-size:11px;padding:4px 8px;}
   .player-label{font-size:9px;}
   .btn{padding:8px 12px;font-size:12px;}
-  .dice-discards{min-height:150px;gap:4px;}
-  .dice-center{font-size:13px;}
+  .dice-discards{gap:4px;}
+  .dice-center{font-size:12px;}
   .discard-pocket{min-height:62px;padding:4px;}
   .discard-pocket .p-label{font-size:9px;}
-  .discard-pocket .p-tiles{max-height:84px;gap:2px;}
+  .discard-pocket .p-tiles{max-height:100px;gap:2px;}
   .tile.just-drawn{transform:translateY(-6px) scale(1.03);}
   .tile.just-drawn::after{font-size:7px;padding:1px 3px;top:-7px;}
 }
@@ -599,7 +614,7 @@ body:not(.fx-hitstop) .table-shell{
 /* short screens (landscape phone) */
 @media (max-height:480px){
   #top-area{min-height:40px;}
-  .center-ring{min-height:84px;padding:4px;}
+  .center-ring{padding:4px;}
   .discard-pocket .p-tiles{max-height:44px;}
 }
 </style>
@@ -996,6 +1011,7 @@ function buildOnlineGame(){
     skipDrawAfterCallBy:null,
     lastWin:null,
     fxFlash:null,
+    _epoch:0,
   };
 }
 function renderOnlineOrStart(){
@@ -1231,9 +1247,28 @@ function parseTileKey(k){
 // GAME STATE
 // ======================================================
 let G=null;
+let MATCH_EPOCH=0;
 const FX_STATE={lastAt:0,combo:0};
 
+function scheduleMatch(fn, ms){
+  if(!G) return;
+  const ep=G._epoch;
+  setTimeout(()=>{ if(!G||G._epoch!==ep) return; fn(); }, ms);
+}
+
 function startGame(){
+  MATCH_EPOCH++;
+  if(_fxHideTimer){clearTimeout(_fxHideTimer);_fxHideTimer=null;}
+  if(_fxHitstopTimer){clearTimeout(_fxHitstopTimer);_fxHitstopTimer=null;}
+  if(_fxShakeTimer){clearTimeout(_fxShakeTimer);_fxShakeTimer=null;}
+  document.body.classList.remove('fx-hitstop');
+  const rootFx=document.getElementById('action-fx');
+  if(rootFx) rootFx.classList.remove('show','fx-chi','fx-pon','fx-kan');
+  const shell0=document.querySelector('.table-shell');
+  if(shell0) shell0.classList.remove('fx-shake');
+  FX_STATE.lastAt=0;
+  FX_STATE.combo=0;
+
   document.getElementById('overlay').classList.add('hidden');
   const deck=shuffle(createDeck());
   // Last tile = treasure
@@ -1275,6 +1310,7 @@ function startGame(){
     skipDrawAfterCallBy:null,
     lastWin:null,
     fxFlash:null,
+    _epoch:MATCH_EPOCH,
   };
   updateAllTenpai();
   render();
@@ -1438,7 +1474,7 @@ function drawAndPlay(pi){
       G.phase='discard';
       G.tsumoTile=drawn;
       render();
-      setTimeout(()=>resolveWin(0,drawn,true,true),900);
+      scheduleMatch(()=>resolveWin(0,drawn,true,true),900);
     } else {
       resolveWin(pi,drawn,true,true);
     }
@@ -1465,7 +1501,7 @@ function drawAndPlay(pi){
         G.phase='discard';
         G.humanOptions=[];
         render();
-        setTimeout(()=>resolveWin(0,drawn,true,false),900);
+        scheduleMatch(()=>resolveWin(0,drawn,true,false),900);
       } else {
         G.msg=UI.lang==='zh'?'可以自摸和牌！':'ツモ上がりできます！';
         G.phase='discard';
@@ -1488,7 +1524,7 @@ function drawAndPlay(pi){
         ? `扣听中... 摸到${tileName(drawn)}（自动打出） ${tr('waiting','待ち')}: ${p.waits.map(tileName).join(' ')}`
         : `扣聴中... ${tileName(drawn)}を引きました（自動で捨てます） ${tr('waiting','待ち')}: ${p.waits.map(tileName).join(' ')}`;
       render();
-      setTimeout(()=>autoDiscardDrawn(0),900);
+      scheduleMatch(()=>autoDiscardDrawn(0),900);
     } else {
       const waits=getKatanWaits(p.hand);
       G.msg=waits.length>0
@@ -1498,9 +1534,9 @@ function drawAndPlay(pi){
     }
   } else {
     if(p.kouTing){
-      setTimeout(()=>autoDiscardDrawn(pi),700);
+      scheduleMatch(()=>autoDiscardDrawn(pi),700);
     } else {
-      setTimeout(()=>aiDiscard(pi),600);
+      scheduleMatch(()=>aiDiscard(pi),600);
     }
   }
 }
@@ -1510,13 +1546,14 @@ function autoDiscardDrawn(pi){
   const p=G.players[pi];
   const drawn=p.drawnTile||G.lastDrawn;
   if(!drawn){return;}
-  const idx=p.hand.findIndex(t=>t===drawn);
-  if(idx>=0) p.hand.splice(idx,1);
-  else {
-    // fallback: find by value
-    const i2=p.hand.findIndex(t=>tileEq(t,drawn));
-    if(i2>=0) p.hand.splice(i2,1);
+  const idx=p.hand.findIndex(t=>tileEq(t,drawn));
+  if(idx<0){
+    addLog(UI.lang==='zh'
+      ? `[sync]扣听自动打出失败: 手牌中无${tileName(drawn)}`
+      : `[整合]扣聴自動打牌: 手牌に${tileName(drawn)}がありません`);
+    return;
   }
+  p.hand.splice(idx,1);
   p.discards.push(drawn);
   p.drawnTile=null;
   if(p.isHuman) G.lastDrawn=null;
@@ -1548,6 +1585,9 @@ function drawAfterDiscard(pi){
   // Invariant for 先出後引き: each turn start should be concealed 13-(melds*3).
   const expected=expectedHandCount(p);
   if(p.hand.length!==expected){
+    addLog(UI.lang==='zh'
+      ? `[sync]引牌后手牌长度 ${p.hand.length}→${expected}（截断） ${tilesText(p.hand)}`
+      : `[整合]摸調後の手牌 ${p.hand.length}→${expected}（切り詰め） ${tilesText(p.hand)}`);
     p.hand=sortTiles(p.hand.slice(0,expected));
   }
   return true;
@@ -1599,7 +1639,7 @@ function afterDiscard(fromPi, tile){
     if(checkWin(human,tile)){
       // In 扣聴, auto-ron (no choice). Otherwise offer button.
       if(human.kouTing){
-        setTimeout(()=>resolveWin(0,tile,false,false),500);
+        scheduleMatch(()=>resolveWin(0,tile,false,false),500);
         G.msg=`${tr('ron','ロン！')} ${tileName(tile)}`;
         render();
         return;
@@ -1633,7 +1673,7 @@ function processAIResponses(fromPi, tile, done){
   for(const p of G.players){
     if(p.isHuman||p.idx===fromPi) continue;
     if(checkWin(p,tile)){
-      setTimeout(()=>resolveWin(p.idx,tile,false,false),400);
+      scheduleMatch(()=>resolveWin(p.idx,tile,false,false),400);
       return;
     }
   }
@@ -1641,9 +1681,8 @@ function processAIResponses(fromPi, tile, done){
   for(const p of G.players){
     if(p.isHuman||p.idx===fromPi||p.kouTing) continue;
     if(countTile(p.hand,tile)>=2&&p.hand.length>3){
-      const needsPon=!p.melds.some(m=>m.type==='pon'||m.type==='kan');
-      if(needsPon||Math.random()<lv.pon){
-        setTimeout(()=>{aiPon(p.idx,tile,fromPi);},400);
+      if(Math.random()<lv.pon){
+        scheduleMatch(()=>{aiPon(p.idx,tile,fromPi);},400);
         return;
       }
     }
@@ -1654,7 +1693,7 @@ function processAIResponses(fromPi, tile, done){
   if(!nxt.isHuman&&!nxt.kouTing){
     const chiOpts=getChiOptions(nxt.hand,tile);
     if(chiOpts.length>0&&nxt.melds.some(m=>m.type==='pon'||m.type==='kan')&&Math.random()<lv.chi){
-      setTimeout(()=>{aiChi(nextPi,tile,chiOpts[0],fromPi);},400);
+      scheduleMatch(()=>{aiChi(nextPi,tile,chiOpts[0],fromPi);},400);
       return;
     }
   }
@@ -1671,7 +1710,7 @@ function nextTurn(fromPi){
       G.msg=tr('autoKouting','扣聴中... 自動で捨てます');
       G.humanOptions=[];
       render();
-      setTimeout(()=>autoDiscardDrawn(0),600);
+      scheduleMatch(()=>autoDiscardDrawn(0),600);
     } else {
       G.msg=tr('chooseDiscard','牌を選んで捨てましょう（先出後引き）');
       G.humanOptions=[];
@@ -1679,9 +1718,9 @@ function nextTurn(fromPi){
     }
   } else {
     if(p.kouTing){
-      setTimeout(()=>autoDiscardDrawn(G.turn),500);
+      scheduleMatch(()=>autoDiscardDrawn(G.turn),500);
     } else {
-      setTimeout(()=>aiDiscard(G.turn),500);
+      scheduleMatch(()=>aiDiscard(G.turn),500);
     }
   }
 }
@@ -1768,7 +1807,7 @@ function humanAnkan(tileK){
       G.lastDrawn=drawn;
       G.msg=UI.lang==='zh'?'暗杠后补宝牌！':'暗槓後に宝牌補充！';
       render();
-      setTimeout(()=>resolveWin(0,drawn,true,true),700);
+      scheduleMatch(()=>resolveWin(0,drawn,true,true),700);
       return;
     }
     endRound(tr('roundDraw','流局'));
@@ -1837,9 +1876,9 @@ function aiPon(pi, tile, fromPi){
   if(p.kouTing){
     // The pon itself made AI tenpai — but they still must discard one tile.
     // Use aiDiscard (which picks worst tile) since auto-discard-drawn doesn't apply (no drawn).
-    setTimeout(()=>aiDiscard(pi),600);
+    scheduleMatch(()=>aiDiscard(pi),600);
   } else {
-    setTimeout(()=>aiDiscard(pi),600);
+    scheduleMatch(()=>aiDiscard(pi),600);
   }
 }
 
@@ -1865,7 +1904,7 @@ function aiChi(pi, tile, handPair, fromPi){
   updateAllTenpai();
   G.turn=pi;
   G.phase='discard';
-  setTimeout(()=>aiDiscard(pi),600);
+  scheduleMatch(()=>aiDiscard(pi),600);
 }
 
 function aiDiscard(pi){
@@ -2181,7 +2220,8 @@ function render(){
 
   // === CENTER (dice-like compass layout) ===
   const pocket=(label,tiles,cls,sizeCls='sm',ownerIdx=-1)=>{
-    const tileHtml=tiles.slice(-14).map((t,i,arr)=>{
+    const cnt=tiles.length;
+    const tileHtml=tiles.slice(-18).map((t,i,arr)=>{
       const inFlashWindow = !!(G.fxFlash&&Date.now()<=G.fxFlash.until);
       const isFxFlashSource = inFlashWindow &&
         ownerIdx===G.fxFlash.from &&
@@ -2198,7 +2238,7 @@ function render(){
     }).join('');
     return `
     <div class="discard-pocket ${cls}">
-      <div class="p-label">${label}</div>
+      <div class="p-label">${label} <span class="p-count">(${cnt})</span></div>
       <div class="p-tiles">${tileHtml}</div>
     </div>
   `;
@@ -2217,8 +2257,12 @@ function render(){
     </div>
   `;
 
-  const treasureInfo=p0.isTenpai?
-    `<div class="treasure-reveal">${tr('treasure','宝牌')}: ${tileHTML(G.treasure,'sm')}</div>`:'';
+  const treasureMuted=!p0.isTenpai?'opacity:.58;':'';
+  const treasureUsedTag=G.treasureUsed
+    ? (UI.lang==='zh'?' <span class="treasure-used">（已用）</span>':' <span class="treasure-used">（使用済）</span>')
+    : '';
+  const treasureInfo=
+    `<div class="treasure-reveal" style="${treasureMuted}">${tr('treasure','宝牌')}: ${tileHTML(G.treasure,'sm')}${treasureUsedTag}</div>`;
 
   const turnLabel=sideName(G.turn);
   const playerLabelByIdx=[sideName(0),sideName(1),sideName(2),sideName(3)];
@@ -2232,16 +2276,16 @@ function render(){
   ` : '';
   const winds=[tr('windEast','東'),tr('windSouth','南'),tr('windWest','西'),tr('windNorth','北')];
   const windHUD=winds.map((w,i)=>`<div class="wind-chip ${G.turn===i?'active':''}">${w}</div>`).join('');
-  const scoreStr=G.scores.map((s,i)=>`${sideName(i)}:${s}`).join(' ');
+  const scoreDigital=G.scores.map((s,i)=>`<span class="score-cell">${sideName(i)}:${s}</span>`).join('');
 
-  const humanLabel = `${sideName(0)} ${ktBadge(p0)} ${tenpaiSpan(p0)} ${p0.kouTing?`<span style="color:#ffd44b;font-size:10px">${tr('waiting','待ち')}: ${(p0.waits||waits).map(tileName).join(' ')}</span>`:''}`;
+  const humanLabel = `${G.turn===0?'▶ ':''}${sideName(0)} ${ktBadge(p0)} ${tenpaiSpan(p0)} ${p0.kouTing?`<span style="color:#ffd44b;font-size:10px">${tr('waiting','待ち')}: ${(p0.waits||waits).map(tileName).join(' ')}</span>`:''}`;
 
   const html=`
   <div class="table-shell">
   <div class="table-felt">
   <div id="top-area">
     <div style="text-align:center">
-      <div class="player-label">${p2.name} ${p2.melds.length>0?'['+p2.melds.length+tr('calledCount','鳴')+']':''} ${ktBadge(p2)} ${tenpaiSpan(p2)}</div>
+      <div class="player-label">${G.turn===2?'▶ ':''}${p2.name} ${p2.melds.length>0?'['+p2.melds.length+tr('calledCount','鳴')+']':''} ${ktBadge(p2)} ${tenpaiSpan(p2)}</div>
       <div class="tiles-row">${topHand}</div>
       <div class="melds-row">${topMelds}</div>
       <div class="tiles-row">${topDiscards}</div>
@@ -2249,27 +2293,31 @@ function render(){
   </div>
   <div id="middle-area">
     <div id="left-area">
-      <div class="player-label">${p1.name} ${ktBadge(p1)} ${tenpaiSpan(p1)}</div>
+      <div class="player-label">${G.turn===1?'▶ ':''}${p1.name} ${ktBadge(p1)} ${tenpaiSpan(p1)}</div>
       ${leftHand}
       ${leftMelds}
       ${leftDiscards}
     </div>
     <div id="center-area">
-      <div class="wall-info">${tr('wall','山')}: ${G.wall.length}${tr('wallUnit','枚')}</div>
-      <div class="center-ring">
-        <div class="wind-hud">${windHUD}</div>
-        <div class="center-console">
-          <div class="digital">${scoreStr}</div>
+      <div id="center-hud">
+        <div class="wall-info">${tr('wall','山')}: ${G.wall.length}${tr('wallUnit','枚')}</div>
+        <div class="center-ring">
+          <div class="wind-hud">${windHUD}</div>
+          <div class="center-console">
+            <div class="digital">${scoreDigital}</div>
+          </div>
         </div>
+        <div class="message">${G.msg}</div>
+        ${pendingTilePopup}
+        <div class="wall-info" style="font-size:10px">${tr('turn','番手')}: <span class="current-turn-indicator">${turnLabel}</span></div>
+        ${treasureInfo}
       </div>
-      <div class="message">${G.msg}</div>
-      ${pendingTilePopup}
-      <div class="wall-info" style="font-size:10px">${tr('turn','番手')}: <span class="current-turn-indicator">${turnLabel}</span></div>
-      ${treasureInfo}
-      <div class="center-discards">${centerDiscards}</div>
+      <div id="center-discard-wrap">
+        <div class="center-discards">${centerDiscards}</div>
+      </div>
     </div>
     <div id="right-area">
-      <div class="player-label">${p3.name} ${ktBadge(p3)} ${tenpaiSpan(p3)}</div>
+      <div class="player-label">${G.turn===3?'▶ ':''}${p3.name} ${ktBadge(p3)} ${tenpaiSpan(p3)}</div>
       ${rightHand}
       ${rightMelds}
       ${rightDiscards}
