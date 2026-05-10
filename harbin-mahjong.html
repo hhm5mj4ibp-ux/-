@@ -2375,11 +2375,6 @@ function renderStartScreen(){
           <button class="btn btn-new" onclick="onlineCreateRoom()">${t('onlineCreate')}</button>
           <button class="btn btn-lite" onclick="onlineJoinRoom()">${t('onlineJoin')}</button>
         </div>
-        <div class="menu-row" style="margin-top:8px;">
-          <button class="btn btn-ghost" onclick="setOnlineServerUrl()">${t('onlineSetServer')}</button>
-          <button class="btn btn-lite" onclick="clearOnlineServerUrl()">${t('onlineClearServer')}</button>
-        </div>
-        <div style="margin-top:6px;color:#d7f7dd;font-size:10px">${t('onlineServer')}: <code>${UI.apiBase||'(same-origin)'}</code></div>
       `}
     </div>
   `;
