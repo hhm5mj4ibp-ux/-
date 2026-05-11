@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node -e \"process.exit(0)\"",
+    "build": "node scripts/vercel-static-build.mjs",
     "start": "node server/online-server.mjs",
     "start:online": "node server/online-server.mjs",
     "vercel:login": "npx --yes vercel@latest login",
