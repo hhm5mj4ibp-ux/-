@@ -510,6 +510,25 @@ function seatOf(room, playerId) {
   return player.seat;
 }
 
+/** Client UI sorts the hand; discard index is that sorted order (including duplicate disambiguation). */
+function removeTileAtSortedIndex(hand, sortedIdx) {
+  const sorted = sortTiles([...hand]);
+  const tile = sorted[sortedIdx];
+  if (!tile) return null;
+  let nth = 0;
+  for (let i = 0; i < sortedIdx; i++) {
+    if (tileEq(sorted[i], tile)) nth++;
+  }
+  let seen = 0;
+  for (let i = 0; i < hand.length; i++) {
+    if (tileEq(hand[i], tile)) {
+      if (seen === nth) return i;
+      seen++;
+    }
+  }
+  return null;
+}
+
 function drawFor(game, seat) {
   if (!game.wall.length) {
     game.status = 'ended';
@@ -549,10 +568,11 @@ function resolveOnlineAction(room, playerId, body) {
 
   if (type === 'discard') {
     if (game.phase !== 'discard' || game.turn !== seat) throw Object.assign(new Error('not_your_turn'), { status: 409 });
-    const idx = Number(body.index);
-    const tile = game.hands[seat][idx];
-    if (!tile) throw Object.assign(new Error('invalid_tile'), { status: 400 });
-    game.hands[seat].splice(idx, 1);
+    const sortedIdx = Number(body.index);
+    const realIdx = removeTileAtSortedIndex(game.hands[seat], sortedIdx);
+    if (realIdx == null) throw Object.assign(new Error('invalid_tile'), { status: 400 });
+    const tile = game.hands[seat][realIdx];
+    game.hands[seat].splice(realIdx, 1);
     game.discards[seat].push(tile);
     game.lastDiscard = { seat, tile };
     game.lastDraw = null;

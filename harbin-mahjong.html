@@ -43,22 +43,45 @@ body{
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
 }
 
-/* === TILES: 写真風ベース + SVG牌面（tiles/*.png） === */
+/* === TILES: 表は淡い面＋濃青の帯、裏は同系の濃青＋薄灰青の縁で立体（参照イラスト寄せ） === */
 .tile:not(.back){
   position:relative;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  background-color:#e6d2ae;
-  background-image:
-    linear-gradient(180deg,rgba(255,255,255,.32) 0%,rgba(255,255,255,0) 38%),
-    radial-gradient(circle at 28% 14%,rgba(255,255,255,.5),rgba(255,255,255,0) 30%),
-    radial-gradient(ellipse 95% 70% at 50% 92%,rgba(80,52,20,.12),transparent 48%),
-    url(tiles/tile-face-bone.png);
-  background-size:100% 100%,100% 100%,100% 100%,cover;
-  background-position:0 0,0 0,0 0,center;
-  background-repeat:no-repeat;
-  border-radius:5px;border:1px solid #8a6830;box-shadow:0 2px 0 #c9a85e,0 4px 0 #1f4a32,1px 6px 8px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,244,190,.55),inset 0 -5px 10px rgba(90,58,22,.15);font-weight:bold;cursor:pointer;transition:transform .12s ease;overflow:hidden;
+  background:linear-gradient(165deg,#feffff 0%,#f4f9fd 38%,#e8f2fa 100%);
+  border-radius:2px;
+  border:1px solid #b8d4ea;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.96) inset,
+    0 -2px 6px rgba(120,175,215,.16) inset,
+    1px 1px 0 rgba(230,242,252,.95),
+    0 2px 0 rgba(190,215,238,.6),
+    0 4px 8px rgba(70,125,175,.16),
+    0 8px 14px rgba(55,110,155,.09);
+  font-weight:bold;cursor:pointer;transition:transform .12s ease;overflow:hidden;
 }
-.tile::before{content:"";position:absolute;left:3px;right:3px;top:3px;bottom:3px;border-radius:4px;border:1px solid rgba(181,137,36,.55);box-shadow:inset 0 1px 2px rgba(255,255,255,.75),inset 0 -1px 2px rgba(116,83,28,.18);pointer-events:none;z-index:1;}
-.tile:not(.back)::after{content:"";position:absolute;left:2px;right:2px;top:2px;height:42%;background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(255,255,255,0));border-radius:4px 4px 10px 10px;pointer-events:none;z-index:2;}
+.tile::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:12%;
+  min-height:3px;
+  /* 参照イラストの「厚みの青」に近い帯（表側の立体と色を揃える） */
+  background:linear-gradient(180deg,#7eb2e8 0%,#5f9ad8 38%,#4a86ca 72%,#3d74b4 100%);
+  border-top:1px solid rgba(220,236,252,.55);
+  box-shadow:
+    0 -1px 1px rgba(255,255,255,.28) inset,
+    0 2px 3px rgba(35,75,120,.2);
+  pointer-events:none;
+  z-index:1;
+}
+.tile:not(.back)::after{
+  content:"";
+  position:absolute;
+  left:2px;right:2px;top:2px;height:30%;
+  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(230,244,255,0));
+  border-radius:1px 1px 2px 2px;
+  pointer-events:none;
+  z-index:2;
+}
 .tile{-webkit-tap-highlight-color:transparent;}
 @media (hover:hover){
 .tile:hover{transform:translateY(-4px);}
@@ -68,41 +91,58 @@ body{
 .tile.pin{color:#125ec0;}
 .tile.sou{color:#0a7a2a;}
 .tile.chun{color:#c00;}
-/* 裏牌: 写真テクスチャ + 軽い艶レイヤー */
+/* 裏牌: 柄なし・参照イラストの濃青側面＋薄い青灰の縁、影で厚みを強調 */
 .tile.back{
   position:relative;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
   color:transparent;
-  border-color:#120a05;
-  border-width:1px;border-style:solid;
-  background-color:#3d2614;
-  font-weight:bold;cursor:pointer;transition:transform .12s ease;overflow:hidden;border-radius:5px;
-  background-image:
-    linear-gradient(155deg,rgba(255,220,170,.16) 0%,transparent 42%),
-    radial-gradient(ellipse 95% 60% at 50% 88%,rgba(0,0,0,.45),transparent 52%),
-    url(tiles/tile-back-photo.png);
-  background-size:100% 100%,100% 100%,cover;
-  background-position:center;
-  background-repeat:no-repeat;
+  border:1px solid #c4d8ea;
+  border-radius:2px;
+  font-weight:bold;cursor:pointer;transition:transform .12s ease;overflow:hidden;
+  background:
+    linear-gradient(105deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 42%,rgba(40,90,130,.06) 100%),
+    linear-gradient(180deg,#9ec4ef 0%,#7eace4 12%,#6a9ad8 32%,#5688cc 52%,#4676b8 72%,#3a649e 100%);
   box-shadow:
-    0 2px 0 #9a7340,
-    0 4px 0 #0a0604,
-    1px 6px 8px rgba(0,0,0,.58),
-    inset 0 1px 0 rgba(255,220,180,.25),
-    inset 0 -5px 12px rgba(0,0,0,.35);
+    0 0 0 1px rgba(220,235,248,.65) inset,
+    0 2px 0 rgba(255,255,255,.22) inset,
+    0 -5px 12px rgba(40,85,130,.22) inset,
+    1px 1px 0 rgba(225,238,252,.65),
+    0 2px 0 rgba(70,120,170,.32),
+    0 5px 8px rgba(55,105,155,.2),
+    0 9px 16px rgba(45,95,145,.12),
+    0 14px 22px rgba(40,85,125,.08);
 }
 .tile.back::before{display:none;}
 .tile.back::after{
   content:'';
-  position:absolute;left:10%;top:10%;width:80%;height:80%;
-  border-radius:4px;
+  position:absolute;inset:0;
+  border-radius:inherit;
   pointer-events:none;
-  border:1px solid rgba(255,210,140,.22);
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
-  background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 55%);
+  box-shadow:
+    inset 0 3px 6px rgba(255,255,255,.26),
+    inset 0 -4px 10px rgba(35,75,115,.26);
 }
 .tile .num{line-height:1;z-index:1;}
 .tile .suit{font-size:.6em;line-height:1;z-index:1;}
-.tile-svg{display:block;width:100%;height:100%;padding:7%;position:relative;z-index:3;filter:drop-shadow(0 1px .6px rgba(0,0,0,.45));}
+.tile-svg{display:block;width:100%;height:100%;padding:7%;position:relative;z-index:3;filter:drop-shadow(0 1px 1px rgba(70,125,175,.28));}
+/* スプライトは <img> で表示（background + var(url) が環境によって無効になり白牌になるのを避ける） */
+.tile-art{
+  overflow:hidden;
+  width:100%;
+  height:100%;
+  position:relative;
+  z-index:3;
+}
+.tile-art .tile-art-img{
+  position:absolute;
+  display:block;
+  left:calc(var(--tx) * -100% / 62);
+  top:calc(var(--ty) * -100% / 98);
+  width:calc(760 * 100% / 62);
+  height:calc(456 * 100% / 98);
+  max-width:none;
+  pointer-events:none;
+  user-select:none;
+}
 /* sizes */
 .tile.lg{width:38px;height:54px;font-size:17px;}
 .tile.lg .tile-svg{padding:8% 10%;}
@@ -122,7 +162,7 @@ body{
 
 /* kouting (tenpai-locked) hand: subtle green tint to indicate locked */
 .kouting-tile{filter:brightness(.93) saturate(.85);position:relative;}
-.kouting-tile::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,220,80,.55);border-radius:3px;pointer-events:none;}
+.kouting-tile::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,220,80,.55);border-radius:2px;pointer-events:none;}
 .kouting-badge{display:inline-block;background:linear-gradient(180deg,#d4a017,#a87b00);color:#fff;font-size:10px;font-weight:bold;padding:2px 8px;border-radius:10px;margin-left:4px;letter-spacing:.5px;box-shadow:0 1px 2px rgba(0,0,0,.4);}
 
 /* === LAYOUT === */
@@ -345,7 +385,8 @@ body{
 /* overlay */
 #overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;}
 #overlay.hidden{display:none;}
-.overlay-box{background:#fff;border-radius:12px;padding:20px;text-align:center;max-width:min(300px,92vw);width:100%;margin:0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));}
+.overlay-box{background:#fff;border-radius:12px;padding:20px;text-align:center;max-width:min(300px,92vw);width:100%;margin:0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));outline:none;box-shadow:0 8px 32px rgba(0,0,0,.35);}
+.overlay-box:focus-within{box-shadow:0 8px 32px rgba(0,0,0,.35),0 0 0 2px rgba(52,152,219,.45);}
 .overlay-box h2{margin-bottom:10px;font-size:20px;}
 .overlay-box p{margin-bottom:14px;color:#555;}
 .overlay-box .ov-detail{
@@ -652,12 +693,32 @@ body:not(.fx-hitstop) .table-shell{
   .center-ring{padding:4px;}
   .discard-pocket .p-tiles{max-height:44px;}
 }
+
+.turn-timer{
+  position:fixed;
+  top:max(6px, env(safe-area-inset-top));
+  right:max(6px, env(safe-area-inset-right));
+  z-index:40;
+  background:rgba(0,0,0,.78);
+  color:#ffe066;
+  font-size:12px;
+  font-weight:bold;
+  padding:5px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,220,100,.4);
+  pointer-events:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.45);
+  max-width:min(200px, 88vw);
+  text-align:center;
+}
+.turn-timer.hidden{display:none;}
 </style>
 </head>
 <body>
 <div id="app"></div>
-<div id="overlay" class="hidden">
-  <div class="overlay-box">
+<div id="turn-timer" class="turn-timer hidden" aria-live="polite"></div>
+<div id="overlay" class="hidden" role="presentation">
+  <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="ov-title">
     <h2 id="ov-title"></h2>
     <p id="ov-body"></p>
     <div id="ov-detail" class="ov-detail"></div>
@@ -737,6 +798,99 @@ const ONLINE={
   private:null,
 };
 
+const TURN_LIMIT_MS=30000;
+let _turnTimerGeneration=0;
+let _turnTickTimer=null;
+
+function clearTurnTimer(){
+  _turnTimerGeneration++;
+  if(_turnTickTimer){clearInterval(_turnTickTimer);_turnTickTimer=null;}
+  const el=document.getElementById('turn-timer');
+  if(el){el.classList.add('hidden');el.textContent='';}
+}
+
+function shouldArmHumanTurnTimer(){
+  if(!G||G.gameOver)return false;
+  if(G.turn!==0)return false;
+  const p0=G.players[0];
+  if(G.phase==='after_discard'&&G.humanOptions&&G.humanOptions.length)return true;
+  if(G.phase==='discard'&&!p0.kouTing)return true;
+  return false;
+}
+
+function leaveToMenu(){
+  if(G&&!G.gameOver){
+    if(!confirm(t('backToMenuConfirm')))return;
+  }
+  clearTurnTimer();
+  if(ONLINE.source){try{ONLINE.source.close();}catch(_e){}ONLINE.source=null;}
+  ONLINE.room=null;
+  ONLINE.playerId=null;
+  ONLINE.seat=null;
+  ONLINE.private=null;
+  ONLINE.status='';
+  G=null;
+  MATCH_EPOCH++;
+  document.removeEventListener('keydown',_overlayTrapKey,true);
+  _overlayFocusPrev=null;
+  const ov=document.getElementById('overlay');
+  if(ov) ov.classList.add('hidden');
+  const rootFx=document.getElementById('action-fx');
+  if(rootFx) rootFx.classList.remove('show','fx-chi','fx-pon','fx-kan');
+  renderStartScreen();
+}
+
+function applyTurnTimeoutAction(){
+  if(!G||G.gameOver)return;
+  const p0=G.players[0];
+  if(G.online){
+    if(G.phase==='after_discard'&&G.humanOptions.length){
+      if(onlineLegal('skip')) onlineAction('skip');
+      return;
+    }
+    if(G.phase==='discard'&&G.turn===0&&!p0.kouTing){
+      const t=aiFindDiscard(p0);
+      const idx=p0.hand.findIndex(x=>tileEq(x,t));
+      if(idx>=0) onlineAction('discard',{index:idx});
+    }
+    return;
+  }
+  if(G.phase==='after_discard'&&G.humanOptions.length){humanSkip();return;}
+  if(G.phase==='discard'&&!p0.kouTing){
+    const t=aiFindDiscard(p0);
+    const idx=p0.hand.findIndex(x=>tileEq(x,t));
+    if(idx>=0) humanDiscard(idx);
+  }
+}
+
+function onTurnTimeDeadline(scheduledGen){
+  if(scheduledGen!==_turnTimerGeneration)return;
+  if(!G||G.gameOver)return;
+  if(!shouldArmHumanTurnTimer())return;
+  clearTurnTimer();
+  applyTurnTimeoutAction();
+}
+
+function armTurnTimer(){
+  clearTurnTimer();
+  if(!G||G.gameOver)return;
+  if(!shouldArmHumanTurnTimer())return;
+  const scheduledGen=_turnTimerGeneration;
+  const deadline=Date.now()+TURN_LIMIT_MS;
+  const el=document.getElementById('turn-timer');
+  const tick=()=>{
+    if(scheduledGen!==_turnTimerGeneration)return;
+    const left=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+    if(el){
+      el.classList.remove('hidden');
+      el.textContent=left>0?`${tr('turnTimeLeft','残り')} ${left} ${tr('turnTimeSec','秒')}`:`0 ${tr('turnTimeSec','秒')}`;
+    }
+  };
+  tick();
+  _turnTickTimer=setInterval(tick,500);
+  setTimeout(()=>onTurnTimeDeadline(scheduledGen),TURN_LIMIT_MS);
+}
+
 const I18N={
   ja:{
     title:'ハルビン麻雀',
@@ -800,6 +954,10 @@ const I18N={
     onlineSetServer:'サーバーURL設定',
     onlineClearServer:'既定に戻す',
     onlineAiSeats:'空き席はAIが操作します（2人〜4人で開始）',
+    backToMenu:'メニューに戻る',
+    backToMenuConfirm:'対局を離れてメニューに戻りますか？（オンラインは再接続が必要になる場合があります）',
+    turnTimeLeft:'残り',
+    turnTimeSec:'秒',
   },
   zh:{
     title:'哈尔滨麻将',
@@ -863,6 +1021,10 @@ const I18N={
     onlineSetServer:'设置服务器URL',
     onlineClearServer:'恢复默认',
     onlineAiSeats:'空位由电脑代打（2〜4人开始）',
+    backToMenu:'返回菜单',
+    backToMenuConfirm:'要离开对局并返回菜单吗？（在线对局可能需要重新加入房间）',
+    turnTimeLeft:'剩余',
+    turnTimeSec:'秒',
   }
 };
 
@@ -960,6 +1122,8 @@ function connectOnlineEvents(){
     renderOnlineOrStart();
   });
   source.onerror=()=>{
+    try{source.close();}catch(_e){}
+    if(ONLINE.source===source) ONLINE.source=null;
     ONLINE.status=tr('onlineDisconnected','未接続');
     renderStartScreen();
   };
@@ -1293,6 +1457,7 @@ function scheduleMatch(fn, ms){
 
 function startGame(){
   MATCH_EPOCH++;
+  clearTurnTimer();
   if(_fxHideTimer){clearTimeout(_fxHideTimer);_fxHideTimer=null;}
   if(_fxHitstopTimer){clearTimeout(_fxHitstopTimer);_fxHitstopTimer=null;}
   if(_fxShakeTimer){clearTimeout(_fxShakeTimer);_fxShakeTimer=null;}
@@ -1304,7 +1469,11 @@ function startGame(){
   FX_STATE.lastAt=0;
   FX_STATE.combo=0;
 
+  document.removeEventListener('keydown',_overlayTrapKey,true);
+  _overlayFocusPrev=null;
   document.getElementById('overlay').classList.add('hidden');
+  GameSFX.play('tap');
+  fxVibrate(12);
   const deck=shuffle(createDeck());
   // Last tile = treasure
   const treasure=deck[deck.length-1];
@@ -1376,8 +1545,76 @@ const expectedHandCount = p => Math.max(1,13-(p.melds.length*3));
 const sideName = i => (G&&G.players&&G.players[i]?G.players[i].name:(UI.lang==='zh'?['你','左家','对家','右家'][i]:['あなた','左','対面','右'][i]))||'?';
 const tilesText = tiles => (tiles&&tiles.length)?sortTiles(tiles).map(tileName).join(' '):(UI.lang==='zh'?'无':'なし');
 
+/* 軽量 SE（Web Audio・外部ファイルなし）と触覚 */
+const GameSFX=(function(){
+  let ctx=null;
+  const getCtx=()=>{
+    if(ctx) return ctx;
+    const C=window.AudioContext||window.webkitAudioContext;
+    if(!C) return null;
+    ctx=new C();
+    return ctx;
+  };
+  const resume=c=>{if(c&&c.state==='suspended') c.resume().catch(()=>{});};
+  const tone=(freq,dur,type,vol,t0)=>{
+    const c=getCtx();if(!c)return;
+    resume(c);
+    const t=c.currentTime+(t0||0);
+    const o=c.createOscillator();
+    const g=c.createGain();
+    o.type=type||'sine';
+    o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(c.destination);
+    o.start(t);o.stop(t+dur+0.03);
+  };
+  return{
+    play(name){
+      switch(name){
+        case 'discard':tone(540,0.038,'triangle',0.075,0);tone(360,0.032,'triangle',0.045,0.04);break;
+        case 'draw':tone(720,0.055,'sine',0.065,0);tone(880,0.04,'sine',0.04,0.05);break;
+        case 'chi':tone(920,0.055,'sine',0.08,0);tone(740,0.045,'sine',0.055,0.06);break;
+        case 'pon':tone(420,0.065,'square',0.055,0);tone(620,0.05,'square',0.045,0.07);break;
+        case 'kan':tone(300,0.1,'sine',0.085,0);tone(220,0.08,'sine',0.06,0.09);break;
+        case 'win':[523,659,784].forEach((f,i)=>{setTimeout(()=>tone(f,0.12,'sine',0.06,0),i*72);});break;
+        case 'skip':tone(320,0.045,'sine',0.04,0);break;
+        case 'tap':tone(800,0.028,'sine',0.045,0);break;
+        case 'round':tone(280,0.08,'triangle',0.05,0);break;
+        default:break;
+      }
+    }
+  };
+})();
+
+function fxVibrate(pattern){
+  try{if(navigator.vibrate) navigator.vibrate(pattern);}catch(_e){}
+}
+
+let _overlayFocusPrev=null;
+function _overlayTrapKey(ev){
+  const ov=document.getElementById('overlay');
+  if(!ov||ov.classList.contains('hidden')) return;
+  if(ev.key==='Escape'){ev.preventDefault();closeOverlay();return;}
+  if(ev.key!=='Tab') return;
+  const box=ov.querySelector('.overlay-box');
+  if(!box) return;
+  const sel='button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  const list=[].filter.call(box.querySelectorAll(sel),el=>!el.disabled&&el.offsetParent!==null);
+  if(!list.length) return;
+  const first=list[0],last=list[list.length-1];
+  if(ev.shiftKey){if(document.activeElement===first){ev.preventDefault();last.focus();}}
+  else{if(document.activeElement===last){ev.preventDefault();first.focus();}}
+}
+
 function closeOverlay(){
+  document.removeEventListener('keydown',_overlayTrapKey,true);
   document.getElementById('overlay').classList.add('hidden');
+  if(_overlayFocusPrev&&typeof _overlayFocusPrev.focus==='function'){
+    try{_overlayFocusPrev.focus();}catch(_e){}
+  }
+  _overlayFocusPrev=null;
 }
 
 function showOverlay(title, body, detail){
@@ -1385,7 +1622,15 @@ function showOverlay(title, body, detail){
   document.getElementById('ov-title').textContent=title||'';
   document.getElementById('ov-body').textContent=body||'';
   document.getElementById('ov-detail').textContent=detail||'';
-  document.getElementById('overlay').classList.remove('hidden');
+  const ov=document.getElementById('overlay');
+  document.removeEventListener('keydown',_overlayTrapKey,true);
+  _overlayFocusPrev=document.activeElement;
+  ov.classList.remove('hidden');
+  document.addEventListener('keydown',_overlayTrapKey,true);
+  requestAnimationFrame(function(){
+    const btn=document.getElementById('ov-view-btn');
+    if(btn) btn.focus();
+  });
 }
 
 const ACTION_FX = {
@@ -1419,7 +1664,7 @@ function preloadActionFx(){
   }
 }
 function preloadTileTextures(){
-  for(const path of ['tiles/tile-face-bone.png','tiles/tile-back-photo.png']){
+  for(const path of ['7198.png']){
     const img=new Image();
     img.src=toAssetUrl(path);
   }
@@ -1483,6 +1728,9 @@ function playActionFx(kind, actorLabel, meta={}){
   },1280);
 
   try{ render(); }catch(_e){}
+  if(kind==='chi'){GameSFX.play('chi');fxVibrate([16,28,16]);}
+  else if(kind==='pon'){GameSFX.play('pon');fxVibrate([20,35,20]);}
+  else if(kind==='kan'){GameSFX.play('kan');fxVibrate([22,40,22,40,28]);}
 }
 
 function openResultOverlay(){
@@ -1600,6 +1848,7 @@ function autoDiscardDrawn(pi){
   if(p.isHuman) G.lastDrawn=null;
   updateAllTenpai();
   addLog(`${p.isHuman?sideName(0):p.name}が${tileName(drawn)}を捨てました（扣聴）`);
+  if(p.isHuman){GameSFX.play('discard');fxVibrate(12);}
   afterDiscard(pi,drawn);
   render();
 }
@@ -1631,6 +1880,7 @@ function drawAfterDiscard(pi){
       : `[整合]摸調後の手牌 ${p.hand.length}→${expected}（切り詰め） ${tilesText(p.hand)}`);
     p.hand=sortTiles(p.hand.slice(0,expected));
   }
+  if(p.isHuman){GameSFX.play('draw');fxVibrate(10);}
   return true;
 }
 
@@ -1665,6 +1915,8 @@ function humanDiscard(tileIdx){
   G.lastDrawn=null;
   updateAllTenpai();
   addLog(`${sideName(0)}が${tileName(tile)}を捨てました`);
+  GameSFX.play('discard');
+  fxVibrate(15);
   afterDiscard(0,tile);
 }
 
@@ -1879,6 +2131,8 @@ function humanAnkan(tileK){
 
 function humanSkip(){
   if(G?.online){onlineAction('skip');return;}
+  GameSFX.play('skip');
+  fxVibrate(8);
   G.humanOptions=[];
   G.chiOpts=[];
   processAIResponses(G.pendingFrom,G.pendingDiscard,()=>finalizeAfterDiscardCycle(G.pendingFrom));
@@ -1999,6 +2253,8 @@ function aiWinTreasure(pi, treasureTile){
 // ======================================================
 function resolveWin(pi, tile, isTsumo, isTreasure){
   G.gameOver=true;
+  GameSFX.play('win');
+  fxVibrate([35,85,35,85,140]);
   const p=G.players[pi];
   let pts=isTreasure?12:isTsumo?4:2;
   const payers=G.players.filter(x=>x.idx!==pi);
@@ -2043,6 +2299,8 @@ function resolveWin(pi, tile, isTsumo, isTreasure){
 function endRound(reason){
   G.gameOver=true;
   G.lastWin=null;
+  GameSFX.play('round');
+  fxVibrate([28,55]);
   const body = UI.lang==='zh'
     ? '流局。你可以先查看牌局，或者开始新的一局。'
     : '流局です。盤面を確認するか、新しいゲームを始めてください。';
@@ -2057,6 +2315,28 @@ function tileName(t){
   if(!t) return '?';
   if(t.suit==='z') return '中';
   return t.num+SUIT_NAME[t.suit];
+}
+
+const TILE_ART_SHEET_URL=toAssetUrl('7198.png');
+const TILE_ART_POS={
+  // honors row (only 中 is used in current ruleset)
+  z5:[464,0],
+  // man row (5赤は使わず通常5を使用)
+  m1:[1,122],m2:[78,122],m3:[155,122],m4:[233,122],m5:[311,122],m6:[465,122],m7:[543,122],m8:[619,122],m9:[697,122],
+  // sou row
+  s1:[1,240],s2:[78,240],s3:[155,240],s4:[233,240],s5:[311,240],s6:[465,240],s7:[543,240],s8:[619,240],s9:[697,240],
+  // pin row
+  p1:[1,358],p2:[78,358],p3:[155,358],p4:[233,358],p5:[311,358],p6:[465,358],p7:[543,358],p8:[619,358],p9:[697,358],
+};
+function escapeHtmlAttr(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+}
+function tileFaceArt(t){
+  const key=`${t.suit}${t.num}`;
+  const pos=TILE_ART_POS[key]||TILE_ART_POS.z5;
+  const [tx,ty]=pos;
+  const src=TILE_ART_SHEET_URL;
+  return `<div class="tile-art" style="--tx:${tx};--ty:${ty}"><img class="tile-art-img" src="${escapeHtmlAttr(src)}" alt="" decoding="async" draggable="false"></div>`;
 }
 
 // --- luxury SVG tile faces ---
@@ -2177,7 +2457,7 @@ function tileFaceSVG(t){
 function tileHTML(t,cls='',faceDown=false,onclick=''){
   if(faceDown) return `<div class="tile back ${cls}" ${onclick?`onclick="${onclick}"`:''}></div>`;
   const sc=SUIT_CLS[t.suit];
-  return `<div class="tile ${sc} ${cls}" ${onclick?`onclick="${onclick}"`:''}>${tileFaceSVG(t)}</div>`;
+  return `<div class="tile ${sc} ${cls}" ${onclick?`onclick="${onclick}"`:''}>${tileFaceArt(t)}</div>`;
 }
 
 function renderTiles(tiles,cls,faceDown,onclickFn){
@@ -2374,7 +2654,7 @@ function render(){
     </div>
     <div id="human-discards">${humanDiscards}</div>
   </div>
-  <div id="action-bar">${buttons}</div>
+  <div id="action-bar">${buttons}<button type="button" class="btn btn-ghost" onclick="leaveToMenu()">${t('backToMenu')}</button></div>
   </div>
   </div>
   `;
@@ -2386,6 +2666,7 @@ function render(){
       el.onclick=()=>humanDiscard(i);
     });
   }
+  armTurnTimer();
 }
 
 // ======================================================
@@ -2396,6 +2677,8 @@ function renderStartScreen(){
     renderOnlineOrStart();
     return;
   }
+  clearTurnTimer();
+  G=null;
   const diffBtn = (key,val)=>`<button class="btn btn-lite ${UI.difficulty===val?'active':''}" onclick="setDifficulty('${val}')">${t(key)}</button>`;
   const langBtn = (label,val)=>`<button class="btn btn-lite ${UI.lang===val?'active':''}" onclick="setLanguage('${val}')">${label}</button>`;
   const onlinePlayers = ONLINE.room ? ONLINE.room.players.map(p=>`${p.seat}:${p.name}${p.connected?'●':'○'}`).join(' / ') : '';

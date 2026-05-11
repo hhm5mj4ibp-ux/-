@@ -1,5 +1,39 @@
 # 完全無料（スリープ許容）でオンライン対戦を使う手順
 
+## 0) フロントを Vercel にデプロイ（このリポジトリの最新版をウェブで開く）
+
+このプロジェクトは **静的 HTML**（`index.html` → `harbin-mahjong.html`）なので、Vercel では **フレームワークなし（Other）** でそのまま配信できます。
+
+### GitHub にプッシュ済みの場合（推奨）
+
+1. [Vercel](https://vercel.com) にログインする。
+2. **Add New… → Project** で該当リポジトリを **Import** する。
+3. 設定は次のとおり（多くは自動で問題ありません）。
+   - **Framework Preset**: `Other`（または「No framework」に相当するもの）
+   - **Root Directory**: `./`（リポジトリ直下）
+   - **Build Command**: `npm run build`（`package.json` の空ビルド。変更しなくてよい）
+   - **Output Directory**: 空欄のまま（プロジェクトルートをそのまま公開）
+4. **Deploy** を押す。
+5. 完了後に表示される **`https://＜プロジェクト名＞.vercel.app`** が本番 URL。`/` で `index.html` が開き、すぐ `harbin-mahjong.html` に入ります。
+
+**同梱が必要なアセット**: ルートの `7198.png` と、演出用に参照している PNG（リポジトリに含まれているもの）がデプロイ対象に含まれていることを確認してください。
+
+### CLI でデプロイする場合
+
+ローカルに Node/npm がある環境で、リポジトリのルートで:
+
+```bash
+npx vercel@latest
+```
+
+初回はログインとプロジェクト紐付けの対話が出ます。本番反映は:
+
+```bash
+npx vercel@latest --prod
+```
+
+---
+
 ## 1) サーバーをRender無料に置く
 
 このリポジトリには `render.yaml` を追加済みなので、Render側でほぼ自動設定されます。
