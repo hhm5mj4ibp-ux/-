@@ -18,19 +18,75 @@
 
 **同梱が必要なアセット**: ルートの `7198.png` と、演出用に参照している PNG（リポジトリに含まれているもの）がデプロイ対象に含まれていることを確認してください。
 
-### CLI でデプロイする場合
+### CLI でデプロイする（「とにかくできる」ようにする手順）
 
-ローカルに Node/npm がある環境で、リポジトリのルートで:
+**ポイントは 2 つだけです。** (1) パソコンに **Node.js（npm 付き）** を入れる、(2) **Vercel にログイン**してこのフォルダとプロジェクトを紐付ける。グローバルに `vercel` を入れる必要はありません（`npx` で毎回最新 CLI が使えます）。
+
+#### 1. Node.js を入れる（まだなら）
+
+- 公式: [https://nodejs.org/](https://nodejs.org/) の **LTS** をインストール  
+- または macOS + Homebrew: `brew install node`
+
+ターミナルで確認:
 
 ```bash
-npx vercel@latest
+node -v
+npm -v
 ```
 
-初回はログインとプロジェクト紐付けの対話が出ます。本番反映は:
+どちらもバージョンが表示されれば OK です。
+
+#### 2. Vercel にログイン（ブラウザで一度だけ）
+
+リポジトリのルート（`package.json` がある場所）で:
 
 ```bash
-npx vercel@latest --prod
+npm run vercel:login
 ```
+
+ブラウザが開くので、Vercel アカウントで承認します。
+
+#### 3. このリポジトリと Vercel プロジェクトを紐付ける（初回だけ）
+
+```bash
+npm run vercel:link
+```
+
+対話で **既存の Vercel プロジェクトを選ぶ**か、**新規作成**できます。完了すると `.vercel/` に設定ができますが、**`.gitignore` に含まれているため Git には上がりません**（各自のマシンで一度ずつ `link` すればよいです）。
+
+#### 4. 本番（Production）に反映する
+
+```bash
+npm run vercel:prod
+```
+
+プレビュー用にだけ試す場合:
+
+```bash
+npm run vercel:deploy
+```
+
+#### グローバルに CLI を入れたい場合（任意）
+
+```bash
+npm install -g vercel
+vercel login
+vercel link
+vercel deploy --prod
+```
+
+#### 非対話（CI・Cursor など）でデプロイしたい場合
+
+1. Vercel: [Account Settings → Tokens](https://vercel.com/account/tokens) で **Token を作成**  
+2. 環境変数に設定: `export VERCEL_TOKEN=（発行した文字列）`  
+3. プロジェクトは一度ローカルで `npm run vercel:link` 済みで `.vercel/project.json` があるか、または `--scope` / プロジェクト指定をドキュメント通りに付ける  
+4. デプロイ:
+
+```bash
+npx --yes vercel@latest deploy --prod --token "$VERCEL_TOKEN"
+```
+
+GitHub Actions では Repository secrets に `VERCEL_TOKEN`（必要なら `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`）を入れ、上記コマンドを workflow で実行する形にします。
 
 ---
 

@@ -6,6 +6,10 @@
   "scripts": {
     "build": "node -e \"process.exit(0)\"",
     "start": "node server/online-server.mjs",
-    "start:online": "node server/online-server.mjs"
+    "start:online": "node server/online-server.mjs",
+    "vercel:login": "npx --yes vercel@latest login",
+    "vercel:link": "npx --yes vercel@latest link",
+    "vercel:deploy": "npx --yes vercel@latest deploy",
+    "vercel:prod": "npx --yes vercel@latest deploy --prod"
   }
 }
