@@ -1208,6 +1208,7 @@ function buildOnlineGame(){
     tsumoTile:legal.find(a=>a.type==='tsumo')?.tile||null,
     dealerOpeningDiscardNoDraw:false,
     skipDrawAfterCallBy:null,
+    pendingKouTingFrom:null,
     lastWin:null,
     fxFlash:null,
     _epoch:0,
@@ -1512,6 +1513,7 @@ function startGame(){
     tsumoTile:null,
     dealerOpeningDiscardNoDraw:true,
     skipDrawAfterCallBy:null,
+    pendingKouTingFrom:null,
     lastWin:null,
     fxFlash:null,
     _epoch:MATCH_EPOCH,
@@ -1523,7 +1525,7 @@ function startGame(){
 // Tenpai + 扣聴 (kouTing) detection.
 // Once a player reaches tenpai at an end-of-turn hand size (4/7/10/13),
 // they automatically enter 扣聴: hand is locked, no more pon/chi/discard choice.
-// They just draw and auto-discard until winning tile or treasure arrives.
+// 先出後引きのまま: 番の入口で手から1枚切り → finalize で摸牌 → 摸いた牌を自動切り（finalize 連鎖）。
 // During non-end-of-turn states (just drew, just ponned), keep last valid waits.
 function updateAllTenpai(){
   for(const p of G.players){
@@ -1823,11 +1825,53 @@ function drawAndPlay(pi){
     }
   } else {
     if(p.kouTing){
-      scheduleMatch(()=>autoDiscardDrawn(pi),700);
+      scheduleMatch(()=>kouTingOpeningDiscard(pi),700);
     } else {
       scheduleMatch(()=>aiDiscard(pi),600);
     }
   }
+}
+
+// 捨て牌が鳴かれたとき、先出後引きの「引き」は捨て主が山から1枚拾う（finalize が鳴き経路で呼ばれないためここで補う）
+function replenishDiscardAfterCall(fromPi){
+  if(!G||G.gameOver||fromPi==null||fromPi<0)return;
+  const d=G.players[fromPi];
+  if(!d)return;
+  if(!drawAfterDiscard(fromPi)) return;
+  updateAllTenpai();
+}
+
+function kouTingSafeDiscardIndex(p){
+  const hand=p.hand;
+  const tried=new Set(),cands=[];
+  for(let i=0;i<hand.length;i++){
+    const k=tileKey(hand[i]);
+    if(tried.has(k)) continue;
+    tried.add(k);
+    const nh=hand.filter((_,j)=>j!==i);
+    if(getKatanWaits(nh).length>0) cands.push(i);
+  }
+  if(cands.length) return cands[Math.floor(Math.random()*cands.length)];
+  return 0;
+}
+
+// 扣聴の番の入口: 先出後引きに合わせ、まず手牌13（想定枚数）から1枚切ってから finalize で摸る
+function kouTingOpeningDiscard(pi){
+  const p=G.players[pi];
+  if(!p||!p.kouTing||G.gameOver) return;
+  const idx=kouTingSafeDiscardIndex(p);
+  const tile=p.hand[idx];
+  if(!tile) return;
+  p.hand.splice(idx,1);
+  p.hand=sortTiles(p.hand);
+  p.discards.push(tile);
+  p.drawnTile=null;
+  if(p.isHuman) G.lastDrawn=null;
+  updateAllTenpai();
+  addLog(`${p.isHuman?sideName(0):p.name}が${tileName(tile)}を捨てました（扣聴）`);
+  if(p.isHuman){GameSFX.play('discard');fxVibrate(12);}
+  afterDiscard(pi,tile);
+  render();
 }
 
 // Auto-discard the just-drawn tile (used in 扣聴 state for both human and AI)
@@ -1842,6 +1886,7 @@ function autoDiscardDrawn(pi){
       : `[整合]扣聴自動打牌: 手牌に${tileName(drawn)}がありません`);
     return;
   }
+  G.pendingKouTingFrom=pi;
   p.hand.splice(idx,1);
   p.discards.push(drawn);
   p.drawnTile=null;
@@ -1898,7 +1943,18 @@ function finalizeAfterDiscardCycle(fromPi){
     nextTurn(fromPi);
     return;
   }
+  // 扣聴: 摸った直後の自動打牌で来た2回目の finalize は摸り直さず次家へ（先出後引きの1サイクル完了）
+  if(G.pendingKouTingFrom===fromPi){
+    G.pendingKouTingFrom=null;
+    nextTurn(fromPi);
+    return;
+  }
   if(!drawAfterDiscard(fromPi)) return;
+  const pk=G.players[fromPi];
+  if(pk.kouTing){
+    scheduleMatch(()=>autoDiscardDrawn(fromPi),280);
+    return;
+  }
   nextTurn(fromPi);
 }
 
@@ -1999,11 +2055,11 @@ function nextTurn(fromPi){
   const p=G.players[G.turn];
   if(p.isHuman){
     if(p.kouTing){
-      // 扣聴: auto-discard the tile drawn at end of previous own turn.
+      // 扣聴: 先出後引き — 番の入口では手から先に1枚切り、摸牌と「摸った牌の自動切り」は finalize 側で連鎖
       G.msg=tr('autoKouting','扣聴中... 自動で捨てます');
       G.humanOptions=[];
       render();
-      scheduleMatch(()=>autoDiscardDrawn(0),600);
+      scheduleMatch(()=>kouTingOpeningDiscard(0),600);
     } else {
       G.msg=tr('chooseDiscard','牌を選んで捨てましょう（先出後引き）');
       G.humanOptions=[];
@@ -2011,7 +2067,7 @@ function nextTurn(fromPi){
     }
   } else {
     if(p.kouTing){
-      scheduleMatch(()=>autoDiscardDrawn(G.turn),500);
+      scheduleMatch(()=>kouTingOpeningDiscard(G.turn),500);
     } else {
       scheduleMatch(()=>aiDiscard(G.turn),500);
     }
@@ -2024,13 +2080,15 @@ function nextTurn(fromPi){
 function humanPon(){
   if(G?.online){onlineAction('pon');return;}
   const p=G.players[0],tile=G.pendingDiscard;
+  const donor=G.pendingFrom;
   if(p.kouTing) return;
   const newHand=removeTiles(p.hand,[tile,tile]);
   if(!newHand) return;
   p.hand=newHand;
-  p.melds.push({type:'pon',tiles:[tile,tile,tile],from:G.pendingFrom});
+  p.melds.push({type:'pon',tiles:[tile,tile,tile],from:donor});
   addLog(`${sideName(0)}が${tr('pon','ポン')}！${tileName(tile)}`);
-  playActionFx('pon',`${sideName(0)} `,{tile,from:G.pendingFrom});
+  playActionFx('pon',`${sideName(0)} `,{tile,from:donor});
+  replenishDiscardAfterCall(donor);
   G.skipDrawAfterCallBy=0;
   G.turn=0;
   G.phase='discard';
@@ -2050,6 +2108,7 @@ function humanChi(optIdx){
   if(G?.online){onlineAction('chi',{option:optIdx});return;}
   if(G.chiOpts.length===0) return;
   const p=G.players[0];
+  const donor=G.pendingFrom;
   if(p.kouTing) return;
   const [t1,t2]=G.chiOpts[optIdx];
   const tile=G.pendingDiscard;
@@ -2057,9 +2116,10 @@ function humanChi(optIdx){
   if(!newHand) return;
   p.hand=newHand;
   const meldTiles=sortTiles([t1,t2,tile]);
-  p.melds.push({type:'chi',tiles:meldTiles,from:G.pendingFrom});
+  p.melds.push({type:'chi',tiles:meldTiles,from:donor});
   addLog(`${sideName(0)}が${tr('chi','チー')}！${meldTiles.map(tileName).join('')}`);
-  playActionFx('chi',`${sideName(0)} `,{tile,from:G.pendingFrom});
+  playActionFx('chi',`${sideName(0)} `,{tile,from:donor});
+  replenishDiscardAfterCall(donor);
   G.skipDrawAfterCallBy=0;
   G.turn=0;
   G.phase='discard';
@@ -2163,18 +2223,12 @@ function aiPon(pi, tile, fromPi){
   p.melds.push({type:'pon',tiles:[tile,tile,tile],from:fromPi});
   addLog(UI.lang==='zh'?`${p.name} 碰！${tileName(tile)}`:`${p.name}がポン！${tileName(tile)}`);
   playActionFx('pon',`${p.name} `,{tile,from:fromPi});
+  replenishDiscardAfterCall(fromPi);
   G.skipDrawAfterCallBy=pi;
-  G.lastDrawn=null;
   updateAllTenpai();
   G.turn=pi;
   G.phase='discard';
-  if(p.kouTing){
-    // The pon itself made AI tenpai — but they still must discard one tile.
-    // Use aiDiscard (which picks worst tile) since auto-discard-drawn doesn't apply (no drawn).
-    scheduleMatch(()=>aiDiscard(pi),600);
-  } else {
-    scheduleMatch(()=>aiDiscard(pi),600);
-  }
+  scheduleMatch(()=>aiDiscard(pi),600);
 }
 
 function aiChi(pi, tile, handPair, fromPi){
@@ -2194,8 +2248,8 @@ function aiChi(pi, tile, handPair, fromPi){
   p.melds.push({type:'chi',tiles:meldTiles,from:fromPi});
   addLog(UI.lang==='zh'?`${p.name} 吃！${meldTiles.map(tileName).join('')}`:`${p.name}がチー！${meldTiles.map(tileName).join('')}`);
   playActionFx('chi',`${p.name} `,{tile,from:fromPi});
+  replenishDiscardAfterCall(fromPi);
   G.skipDrawAfterCallBy=pi;
-  G.lastDrawn=null;
   updateAllTenpai();
   G.turn=pi;
   G.phase='discard';
