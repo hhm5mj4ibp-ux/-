@@ -361,6 +361,7 @@ body{
 .btn{padding:7px 16px;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;box-shadow:0 2px 4px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);}
 .btn-win{background:#e74c3c;color:#fff;}
 .btn-pon{background:#e67e22;color:#fff;}
+.btn-minkan{background:linear-gradient(180deg,#f4d03f,#d4ac0d);color:#1a1200;}
 .btn-chi{background:#3498db;color:#fff;}
 .btn-skip{background:#555;color:#ccc;}
 .callout-tile{
@@ -923,6 +924,7 @@ const I18N={
     ron:'ロン！',
     pon:'ポン',
     chi:'チー',
+    minkan:'大明槓',
     skip:'スキップ',
     ankan:'暗槓',
     treasure:'宝牌',
@@ -990,6 +992,7 @@ const I18N={
     ron:'荣和！',
     pon:'碰',
     chi:'吃',
+    minkan:'大明杠',
     skip:'跳过',
     ankan:'暗杠',
     treasure:'宝牌',
@@ -1181,6 +1184,7 @@ function buildOnlineGame(){
   let phase='discard';
   let chiOpts=[];
   if(legal.some(a=>a.type==='ron')){phase='after_discard';humanOptions.push('win');}
+  if(legal.some(a=>a.type==='minkan')){phase='after_discard';humanOptions.push('minkan');}
   if(legal.some(a=>a.type==='pon')){phase='after_discard';humanOptions.push('pon');}
   const chi=legal.find(a=>a.type==='chi');
   if(chi){phase='after_discard';humanOptions.push('chi');chiOpts=chi.options||[];}
@@ -1647,6 +1651,10 @@ const ACTION_FX = {
   kan:{
     src:'Gemini_Generated_Image_gbck4gbck4gbck4g.png',
     key:'ankan'
+  },
+  minkan:{
+    src:'Gemini_Generated_Image_gbck4gbck4gbck4g.png',
+    key:'minkan'
   }
 };
 
@@ -1694,7 +1702,7 @@ function playActionFx(kind, actorLabel, meta={}){
 
   const url=toAssetUrl(cfg.src);
   img.style.backgroundImage=`url("${url.replace(/"/g,'%22')}")`;
-  const fxText = cfg.key==='pon' ? tr('pon','ポン') : cfg.key==='chi' ? tr('chi','チー') : tr('ankan','暗槓');
+  const fxText = cfg.key==='pon' ? tr('pon','ポン') : cfg.key==='chi' ? tr('chi','チー') : cfg.key==='minkan' ? tr('minkan','大明槓') : tr('ankan','暗槓');
   label.textContent=`${actorLabel||''}${fxText}！`;
   if(FX_STATE.combo>=2){
     combo.textContent=`${FX_STATE.combo} COMBO`;
@@ -1706,7 +1714,7 @@ function playActionFx(kind, actorLabel, meta={}){
 
   if(_fxHideTimer){clearTimeout(_fxHideTimer);_fxHideTimer=null;}
   root.classList.remove('fx-chi','fx-pon','fx-kan');
-  root.classList.add(`fx-${kind}`);
+  root.classList.add(kind==='minkan'?'fx-kan':`fx-${kind}`);
   root.classList.remove('show');
   void root.offsetWidth;
   root.classList.add('show');
@@ -1732,7 +1740,7 @@ function playActionFx(kind, actorLabel, meta={}){
   try{ render(); }catch(_e){}
   if(kind==='chi'){GameSFX.play('chi');fxVibrate([16,28,16]);}
   else if(kind==='pon'){GameSFX.play('pon');fxVibrate([20,35,20]);}
-  else if(kind==='kan'){GameSFX.play('kan');fxVibrate([22,40,22,40,28]);}
+  else if(kind==='kan'||kind==='minkan'){GameSFX.play('kan');fxVibrate([22,40,22,40,28]);}
 }
 
 function openResultOverlay(){
@@ -1997,6 +2005,9 @@ function afterDiscard(fromPi, tile){
     }
     // Pon/Chi only allowed when NOT in 扣聴 (hand is locked once tenpai)
     if(!human.kouTing){
+      if(countTile(human.hand,tile)>=3&&human.hand.length>3){
+        G.humanOptions.push('minkan');
+      }
       if(countTile(human.hand,tile)>=2&&human.hand.length>3){
         G.humanOptions.push('pon');
       }
@@ -2024,6 +2035,16 @@ function processAIResponses(fromPi, tile, done){
     if(checkWin(p,tile)){
       scheduleMatch(()=>resolveWin(p.idx,tile,false,false),400);
       return;
+    }
+  }
+  // 大明槓（手に3枚＋捨て1枚）— ポンより先に判定
+  for(const p of G.players){
+    if(p.isHuman||p.idx===fromPi||p.kouTing) continue;
+    if(countTile(p.hand,tile)>=3&&p.hand.length>3){
+      if(Math.random()<lv.pon*0.22){
+        scheduleMatch(()=>{aiMinkan(p.idx,tile,fromPi);},400);
+        return;
+      }
     }
   }
   // Check AI for pon (only if AI is not in 扣聴)
@@ -2077,6 +2098,34 @@ function nextTurn(fromPi){
 // ======================================================
 // MELD ACTIONS
 // ======================================================
+function humanMinkan(){
+  if(G?.online){onlineAction('minkan');return;}
+  const p=G.players[0],tile=G.pendingDiscard;
+  const donor=G.pendingFrom;
+  if(p.kouTing) return;
+  if(countTile(p.hand,tile)<3) return;
+  const newHand=removeTiles(p.hand,[tile,tile,tile]);
+  if(!newHand) return;
+  p.hand=newHand;
+  p.melds.push({type:'kan',tiles:[tile,tile,tile,tile],from:donor});
+  addLog(`${sideName(0)}が${tr('minkan','大明槓')}！${tileName(tile)}`);
+  playActionFx('minkan',`${sideName(0)} `,{tile,from:donor});
+  replenishDiscardAfterCall(donor);
+  G.skipDrawAfterCallBy=0;
+  G.turn=0;
+  G.phase='discard';
+  G.humanOptions=[];
+  G.tsumoTile=null;
+  G.lastDrawn=null;
+  p.drawnTile=null;
+  updateAllTenpai();
+  const waits=getKatanWaits(p.hand);
+  G.msg=waits.length>0
+    ? `${tr('tenpai','テンパイ')}！${tr('waiting','待ち')}: ${waits.map(tileName).join(' ')}  ${UI.lang==='zh'?'请选择打牌':'捨て牌を選んでください'}`
+    : (UI.lang==='zh'?'请选择打牌':'捨て牌を選んでください');
+  render();
+}
+
 function humanPon(){
   if(G?.online){onlineAction('pon');return;}
   const p=G.players[0],tile=G.pendingDiscard;
@@ -2206,6 +2255,29 @@ function humanWin(isTsumo, isTreasure){
   if(G?.online){onlineAction(isTsumo?'tsumo':'ron');return;}
   const tile=isTsumo?G.tsumoTile:G.pendingDiscard;
   resolveWin(0,tile,isTsumo,isTreasure);
+}
+
+function aiMinkan(pi, tile, fromPi){
+  const p=G.players[pi];
+  if(p.kouTing||countTile(p.hand,tile)<3){
+    finalizeAfterDiscardCycle(fromPi);
+    return;
+  }
+  const newHand=removeTiles(p.hand,[tile,tile,tile]);
+  if(!newHand){
+    finalizeAfterDiscardCycle(fromPi);
+    return;
+  }
+  p.hand=newHand;
+  p.melds.push({type:'kan',tiles:[tile,tile,tile,tile],from:fromPi});
+  addLog(UI.lang==='zh'?`${p.name} 大明杠！${tileName(tile)}`:`${p.name}が${tr('minkan','大明槓')}！${tileName(tile)}`);
+  playActionFx('minkan',`${p.name} `,{tile,from:fromPi});
+  replenishDiscardAfterCall(fromPi);
+  G.skipDrawAfterCallBy=pi;
+  updateAllTenpai();
+  G.turn=pi;
+  G.phase='discard';
+  scheduleMatch(()=>aiDiscard(pi),600);
 }
 
 function aiPon(pi, tile, fromPi){
@@ -2578,6 +2650,8 @@ function render(){
   if(G.phase==='after_discard'){
     if(G.humanOptions.includes('win'))
       buttons+=`<button class="btn btn-win" onclick="humanWin(false,false)">${tr('ron','ロン！')} ${tileName(G.pendingDiscard)}</button>`;
+    if(G.humanOptions.includes('minkan'))
+      buttons+=`<button class="btn btn-minkan" onclick="humanMinkan()">${tr('minkan','大明槓')}</button>`;
     if(G.humanOptions.includes('pon'))
       buttons+=`<button class="btn btn-pon" onclick="humanPon()">${tr('pon','ポン')}</button>`;
     if(G.humanOptions.includes('chi')){

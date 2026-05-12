@@ -329,6 +329,23 @@ function applyAiClaimPhase(room) {
 
   for (const seat of order) {
     if (isHumanSeat(room, seat) || game.kouTing[seat]) continue;
+    if (countTile(game.hands[seat], tile) >= 3) {
+      if (Math.random() < AI_LV.pon * 0.22) {
+        game.hands[seat] = removeTiles(game.hands[seat], [tile, tile, tile]);
+        game.melds[seat].push({ type: 'kan', tiles: [tile, tile, tile, tile], from });
+        game.turn = seat;
+        game.phase = 'discard';
+        game.pending = null;
+        game.passed = [];
+        game.skipDrawAfterCallBy = seat;
+        room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'minkan', payload: {} });
+        return true;
+      }
+    }
+  }
+
+  for (const seat of order) {
+    if (isHumanSeat(room, seat) || game.kouTing[seat]) continue;
     if (countTile(game.hands[seat], tile) >= 2) {
       const needsPon = !game.melds[seat].some((m) => m.type === 'pon' || m.type === 'kan');
       if (needsPon || Math.random() < AI_LV.pon) {
@@ -494,6 +511,7 @@ function legalActions(game, seat) {
   if (game.phase === 'claim' && game.pending && game.pending.from !== seat && !game.passed.includes(seat)) {
     const tile = game.pending.tile;
     if (canWin(game, seat, tile)) actions.push({ type: 'ron', tile });
+    if (!game.kouTing[seat] && countTile(hand, tile) >= 3) actions.push({ type: 'minkan', tile });
     if (!game.kouTing[seat] && countTile(hand, tile) >= 2) actions.push({ type: 'pon', tile });
     if (!game.kouTing[seat] && nextPlayer(game.pending.from) === seat) {
       const chiOptions = getChiOptions(hand, tile);
@@ -584,6 +602,17 @@ function resolveOnlineAction(room, playerId, body) {
     if (game.phase !== 'claim' || !game.pending || game.pending.from === seat) throw Object.assign(new Error('cannot_skip'), { status: 409 });
     if (!game.passed.includes(seat)) game.passed.push(seat);
     maybeAutoFinishClaim(game);
+  } else if (type === 'minkan') {
+    if (game.phase !== 'claim' || !game.pending || game.pending.from === seat) throw Object.assign(new Error('cannot_minkan'), { status: 409 });
+    const tile = game.pending.tile;
+    if (countTile(game.hands[seat], tile) < 3) throw Object.assign(new Error('cannot_minkan'), { status: 409 });
+    game.hands[seat] = removeTiles(game.hands[seat], [tile, tile, tile]);
+    game.melds[seat].push({ type: 'kan', tiles: [tile, tile, tile, tile], from: game.pending.from });
+    game.turn = seat;
+    game.phase = 'discard';
+    game.pending = null;
+    game.passed = [];
+    game.skipDrawAfterCallBy = seat;
   } else if (type === 'pon') {
     if (game.phase !== 'claim' || !game.pending || game.pending.from === seat) throw Object.assign(new Error('cannot_pon'), { status: 409 });
     const tile = game.pending.tile;
