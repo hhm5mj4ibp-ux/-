@@ -12,7 +12,7 @@
    - **Framework Preset**: `Other`（または「No framework」に相当するもの）
    - **Root Directory**: `./`（リポジトリ直下）
    - **Build Command**: `npm run build`（`package.json` の空ビルド。変更しなくてよい）
-   - **Output Directory**: 空欄のまま（プロジェクトルートをそのまま公開）
+   - **Output Directory**: Vercel ダッシュボードでは **`public`**（`vercel.json` の `outputDirectory` と一致）。ローカルでは `npm run build` で生成。
 4. **Deploy** を押す。
 5. 完了後に表示される **`https://＜プロジェクト名＞.vercel.app`** が本番 URL。`/` で `index.html` が開き、すぐ `harbin-mahjong.html` に入ります。
 
