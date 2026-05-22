@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { pathToFileURL } from 'url';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { skipToPlayableHand } from './verify-helpers.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const htmlUrl = pathToFileURL(join(root, 'harbin-mahjong.html')).href;
@@ -40,13 +41,13 @@ let failed = false;
 for(const vp of viewports){
   const page = await browser.newPage({ viewport: vp });
   await page.goto(htmlUrl);
-  await page.click('button.btn-new');
-  await page.waitForFunction(() => document.getElementById('dealer-roulette')?.classList.contains('hidden'), null, { timeout: 15000 });
-  await page.waitForSelector('#human-hand .tile', { timeout: 5000 });
+  await skipToPlayableHand(page);
+  await page.waitForSelector('#human-hand .tile.hand-face', { timeout: 8000 });
 
   const reports = await Promise.all([
     clipReport(page, '#left-area .side-col', 'left-hand'),
     clipReport(page, '#right-area .side-col', 'right-hand'),
+    clipReport(page, '#top-area .north-hand-row', 'north-hand'),
     clipReport(page, '#human-hand', 'human-hand'),
     clipReport(page, '.human-rack', 'human-rack'),
   ]);
@@ -59,6 +60,11 @@ for(const vp of viewports){
     }
     if(report.tileCount === 0){
       console.error(`[${vp.name}] ${report.label}: no tiles rendered`);
+      failed = true;
+      continue;
+    }
+    if(report.label === 'north-hand' && report.tileCount < 13){
+      console.error(`[${vp.name}] ${report.label}: only ${report.tileCount} tiles (expected >=13)`);
       failed = true;
       continue;
     }

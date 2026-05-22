@@ -10,6 +10,10 @@
     "vercel:login": "npx --yes vercel@latest login",
     "vercel:link": "npx --yes vercel@latest link",
     "vercel:deploy": "npx --yes vercel@latest deploy",
-    "vercel:prod": "npx --yes vercel@latest deploy --prod"
+    "vercel:prod": "npx --yes vercel@latest deploy --prod",
+    "verify:assets": "node scripts/verify-deploy-assets.mjs",
+    "verify:post-deal": "node scripts/verify-post-deal.mjs",
+    "verify:layout": "node scripts/verify-hand-layout.mjs",
+    "verify:all": "npm run build && npm run verify:assets && npm run verify:post-deal && npm run verify:layout"
   }
 }

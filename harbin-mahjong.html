@@ -455,7 +455,8 @@ body{
   gap:6px;
   max-width:min(440px,96vw);
 }
-#top-area .north-hand-row{display:flex;flex-wrap:nowrap;gap:2px;justify-content:center;align-items:flex-end;flex-shrink:0;}
+#top-area .north-hand-row{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:flex-end;flex-shrink:0;max-width:100%;}
+#top-area .north-hand-row.deal-staging{display:flex;flex-direction:column;align-items:center;gap:3px;max-width:100%;}
 #top-area .north-melds{display:flex;flex-wrap:nowrap;gap:2px;justify-content:flex-start;align-items:flex-end;flex-shrink:0;}
 #top-area .top-discards.north-discards{display:flex;flex-direction:column;align-items:stretch;gap:3px;width:100%;max-width:98vw;margin:4px auto 0;padding:0 4px;box-sizing:border-box;}
 #top-area .north-melds .meld-group .tile,
@@ -4181,14 +4182,15 @@ function showOverlay(title, body, detail){
 
 const MELD_FX_SEAT_ROOT=['#bottom-area','#left-area','#top-area','#right-area'];
 const toAssetUrl = file => {
+  const enc=String(file).split('/').map(encodeURIComponent).join('/');
   try{
-    return new URL(`./${file}`,window.location.href).href;
+    return new URL(`./${enc}`,window.location.href).href;
   }catch(_e){
-    return `./${file}`;
+    return `./${enc}`;
   }
 };
 function preloadTileTextures(){
-  for(const path of ['7198.png','名称未設定のデザイン (2).png']){
+  for(const path of ['7198.png','hand-tiles.png']){
     const img=new Image();
     img.src=toAssetUrl(path);
   }
@@ -4796,6 +4798,13 @@ function processAIResponses(fromPi, tile, done){
 
 function beginActiveTurn(){
   if(!G||G.gameOver||G.roundOver) return;
+  if(G.dealCinemaActive){
+    clearDealCinema();
+    G.dealCinemaActive=false;
+    G.dealFaceReveal=false;
+    G.dealRevealCounts=null;
+    G.dealCinemaPhase=null;
+  }
   G.phase='discard';
   G.kanBranchBActive=false;
   G.kanBranchAOpts=null;
@@ -5492,7 +5501,7 @@ function tileName(t){
 }
 
 const TILE_ART_SHEET_URL=toAssetUrl('7198.png');
-const TILE_HAND_SHEET_URL=toAssetUrl('名称未設定のデザイン (2).png');
+const TILE_HAND_SHEET_URL=toAssetUrl('hand-tiles.png');
 const TILE_HAND_SHEET_W=2000;
 const TILE_HAND_SHEET_H=1600;
 const TILE_ART_POS={
@@ -5960,7 +5969,7 @@ function render(){
     <div class="top-seat">
       <div class="player-label player-label-rim"><span class="rim-name">${p2.name} ${p2.melds.length>0?'['+p2.melds.length+tr('calledCount','鳴')+']':''} ${ktBadge(p2)}</span>${dealerMark(2)}</div>
       <div class="north-rack-row">
-        <div class="tiles-row north-hand-row">${topHand}</div>
+        <div class="tiles-row north-hand-row${dealActive&&!G.dealFaceReveal?' deal-staging':''}">${topHand}</div>
         ${topMelds?`<div class="melds-row north-melds">${topMelds}</div>`:''}
       </div>
       <div class="tiles-row top-discards north-discards">${topDiscards}</div>
