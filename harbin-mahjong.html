@@ -455,8 +455,9 @@ body{
   gap:6px;
   max-width:min(440px,96vw);
 }
-#top-area .north-hand-row{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:flex-end;flex-shrink:0;max-width:100%;}
-#top-area .north-hand-row.deal-staging{display:flex;flex-direction:column;align-items:center;gap:3px;max-width:100%;}
+#top-area .north-hand-row{display:flex;flex-wrap:nowrap;gap:2px;justify-content:center;align-items:flex-end;flex-shrink:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#top-area .north-hand-row.deal-staging{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:3px;max-width:100%;overflow-x:visible;}
+#top-area .north-hand-row.deal-staging .deal-hand-row{display:flex;flex-direction:row;flex-wrap:nowrap;gap:2px;justify-content:center;}
 #top-area .north-melds{display:flex;flex-wrap:nowrap;gap:2px;justify-content:flex-start;align-items:flex-end;flex-shrink:0;}
 #top-area .top-discards.north-discards{display:flex;flex-direction:column;align-items:stretch;gap:3px;width:100%;max-width:98vw;margin:4px auto 0;padding:0 4px;box-sizing:border-box;}
 #top-area .north-melds .meld-group .tile,
