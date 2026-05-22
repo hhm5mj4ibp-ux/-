@@ -115,27 +115,24 @@ body{
   padding:0;
   overflow:visible;
   background:transparent;
-  border:1px solid rgba(184,212,234,.92);
-  border-radius:2px;
+  border:none;
+  border-radius:0;
+  box-shadow:none;
   position:relative;
   z-index:0;
   --hand-w:min(34px,calc((100vw - 88px) / 16));
   width:var(--hand-w);
   height:auto;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.94),
-    0 0 0 2px rgba(172,210,246,.72),
-    0 2px 6px rgba(62,112,162,.14);
-  filter:drop-shadow(0 2px 4px rgba(38,72,108,.18));
+  filter:drop-shadow(0 2px 5px rgba(38,72,108,.16));
   transition:transform .12s ease,filter .12s ease,z-index 0s;
 }
 #bottom-area #human-hand .tile.hand-face:not(.back) .tile-art.tile-art-hand{
   width:100%;
   height:min(54px,calc(var(--hand-w)*166/121),11.5dvh);
   overflow:hidden;
-  border-radius:1px;
+  border-radius:0;
   background:transparent;
-  clip-path:inset(0 0 1px 0);
+  clip-path:none;
 }
 #bottom-area #human-hand .tile.hand-face.tsumo-separated{
   margin-left:clamp(10px,2.8vw,16px);
@@ -148,33 +145,43 @@ body{
 #bottom-area #human-hand .tile:not(.back):not(.hand-face)::before{
   display:none;
 }
-#bottom-area #human-hand .tile.hand-face:not(.back)::before{
-  content:"";
-  display:block;
-  position:absolute;
-  left:-1px;right:-1px;top:-1px;
-  height:clamp(3px,12%,11px);
-  min-height:3px;
-  pointer-events:none;
-  z-index:5;
-  border-radius:2px 2px 0 0;
-  background:transparent;
-  border-top:1px solid rgba(255,255,255,.95);
-  box-shadow:0 0 0 1px rgba(168,208,248,.8);
-}
-/* 手札: 7198 と同系の外周のみ（スプライト上に光沢帯を重ねない） */
+#bottom-area #human-hand .tile.hand-face:not(.back)::before{display:none;}
+/* 手札: 捨て牌(.tile::before 下駄)の上下反転 — 図柄上に 灰→濃青→薄青、白線は上辺+左辺のみ */
 .tile.hand-face:not(.back) .tile-art.tile-art-hand{
   position:relative;
 }
-.tile.hand-face.opp-hand:not(.back){
-  border:1px solid rgba(184,212,234,.92);
-  border-radius:2px;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.94),
-    0 0 0 2px rgba(172,210,246,.72),
-    0 2px 5px rgba(62,112,162,.12);
+.tile.hand-face:not(.back) .tile-art.tile-art-hand::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;
+  height:clamp(5px,14%,13px);
+  min-height:5px;
+  pointer-events:none;
+  z-index:3;
+  background:linear-gradient(0deg,
+    rgba(126,178,232,.55) 0%,
+    rgba(95,154,216,.72) 38%,
+    rgba(74,134,202,.88) 72%,
+    rgba(61,116,180,.95) 100%);
+  border-bottom:1px solid rgba(148,158,168,.82);
+  border-top:1px solid rgba(185,218,248,.78);
 }
-.tile.hand-face.opp-hand:not(.back)::before{display:none;}
+.tile.hand-face:not(.back) .tile-art.tile-art-hand::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:4;
+  border:none;
+  border-top:1px solid rgba(255,255,255,.97);
+  border-left:1px solid rgba(255,255,255,.97);
+  background:transparent;
+}
+.tile.hand-face.opp-hand:not(.back){
+  border:none;
+  box-shadow:none;
+  background:transparent;
+}
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-art-img,
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-svg{
   transform:scaleY(-1);
@@ -354,9 +361,10 @@ body{
   overflow:visible;
   background:transparent;
   border:none;
+  box-shadow:none;
   position:relative;
   flex-shrink:0;
-  filter:drop-shadow(1px 2px 4px rgba(38,72,108,.3));
+  filter:drop-shadow(0 2px 4px rgba(38,72,108,.14));
 }
 .tile.hand-face.opp-hand .tile-art.tile-art-hand{
   position:absolute;
