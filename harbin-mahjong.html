@@ -128,10 +128,10 @@ body{
 #bottom-area #human-hand .tile.hand-face:not(.back) .tile-art.tile-art-hand{
   width:100%;
   height:min(54px,calc(var(--hand-w)*166/121),11.5dvh);
-  overflow:hidden;
-  border-radius:1px;
+  overflow:visible;
+  border-radius:2px;
   background:transparent;
-  clip-path:inset(0 0 2px 0);
+  clip-path:none;
 }
 #bottom-area #human-hand .tile.hand-face.tsumo-separated{
   margin-left:clamp(10px,2.8vw,16px);
@@ -147,6 +147,42 @@ body{
 #bottom-area #human-hand .tile.hand-face:not(.back)::before{
   display:none;
 }
+/* 手札スプライト: 7198 実装と同系の外周（薄青→白）。下駄はシート上部＝牌面の上 */
+.tile.hand-face:not(.back) .tile-art.tile-art-hand{
+  position:relative;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.98),
+    0 0 0 2px rgba(148,194,238,.92),
+    1px 1px 0 rgba(232,244,255,.75),
+    0 2px 0 rgba(188,214,238,.5),
+    0 4px 10px rgba(68,118,168,.2),
+    0 7px 14px rgba(52,102,152,.1);
+}
+.tile.hand-face:not(.back) .tile-art.tile-art-hand::before{
+  content:"";
+  position:absolute;
+  left:-1px;right:-1px;top:-1px;
+  height:clamp(4px,13%,12px);
+  min-height:4px;
+  pointer-events:none;
+  z-index:4;
+  border-radius:2px 2px 0 0;
+  background:transparent;
+  border-top:1px solid rgba(255,255,255,.96);
+  box-shadow:
+    0 0 0 1px rgba(168,210,248,.9),
+    inset 0 -1px 0 rgba(255,255,255,.22);
+}
+.tile.hand-face:not(.back) .tile-art.tile-art-hand::after{
+  content:"";
+  position:absolute;
+  left:2px;right:2px;bottom:3px;
+  height:26%;
+  pointer-events:none;
+  z-index:3;
+  border-radius:0 0 1px 1px;
+  background:linear-gradient(0deg,rgba(255,255,255,.82) 0%,rgba(235,246,255,0) 100%);
+}
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-art-img,
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-svg{
   transform:scaleY(-1);
@@ -159,6 +195,10 @@ body{
   max-width:none;
   transform:none;
   mix-blend-mode:screen;
+  z-index:1;
+}
+.tile.hand-face:not(.back) .tile-art-img.tile-art-img-hand{
+  z-index:1;
 }
 /* 反転で既定の上面光沢(::after)が画面下に来るので消す。扣聴枠は ::after を使うため別指定 */
 #bottom-area #human-hand .tile:not(.back):not(.kouting-tile):not(.just-drawn)::after{
@@ -333,10 +373,10 @@ body{
   width:var(--hand-w);
   height:var(--hand-h);
   transform:translate(-50%,-50%) rotate(var(--opp-rot,-90deg));
-  overflow:hidden;
-  border-radius:1px;
+  overflow:visible;
+  border-radius:2px;
   background:transparent;
-  clip-path:inset(0 0 2px 0);
+  clip-path:none;
 }
 .tile.hand-face.opp-rot-left{--opp-rot:-90deg;}
 .tile.hand-face.opp-rot-right{--opp-rot:90deg;}
@@ -348,6 +388,7 @@ body{
 .tile.hand-face.opp-hand .tile-art-img.tile-art-img-hand{mix-blend-mode:screen;}
 .tile.hand-face.opp-hand::before,
 .tile.hand-face.opp-hand::after{display:none;}
+/* opp の外周ラインは .tile-art.tile-art-hand の疑似要素（回転に追従） */
 /* 東西・手牌列だけやや縮小（見切れ防止。鳴き・捨ては opp-hand のまま） */
 #left-area .side-col .tile.hand-face.opp-hand,
 #right-area .side-col .tile.hand-face.opp-hand{
