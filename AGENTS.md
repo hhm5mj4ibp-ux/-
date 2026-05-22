@@ -22,3 +22,7 @@
 ## 仕様変更時
 
 `ゲームDB/90_決定ログ.md` に **日付・一行・理由** を追記してから実装する。
+
+## 自律 QA・修正ループ
+
+`.cursor/skills/harbin-autofix/SKILL.md` を参照。探索は子エージェント、完了条件は `node scripts/verify-hand-layout.mjs`。
