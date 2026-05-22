@@ -115,22 +115,27 @@ body{
   padding:0;
   overflow:visible;
   background:transparent;
-  border:none;
+  border:1px solid rgba(184,212,234,.92);
+  border-radius:2px;
   position:relative;
   z-index:0;
   --hand-w:min(34px,calc((100vw - 88px) / 16));
   width:var(--hand-w);
   height:auto;
-  filter:drop-shadow(0 2px 4px rgba(38,72,108,.22));
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.94),
+    0 0 0 2px rgba(172,210,246,.72),
+    0 2px 6px rgba(62,112,162,.14);
+  filter:drop-shadow(0 2px 4px rgba(38,72,108,.18));
   transition:transform .12s ease,filter .12s ease,z-index 0s;
 }
 #bottom-area #human-hand .tile.hand-face:not(.back) .tile-art.tile-art-hand{
   width:100%;
   height:min(54px,calc(var(--hand-w)*166/121),11.5dvh);
-  overflow:visible;
-  border-radius:2px;
+  overflow:hidden;
+  border-radius:1px;
   background:transparent;
-  clip-path:none;
+  clip-path:inset(0 0 1px 0);
 }
 #bottom-area #human-hand .tile.hand-face.tsumo-separated{
   margin-left:clamp(10px,2.8vw,16px);
@@ -144,41 +149,32 @@ body{
   display:none;
 }
 #bottom-area #human-hand .tile.hand-face:not(.back)::before{
-  display:none;
-}
-/* 手札スプライト: 7198 実装と同系の外周（薄青→白）。下駄はシート上部＝牌面の上 */
-.tile.hand-face:not(.back) .tile-art.tile-art-hand{
-  position:relative;
-  border-radius:2px;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.96),
-    0 0 0 2px rgba(176,212,246,.78),
-    1px 2px 0 rgba(228,240,252,.65),
-    0 3px 7px rgba(62,112,162,.17);
-}
-.tile.hand-face:not(.back) .tile-art.tile-art-hand::before{
   content:"";
+  display:block;
   position:absolute;
-  left:0;right:0;top:0;
-  height:clamp(3px,11%,10px);
+  left:-1px;right:-1px;top:-1px;
+  height:clamp(3px,12%,11px);
   min-height:3px;
   pointer-events:none;
-  z-index:4;
+  z-index:5;
   border-radius:2px 2px 0 0;
   background:transparent;
-  border-top:1px solid rgba(255,255,255,.92);
-  box-shadow:0 0 0 1px rgba(168,208,248,.82);
+  border-top:1px solid rgba(255,255,255,.95);
+  box-shadow:0 0 0 1px rgba(168,208,248,.8);
 }
-.tile.hand-face:not(.back) .tile-art.tile-art-hand::after{
-  content:"";
-  position:absolute;
-  left:2px;right:2px;bottom:2px;
-  height:24%;
-  pointer-events:none;
-  z-index:3;
-  border-radius:0 0 1px 1px;
-  background:linear-gradient(0deg,rgba(255,255,255,.7) 0%,rgba(235,246,255,0) 100%);
+/* 手札: 7198 と同系の外周のみ（スプライト上に光沢帯を重ねない） */
+.tile.hand-face:not(.back) .tile-art.tile-art-hand{
+  position:relative;
 }
+.tile.hand-face.opp-hand:not(.back){
+  border:1px solid rgba(184,212,234,.92);
+  border-radius:2px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.94),
+    0 0 0 2px rgba(172,210,246,.72),
+    0 2px 5px rgba(62,112,162,.12);
+}
+.tile.hand-face.opp-hand:not(.back)::before{display:none;}
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-art-img,
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-svg{
   transform:scaleY(-1);
@@ -369,10 +365,10 @@ body{
   width:var(--hand-w);
   height:var(--hand-h);
   transform:translate(-50%,-50%) rotate(var(--opp-rot,-90deg));
-  overflow:visible;
-  border-radius:2px;
+  overflow:hidden;
+  border-radius:1px;
   background:transparent;
-  clip-path:none;
+  clip-path:inset(0 0 1px 0);
 }
 .tile.hand-face.opp-rot-left{--opp-rot:-90deg;}
 .tile.hand-face.opp-rot-right{--opp-rot:90deg;}
