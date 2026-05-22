@@ -119,10 +119,9 @@ body{
   position:relative;
   z-index:0;
   --hand-w:min(34px,calc((100vw - 88px) / 16));
-  
   width:var(--hand-w);
   height:auto;
-  filter:drop-shadow(1px 3px 5px rgba(38,72,108,.34));
+  filter:drop-shadow(0 2px 4px rgba(38,72,108,.22));
   transition:transform .12s ease,filter .12s ease,z-index 0s;
 }
 #bottom-area #human-hand .tile.hand-face:not(.back) .tile-art.tile-art-hand{
@@ -150,38 +149,35 @@ body{
 /* 手札スプライト: 7198 実装と同系の外周（薄青→白）。下駄はシート上部＝牌面の上 */
 .tile.hand-face:not(.back) .tile-art.tile-art-hand{
   position:relative;
+  border-radius:2px;
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.98),
-    0 0 0 2px rgba(148,194,238,.92),
-    1px 1px 0 rgba(232,244,255,.75),
-    0 2px 0 rgba(188,214,238,.5),
-    0 4px 10px rgba(68,118,168,.2),
-    0 7px 14px rgba(52,102,152,.1);
+    0 0 0 1px rgba(255,255,255,.96),
+    0 0 0 2px rgba(176,212,246,.78),
+    1px 2px 0 rgba(228,240,252,.65),
+    0 3px 7px rgba(62,112,162,.17);
 }
 .tile.hand-face:not(.back) .tile-art.tile-art-hand::before{
   content:"";
   position:absolute;
-  left:-1px;right:-1px;top:-1px;
-  height:clamp(4px,13%,12px);
-  min-height:4px;
+  left:0;right:0;top:0;
+  height:clamp(3px,11%,10px);
+  min-height:3px;
   pointer-events:none;
   z-index:4;
   border-radius:2px 2px 0 0;
   background:transparent;
-  border-top:1px solid rgba(255,255,255,.96);
-  box-shadow:
-    0 0 0 1px rgba(168,210,248,.9),
-    inset 0 -1px 0 rgba(255,255,255,.22);
+  border-top:1px solid rgba(255,255,255,.92);
+  box-shadow:0 0 0 1px rgba(168,208,248,.82);
 }
 .tile.hand-face:not(.back) .tile-art.tile-art-hand::after{
   content:"";
   position:absolute;
-  left:2px;right:2px;bottom:3px;
-  height:26%;
+  left:2px;right:2px;bottom:2px;
+  height:24%;
   pointer-events:none;
   z-index:3;
   border-radius:0 0 1px 1px;
-  background:linear-gradient(0deg,rgba(255,255,255,.82) 0%,rgba(235,246,255,0) 100%);
+  background:linear-gradient(0deg,rgba(255,255,255,.7) 0%,rgba(235,246,255,0) 100%);
 }
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-art-img,
 #bottom-area #human-hand .tile:not(.back):not(.hand-face) .tile-svg{
@@ -494,17 +490,19 @@ body{
   align-items:flex-end;
   justify-content:center;
   gap:6px;
-  max-width:min(440px,96vw);
+  max-width:min(500px,98vw);
 }
-#top-area .north-hand-row{display:flex;flex-wrap:nowrap;gap:2px;justify-content:center;align-items:flex-end;flex-shrink:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#top-area .north-hand-row{display:flex;flex-wrap:nowrap;gap:1px;justify-content:center;align-items:flex-end;flex-shrink:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#top-area .north-hand-row::-webkit-scrollbar{display:none;}
+#top-area .north-hand-row .tile{flex:0 0 auto;vertical-align:bottom;}
 #top-area .north-hand-row.deal-staging{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:3px;max-width:100%;overflow-x:visible;}
 #top-area .north-hand-row.deal-staging .deal-hand-row{display:flex;flex-direction:row;flex-wrap:nowrap;gap:2px;justify-content:center;}
 #top-area .north-melds{display:flex;flex-wrap:nowrap;gap:2px;justify-content:flex-start;align-items:flex-end;flex-shrink:0;}
 #top-area .top-discards.north-discards{display:flex;flex-direction:column;align-items:stretch;gap:3px;width:100%;max-width:98vw;margin:4px auto 0;padding:0 4px;box-sizing:border-box;}
 #top-area .north-melds .meld-group .tile,
 #top-area .north-hand-row .tile{
-  width:min(34px,calc((100vw - 88px) / 16));
-  height:min(48px,calc((100vw - 88px) / 16 * 1.42),10dvh);
+  width:min(32px,calc((100vw - 96px) / 14));
+  height:min(45px,calc((100vw - 96px) / 14 * 1.42),10dvh);
   font-size:clamp(9px,2.2vw,16px);
 }
 #top-area .top-discards .tile.lg{
