@@ -14,12 +14,12 @@ function mustExist(rel) {
 }
 
 let ok = true;
-for (const f of ['7198.png', 'hand-tiles.png', '名称未設定のデザイン (2).png', 'harbin-mahjong.html', 'index.html']) {
+for (const f of ['7198.png', 'hand-tiles.png', 'harbin-mahjong.html', 'index.html']) {
   if (!mustExist(f)) ok = false;
 }
 
 if (fs.existsSync(path.join(root, 'public'))) {
-  for (const f of ['7198.png', 'hand-tiles.png', '名称未設定のデザイン (2).png']) {
+  for (const f of ['7198.png', 'hand-tiles.png']) {
     if (!fs.existsSync(path.join(root, 'public', f))) {
       console.error('missing in public/:', f);
       ok = false;

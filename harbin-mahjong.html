@@ -4469,7 +4469,7 @@ const toAssetUrl = file => {
   }
 };
 function preloadTileTextures(){
-  for(const path of ['7198.png','hand-tiles.png','名称未設定のデザイン (2).png']){
+  for(const path of ['7198.png','hand-tiles.png']){
     const img=new Image();
     img.src=toAssetUrl(path);
   }
@@ -5837,7 +5837,8 @@ function tileName(t){
 }
 
 const TILE_ART_SHEET_URL=toAssetUrl('7198.png');
-const TILE_HAND_SHEET_URL=toAssetUrl('名称未設定のデザイン (2).png');
+/** 本番は ASCII 名 `hand-tiles.png` のみ参照（日本語ファイル名は Vercel で 404 になりやすい） */
+const TILE_HAND_SHEET_URL=toAssetUrl('hand-tiles.png');
 const TILE_HAND_SHEET_W=2000;
 const TILE_HAND_SHEET_H=1600;
 const TILE_ART_POS={
