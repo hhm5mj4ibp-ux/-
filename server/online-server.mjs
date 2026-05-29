@@ -194,10 +194,40 @@ function getKouTingEntryDiscardIndices(game, seat) {
   return out;
 }
 
-function maybeAutoEnterKouTing(game, seat) {
+function getTreasureScoreDeltas(winnerSeat, basePts = 12) {
+  const d = [0, 0, 0, 0];
+  d[winnerSeat] = basePts * 3;
+  for (let s = 0; s < MAX_PLAYERS; s++) if (s !== winnerSeat) d[s] = -basePts;
+  return d;
+}
+
+/** 扣聴成立直後: 待ち牌に宝牌が含まれれば宝中宝で即和了 */
+function tryFinishKouTingTreasureWin(room, seat) {
+  const game = room.game;
+  if (!game || !game.kouTing[seat]) return false;
+  const waits = getKatanWaits(game.hands[seat]);
+  if (!waits.some((w) => tileEq(w, game.treasure))) return false;
+  game.treasureUsed = true;
+  game.treasureRevealed = true;
+  finishHand(room, { seat, type: 'tsumo', tile: game.treasure, treasure: true });
+  room.log.push({
+    at: Date.now(),
+    type: 'kou_ting_treasure',
+    seat,
+    tile: game.treasure,
+  });
+  bump(room);
+  runAiUntilHuman(room);
+  return true;
+}
+
+function maybeAutoEnterKouTing(game, seat, room) {
   const drawn = game.lastDraw?.seat === seat ? game.lastDraw.tile : null;
-  if (!drawn || !shouldEnterKouTing(game, seat, drawn)) return;
+  if (!drawn || !shouldEnterKouTing(game, seat, drawn)) return false;
   game.kouTing[seat] = true;
+  game.treasureRevealed = game.kouTing.some(Boolean);
+  if (room && tryFinishKouTingTreasureWin(room, seat)) return true;
+  return false;
 }
 
 function getKouTingLegalDiscardIndices(game, seat) {
@@ -489,7 +519,7 @@ function applyAiDiscardTurn(room, seat) {
         game.hands[seat].push(drawn);
         game.lastDraw = { seat, tile: drawn };
         if (canWin(game, seat, drawn)) {
-          finishHand(room, { seat, type: 'tsumo', tile: drawn });
+          finishHand(room, { seat, type: 'tsumo', tile: drawn, treasure: true });
           room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'tsumo', payload: { treasure: true } });
           return true;
         }
@@ -594,14 +624,16 @@ function getRonScoreDeltas(winnerSeat, fromSeat, discarderListening, basePts = 2
 
 function applyWinScores(room, winner) {
   if (!room.match || !winner || (winner.type !== 'ron' && winner.type !== 'tsumo')) return null;
-  const deltas = winner.type === 'tsumo'
-    ? getTsumoScoreDeltas(winner.seat, 4)
-    : getRonScoreDeltas(
-      winner.seat,
-      winner.from,
-      winner.discarderListening !== false,
-      2,
-    );
+  const deltas = winner.treasure
+    ? getTreasureScoreDeltas(winner.seat, 12)
+    : winner.type === 'tsumo'
+      ? getTsumoScoreDeltas(winner.seat, 4)
+      : getRonScoreDeltas(
+        winner.seat,
+        winner.from,
+        winner.discarderListening !== false,
+        2,
+      );
   for (let seat = 0; seat < MAX_PLAYERS; seat++) room.match.scores[seat] += deltas[seat];
   return deltas;
 }
@@ -788,7 +820,7 @@ function finishNoClaim(game, room) {
       game.dealerOpeningDiscardNoDraw = false;
     } else {
       drawFor(game, from, room);
-      maybeAutoEnterKouTing(game, from);
+      if (maybeAutoEnterKouTing(game, from, room)) return;
     }
   }
   game.turn = nextPlayer(from);
@@ -841,7 +873,7 @@ function resolveOnlineAction(room, playerId, body) {
         game.hands[seat].push(drawn);
         game.lastDraw = { seat, tile: drawn };
         if (canWin(game, seat, drawn)) {
-          finishHand(room, { seat, type: 'tsumo', tile: drawn });
+          finishHand(room, { seat, type: 'tsumo', tile: drawn, treasure: true });
           room.log.push({ at: Date.now(), playerId, seat, type: 'tsumo', payload: { treasure: true } });
           bump(room);
           runAiUntilHuman(room);
@@ -883,6 +915,8 @@ function resolveOnlineAction(room, playerId, body) {
     game.lastDiscard = { seat, tile };
     game.lastDraw = null;
     game.kouTing[seat] = true;
+    game.treasureRevealed = game.kouTing.some(Boolean);
+    if (tryFinishKouTingTreasureWin(room, seat)) return;
     game.phase = 'claim';
     game.pending = { from: seat, tile };
     game.passed = [];

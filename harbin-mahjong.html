@@ -58,6 +58,14 @@ body{
   --hand-rack-pad:72px;
   --hand-face-w:min(34px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));
   --hand-face-h:min(48px,calc(var(--hand-face-w) * 1.42),10dvh);
+  /* 牌の下駄（青厚み）— 自家手牌・左右捨て鳴き・伏せ牌で共通（PNGは触らず CSS で統一） */
+  --tile-geta-top:#6289c8;
+  --tile-geta-mid:#4870b4;
+  --tile-geta-deep:#365f9e;
+  --tile-geta-shadow:#2f558f;
+  --tile-geta-gradient:linear-gradient(180deg,var(--tile-geta-top) 0%,var(--tile-geta-mid) 38%,var(--tile-geta-deep) 78%,var(--tile-geta-shadow) 100%);
+  --tile-back-face:linear-gradient(180deg,#5588c4 0%,#4a78b0 22%,#3d68a0 48%,#345a90 72%,#2e5082 92%,#284878 100%);
+  --tile-back-edge:linear-gradient(180deg,#6a94c8 0%,#5280b8 42%,#426ca8 100%);
 }
 .felt-play-column{
   position:relative;
@@ -90,8 +98,7 @@ body{
   left:0;right:0;bottom:0;
   height:12%;
   min-height:3px;
-  /* 参照イラストの「厚みの青」に近い帯（表側の立体と色を揃える） */
-  background:linear-gradient(180deg,#7eb2e8 0%,#5f9ad8 38%,#4a86ca 72%,#3d74b4 100%);
+  background:var(--tile-back-edge);
   border-top:1px solid rgba(220,236,252,.55);
   box-shadow:
     0 -1px 1px rgba(255,255,255,.28) inset,
@@ -147,11 +154,11 @@ body{
   left:0;right:0;top:0;
   height:15%;
   border-radius:4px 4px 0 0;
-  background:linear-gradient(180deg,#6f97df 0%,#4a76c8 38%,#3360b2 78%,#2c569f 100%);
+  background:var(--tile-geta-gradient);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 -1px 2px rgba(18,42,86,.45),
-    0 1px 1px rgba(18,42,86,.25);
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -1px 2px rgba(18,42,86,.42),
+    0 1px 1px rgba(18,42,86,.22);
   z-index:5;
   pointer-events:none;
 }
@@ -230,8 +237,8 @@ body{
   border-radius:2px;
   font-weight:bold;cursor:pointer;transition:transform .12s ease;overflow:hidden;
   background:
-    linear-gradient(105deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 42%,rgba(40,90,130,.06) 100%),
-    linear-gradient(180deg,#9ec4ef 0%,#7eace4 12%,#6a9ad8 32%,#5688cc 52%,#4676b8 72%,#3a649e 100%);
+    linear-gradient(105deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 42%,rgba(40,90,130,.08) 100%),
+    var(--tile-back-face);
   box-shadow:
     0 0 0 1px rgba(220,235,248,.65) inset,
     0 2px 0 rgba(255,255,255,.22) inset,
@@ -385,29 +392,27 @@ body{
 .tile.back.hand-face.opp-hand{
   transform:rotate(var(--opp-rot));
   border-radius:3px;
-  border:1px solid #a8c8e8;
+  border:1px solid #8eb0d4;
   background:
-    linear-gradient(118deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,0) 38%,rgba(30,70,110,.08) 100%),
-    linear-gradient(168deg,#b4d4f2 0%,#7eb2e8 28%,#5f9ad8 52%,#4a7eb8 76%,#3a6498 100%);
+    linear-gradient(118deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 38%,rgba(30,70,110,.1) 100%),
+    var(--tile-back-face);
   box-shadow:
-    0 0 0 1px rgba(230,244,255,.7) inset,
-    0 2px 0 rgba(255,255,255,.28) inset,
-    0 -4px 10px rgba(35,75,115,.22) inset,
-    1px 2px 0 rgba(210,230,248,.75),
-    0 3px 6px rgba(50,95,145,.22),
-    0 6px 12px rgba(40,80,125,.14);
+    0 0 0 1px rgba(210,228,248,.55) inset,
+    0 2px 0 rgba(255,255,255,.2) inset,
+    0 -4px 10px rgba(35,75,115,.28) inset,
+    1px 2px 0 rgba(180,204,232,.55),
+    0 3px 6px rgba(50,95,145,.24),
+    0 6px 12px rgba(40,80,125,.16);
 }
 .tile.back.hand-face.opp-hand::before{
   display:block;
   left:0;right:0;top:auto;bottom:0;
   height:20%;
   min-height:5px;
-  background:linear-gradient(180deg,
-    #f2f6fa 0%,#e6ecf4 20%,#d4dee8 38%,
-    #8eb8e6 42%,#6a9ed8 68%,#4a82c4 100%);
-  border-top:1px solid rgba(255,255,255,.72);
+  background:var(--tile-geta-gradient);
+  border-top:1px solid rgba(220,236,252,.55);
   border-bottom:none;
-  box-shadow:inset 0 -1px 1px rgba(255,255,255,.32);
+  box-shadow:inset 0 -1px 1px rgba(255,255,255,.28);
   z-index:2;
 }
 .tile.back.hand-face.opp-hand::after{
@@ -427,6 +432,57 @@ body{
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back){
   border:1px solid #b8d4ea;
   border-bottom:1px solid #b8d4ea;
+}
+/* 左右の捨て・鳴き・手牌列: 自家と同じ CSS 下駄（デザイン2 PNG の青縁を隠して統一） */
+#left-area .side-col .tile.hand-face.opp-hand:not(.back),
+#right-area .side-col .tile.hand-face.opp-hand:not(.back),
+#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+#left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back),
+#right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back){
+  position:relative;
+  background:transparent;
+  border:none;
+  border-bottom:none;
+  filter:drop-shadow(0 2px 3px rgba(20,48,78,.22));
+}
+#left-area .side-col .tile.hand-face.opp-hand:not(.back)::before,
+#right-area .side-col .tile.hand-face.opp-hand:not(.back)::before,
+#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back)::before,
+#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back)::before,
+#left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back)::before,
+#right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back)::before{
+  display:block;
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;
+  height:15%;
+  border-radius:4px 4px 0 0;
+  background:var(--tile-geta-gradient);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -1px 2px rgba(18,42,86,.42),
+    0 1px 1px rgba(18,42,86,.22);
+  z-index:5;
+  pointer-events:none;
+}
+#left-area .side-col .tile.hand-face.opp-hand:not(.back) .tile-art,
+#right-area .side-col .tile.hand-face.opp-hand:not(.back) .tile-art,
+#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back) .tile-art,
+#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back) .tile-art,
+#left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back) .tile-art,
+#right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back) .tile-art{
+  position:absolute;
+  left:0;right:0;top:15%;bottom:0;
+  width:100%;
+  height:auto;
+  align-self:auto;
+  clip-path:none;
+  border-radius:0 0 4px 4px;
+  background:#fff;
+  box-shadow:
+    inset 0 0 0 1px rgba(150,180,210,.5),
+    0 1px 0 rgba(170,196,224,.55);
 }
 .tile.side-face .side-face-art{
   position:absolute;
@@ -495,6 +551,7 @@ body{
   width:auto;
   height:16%;
   min-height:4px;
+  background:var(--tile-back-edge);
   z-index:4;
   border-top:1px solid rgba(220,236,252,.55);
   border-left:none;
@@ -545,11 +602,11 @@ body{
 #right-area .side-discards-zone .tile.back:not(.hand-face),
 #left-area .side-rack .meld-group .tile.back:not(.hand-face),
 #right-area .side-rack .meld-group .tile.back:not(.hand-face){
-  background:linear-gradient(0deg,#3a649e 0%,#4676b8 26%,#5688cc 48%,#6a9ad8 68%,#7eace4 86%,#9ec4ef 100%);
+  background:linear-gradient(0deg,var(--tile-geta-shadow) 0%,var(--tile-geta-deep) 24%,var(--tile-geta-mid) 52%,var(--tile-geta-top) 82%,#6a94c8 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(220,235,248,.5),
-    inset 0 -2px 0 rgba(255,255,255,.14),
-    inset 0 3px 8px rgba(40,85,130,.2);
+    inset 0 0 0 1px rgba(210,228,248,.48),
+    inset 0 -2px 0 rgba(255,255,255,.12),
+    inset 0 3px 8px rgba(40,85,130,.24);
 }
 #left-area .side-col .tile.back:not(.hand-face)::before,
 #right-area .side-col .tile.back:not(.hand-face)::before,
@@ -561,7 +618,7 @@ body{
   left:0;right:0;top:auto;bottom:0;
   height:16%;
   min-height:4px;
-  background:linear-gradient(180deg,#7eb2e8 0%,#5f9ad8 38%,#4a86ca 72%,#3d74b4 100%);
+  background:var(--tile-back-edge);
   border-top:1px solid rgba(220,236,252,.55);
   border-left:none;
   border-right:none;
@@ -2142,6 +2199,7 @@ let ONLINE_DEALER_REVEAL=null;
 let ONLINE_ROULETTE_ACTIVE=false;
 let ONLINE_DEAL_CINEMA_DONE=null;
 let ONLINE_RON_FX_DONE=null;
+let ONLINE_TREASURE_WIN_DONE=null;
 let ONLINE_MATCH_RESULT=null;
 let DEAL_CINEMA_TIMERS=[];
 let DEAL_CINEMA_FLIGHT_LAYER=null;
@@ -2509,6 +2567,7 @@ const I18N={
     actionPrompt:'どうしますか？',
     autoKouting:'扣聴中… 山から1枚引いてから、聴牌を保てる牌だけ捨ててください',
     kouTingNeedDraw:'扣聴です。「牌を引く」で山から1枚（右端に現れます）',
+    kouTingTreasureWin:'扣聴！待ち牌が宝牌と一致 — 宝中宝！',
     ktPickDiscard:'嵌張待ちを保てる牌だけ、タップして捨ててください',
     ktPickDiscardHint:'切った牌が誰かの和了に…と思うとヒリヒリしますね',
     ktTapHint:'聴牌を保てる牌だけクリック',
@@ -2628,6 +2687,7 @@ const I18N={
     actionPrompt:'你要怎么做？',
     autoKouting:'扣听中… 先从山里摸一张，再点击打出（仅可打出保持听牌的牌）',
     kouTingNeedDraw:'扣听中。请点击「摸牌」从山摸一张（会出现在最右侧）',
+    kouTingTreasureWin:'扣听！待牌与宝牌一致 — 宝中宝！',
     ktPickDiscard:'只能打出保持夹张听牌的牌',
     ktPickDiscardHint:'打出去的瞬间会不会点炮…紧张感拉满',
     ktTapHint:'只能点击能保持听牌的牌',
@@ -2902,23 +2962,25 @@ function buildOnlineGame(){
     const fromView=winner.from!=null?onlineViewSeat(winner.from):null;
     const isTsumo=winner.type==='tsumo';
     const isTreasure=!!winner.treasure;
-    const deltasReal=winner.scoreDeltas||(isTsumo?getTsumoScoreDeltas(winner.seat,4):getRonScoreDeltas(winner.seat,winner.from,winner.discarderListening!==false,2));
+    const deltasReal=winner.scoreDeltas||(isTreasure?getTreasureScoreDeltas(winner.seat,12):isTsumo?getTsumoScoreDeltas(winner.seat,4):getRonScoreDeltas(winner.seat,winner.from,winner.discarderListening!==false,2));
     const deltas=[0,1,2,3].map(v=>deltasReal[onlineRealSeat(v)]);
     const totalPts=deltas[wView]||0;
     const fromName=fromView!=null?sideName(fromView):null;
     lastWin={
       winner:wView,
       tile:winner.tile,
-      method:winner.type,
+      method:isTreasure?tr('treasureWin','宝中宝！'):winner.type,
       points:totalPts,
       from:fromView,
       discarderListening:winner.discarderListening,
       isTsumo,
       isTreasure,
       scoreDeltas:deltas,
-      detail:buildWinScoreDetail(wView,deltas,isTsumo,fromView??-1,winner.discarderListening!==false),
+      detail:buildWinScoreDetail(wView,deltas,isTsumo||isTreasure,fromView??-1,winner.discarderListening!==false),
     };
-    if(winner.type==='ron'&&fromName!=null){
+    if(isTreasure){
+      endMsg=`${sideName(wView)} ${tr('treasureWin','宝中宝！')} ${tileName(winner.tile)} (+${totalPts})`;
+    }else if(winner.type==='ron'&&fromName!=null){
       endMsg=`${sideName(wView)} ${tr('ron','ロン！')} ${tileName(winner.tile)} (+${totalPts})\n${tr('dianpao','点炮')}: ${fromName}`;
     }else{
       endMsg=`${onlinePlayerName(winner.seat)} ${winner.type} (+${totalPts})`;
@@ -3023,6 +3085,25 @@ function renderOnlineOrStart(){
   if(!G){
     renderStartScreen();
     return;
+  }
+  if(G.gameOver&&G.lastWin?.isTreasure){
+    const baoFxKey=`${room.id}:${room.match?.round||0}:bao:${G.lastWin.winner}:${tileKey(G.lastWin.tile)}`;
+    if(ONLINE_TREASURE_WIN_DONE!==baoFxKey){
+      ONLINE_TREASURE_WIN_DONE=baoFxKey;
+      render();
+      if(G.lastWin.winner===0){
+        scheduleMatch(()=>playHumanWinCinema({
+          kanji:'宝',
+          label:tr('treasureWin','宝中宝！'),
+          points:G.lastWin.points,
+          tile:G.lastWin.tile,
+          cb:()=>openResultOverlay(),
+        }),180);
+      }else{
+        scheduleMatch(()=>openResultOverlay(),400);
+      }
+      return;
+    }
   }
   if(G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo){
     const ronFxKey=`${room.id}:${room.match?.round||0}:ron:${G.lastWin.from}:${tileKey(G.lastWin.tile)}`;
@@ -4174,7 +4255,8 @@ function updateAllTenpai(){
       if(shouldEnterKouTing(p,drawn)){
         p.kouTing=true;
         p.waits=w;
-        if(p.isHuman) addLog(`${sideName(0)}が扣聴！${tr('waiting','待ち')}: ${w.map(tileName).join(' ')}`);
+        if(tryResolveKouTingTreasureWin(p.idx)) continue;
+        if(p.isHuman) addLog(`${sideName(p.idx)}が扣聴！${tr('waiting','待ち')}: ${w.map(tileName).join(' ')}`);
         else addLog(`${p.name}が扣聴`);
       }
     }
@@ -4285,10 +4367,35 @@ function kouTingEntryDiscardIndices(p){
   return out;
 }
 
+function kouTingWaitsMatchTreasure(waits){
+  return !!(G?.treasure&&waits?.length&&waits.some(w=>tileEq(w,G.treasure)));
+}
+
+/** 扣聴成立直後: 待ち牌に宝牌が含まれれば宝中宝で即和了（山引き不要） */
+function tryResolveKouTingTreasureWin(pi){
+  if(!G||G.gameOver||G.roundOver) return false;
+  const p=G.players[pi];
+  if(!p?.kouTing||!kouTingWaitsMatchTreasure(p.waits)) return false;
+  const tile=G.treasure;
+  if(!tile) return false;
+  G.treasureUsed=true;
+  if(p.isHuman){
+    G.msg=tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！');
+    G.phase='discard';
+    render();
+    scheduleMatch(()=>resolveWin(pi,tile,true,true),900);
+  }else{
+    addLog(`${sideName(pi)} ${tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！')}`);
+    resolveWin(pi,tile,true,true);
+  }
+  return true;
+}
+
 function enterKouTingByDiscard(p,tileIdx){
   const tile=p.hand[tileIdx];
   if(!tile) return false;
-  noteDiscardMeta(0,tile);
+  const pi=p.idx;
+  noteDiscardMeta(pi,tile);
   p.hand=p.hand.filter((_,i)=>i!==tileIdx);
   p.hand=sortTiles(p.hand);
   pushPlayerDiscard(p,tile);
@@ -4297,11 +4404,12 @@ function enterKouTingByDiscard(p,tileIdx){
   p.kouTing=true;
   p.waits=getKatanWaits(p.hand);
   G.kouTingPick=false;
+  if(tryResolveKouTingTreasureWin(pi)) return true;
   updateAllTenpai();
-  addLog(`${sideName(0)}が扣聴！${tr('waiting','待ち')}: ${(p.waits||[]).map(tileName).join(' ')}`);
+  addLog(`${sideName(pi)}が扣聴！${tr('waiting','待ち')}: ${(p.waits||[]).map(tileName).join(' ')}`);
   GameSFX.play('discard');
   fxVibrate(22);
-  afterDiscard(0,tile);
+  afterDiscard(pi,tile);
   return true;
 }
 
@@ -5434,6 +5542,14 @@ function noteDiscardMeta(fromPi, tile){
   G.lastDiscardMeta={from:fromPi,tile,discarderListening:isDiscarderListening(p)};
 }
 
+/** 宝中宝: 各家 basePts（デフォルト12＝ツモ4点の3倍） */
+function getTreasureScoreDeltas(winnerSeat, basePts=12){
+  const d=[0,0,0,0];
+  d[winnerSeat]=basePts*3;
+  for(let s=0;s<4;s++) if(s!==winnerSeat) d[s]=-basePts;
+  return d;
+}
+
 function getTsumoScoreDeltas(winnerSeat, basePts=4){
   const d=[0,0,0,0];
   d[winnerSeat]=basePts*3;
@@ -5615,11 +5731,8 @@ function resolveWin(pi, tile, isTsumo, isTreasure){
   let deltas;
   let totalPts;
   if(isTreasure){
-    const base=12;
-    deltas=[0,0,0,0];
-    deltas[pi]=base*3;
-    for(let s=0;s<4;s++) if(s!==pi) deltas[s]=-base;
-    totalPts=base*3;
+    deltas=getTreasureScoreDeltas(pi,12);
+    totalPts=deltas[pi];
   }else if(isTsumo){
     deltas=getTsumoScoreDeltas(pi,4);
     totalPts=deltas[pi];
