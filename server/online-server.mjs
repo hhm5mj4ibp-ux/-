@@ -17,7 +17,10 @@ const ROOM_TTL_MS = 1000 * 60 * 60 * 3;
 const MAX_PLAYERS = 4;
 const MIN_PLAYERS_TO_START = 2;
 const MATCH_TOTAL_ROUNDS = 10;
-const AI_LV = { pon: 0.4, chi: 0.3 };
+/** オンラインAIは「ふつう」相当（オフライン難易度とは独立） */
+const AI_LV = {
+  pon: 0.58, chi: 0.48, minkan: 0.18, smartPick: true, defense: false, discardNoise: 0.07,
+};
 
 const rooms = new Map();
 const clients = new Map();
@@ -426,53 +429,94 @@ function claimReactionOrder(fromSeat) {
   return out;
 }
 
-function aiFindDiscardTile(hand) {
-  const scores = hand.map((tile) => {
-    let sc = 0;
-    if (countTile(hand, tile) >= 2) sc += 5;
-    if (tile.suit !== 'z') {
-      for (const t of hand) {
-        if (t.suit === tile.suit && Math.abs(t.num - tile.num) === 2) sc += 4;
-      }
+function aiConcealedCore(hand, exp) {
+  const h = sortTiles([...hand]);
+  if (h.length === exp) return h;
+  if (h.length === exp + 1) return h.slice(0, exp);
+  return h;
+}
+
+function aiCountKatanBlocks(hand) {
+  let n = 0;
+  for (const suit of ['m', 'p', 's']) {
+    for (let num = 1; num <= 7; num++) {
+      const a = { suit, num };
+      const b = { suit, num: num + 2 };
+      if (hand.some((x) => tileEq(x, a)) && hand.some((x) => tileEq(x, b))) n++;
     }
-    if (tile.suit !== 'z') {
-      const adj = [{ suit: tile.suit, num: tile.num - 1 }, { suit: tile.suit, num: tile.num + 1 }];
-      for (const a of adj) {
-        if (a.num >= 1 && a.num <= 9 && hand.some((x) => tileEq(x, a))) sc += 2;
-      }
-    }
-    if (tile.suit === 'z' || tile.num === 1 || tile.num === 9) sc += 1;
-    return sc;
-  });
-  const min = Math.min(...scores);
-  const cands = hand.filter((_, i) => scores[i] === min);
-  return cands[Math.floor(Math.random() * cands.length)];
+  }
+  return n;
+}
+
+function aiHandUtility(game, seat, hand) {
+  const meldN = game.melds[seat]?.length || 0;
+  const exp = Math.max(1, 13 - meldN * 3);
+  const core = aiConcealedCore(hand, exp);
+  if (core.length !== exp) return -80;
+  let u = meldN * 14;
+  const waits = getKatanWaits(core);
+  u += waits.length * 48;
+  if (!meldN) u -= 28;
+  const all = [...core, ...(game.melds[seat] || []).flatMap((m) => m.tiles)];
+  if (!all.some((t) => t.suit === 'z' || t.num === 1 || t.num === 9)) u -= 12;
+  if (new Set(core.filter((t) => t.suit !== 'z').map((t) => t.suit)).size < 2 && meldN < 2) u -= 8;
+  u += aiCountKatanBlocks(core) * 7;
+  return u;
 }
 
 function aiFindSafeDiscardIndexKouTing(game, seat) {
   const hand = game.hands[seat];
-  const tried = new Set();
-  const cands = [];
-  for (let i = 0; i < hand.length; i++) {
-    const k = tileKey(hand[i]);
-    if (tried.has(k)) continue;
-    tried.add(k);
+  const leg = getKouTingLegalDiscardIndices(game, seat);
+  if (!leg.length) return 0;
+  let best = leg[0];
+  let bestScore = Infinity;
+  for (const i of leg) {
     const nh = hand.filter((_, j) => j !== i);
-    if (getKatanWaits(nh).length > 0) cands.push(i);
+    const score = -aiHandUtility(game, seat, nh);
+    if (score < bestScore) {
+      bestScore = score;
+      best = i;
+    }
   }
-  if (cands.length) return cands[Math.floor(Math.random() * cands.length)];
-  return 0;
+  return best;
+}
+
+function aiFindDiscardIndex(game, seat) {
+  const hand = game.hands[seat];
+  if (Math.random() < AI_LV.discardNoise) {
+    return Math.floor(Math.random() * hand.length);
+  }
+  let bestIdx = 0;
+  let bestScore = Infinity;
+  for (let i = 0; i < hand.length; i++) {
+    const nh = hand.filter((_, j) => j !== i);
+    const score = -aiHandUtility(game, seat, nh);
+    if (score < bestScore) {
+      bestScore = score;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
 }
 
 function aiChooseDiscardIndex(game, seat) {
-  if (game.kouTing[seat] && game.lastDraw?.seat === seat) {
-    const t = game.lastDraw.tile;
-    const ix = game.hands[seat].findIndex((x) => tileEq(x, t));
-    if (ix >= 0) return ix;
-  }
   if (game.kouTing[seat]) return aiFindSafeDiscardIndexKouTing(game, seat);
-  const pick = aiFindDiscardTile(game.hands[seat]);
-  return game.hands[seat].findIndex((t) => tileEq(t, pick));
+  return aiFindDiscardIndex(game, seat);
+}
+
+function aiShouldClaimMeld(game, seat, tile, kind) {
+  if (kind === 'chi' && Math.random() >= AI_LV.chi) return false;
+  if (kind === 'minkan' && Math.random() >= AI_LV.minkan) return false;
+  if (kind === 'pon' && Math.random() >= AI_LV.pon) return false;
+  if (!AI_LV.smartPick) return true;
+  const hand = game.hands[seat];
+  const removed = kind === 'minkan' ? [tile, tile, tile] : [tile, tile];
+  const nh = removeTiles(hand, removed);
+  if (!nh) return false;
+  const meldType = kind === 'minkan' ? 'kan' : 'pon';
+  const after = aiHandUtility(game, seat, nh);
+  const before = aiHandUtility(game, seat, hand);
+  return after >= before - 6;
 }
 
 function applyAiClaimPhase(room) {
@@ -500,7 +544,7 @@ function applyAiClaimPhase(room) {
   for (const seat of order) {
     if (isHumanSeat(room, seat) || game.kouTing[seat]) continue;
     if (countTile(game.hands[seat], tile) >= 3) {
-      if (Math.random() < AI_LV.pon * 0.22) {
+      if (aiShouldClaimMeld(game, seat, tile, 'minkan')) {
         game.hands[seat] = removeTiles(game.hands[seat], [tile, tile, tile]);
         game.melds[seat].push({ type: 'kan', tiles: [tile, tile, tile, tile], from });
         game.turn = seat;
@@ -518,7 +562,7 @@ function applyAiClaimPhase(room) {
     if (isHumanSeat(room, seat) || game.kouTing[seat]) continue;
     if (countTile(game.hands[seat], tile) >= 2) {
       const needsPon = !game.melds[seat].some((m) => m.type === 'pon' || m.type === 'kan');
-      if (needsPon || Math.random() < AI_LV.pon) {
+      if (needsPon || aiShouldClaimMeld(game, seat, tile, 'pon')) {
         game.hands[seat] = removeTiles(game.hands[seat], [tile, tile]);
         game.melds[seat].push({ type: 'pon', tiles: [tile, tile, tile], from });
         game.turn = seat;
@@ -536,8 +580,22 @@ function applyAiClaimPhase(room) {
   if (!game.passed.includes(chiSeat) && !isHumanSeat(room, chiSeat) && !game.kouTing[chiSeat]) {
     const opts = getChiOptions(game.hands[chiSeat], tile);
     const hasMeld = game.melds[chiSeat].some((m) => m.type === 'pon' || m.type === 'kan');
-    if (opts.length && hasMeld && Math.random() < AI_LV.chi) {
-      const opt = opts[0];
+    if (opts.length && hasMeld && aiShouldClaimMeld(game, chiSeat, tile, 'chi')) {
+      let opt = opts[0];
+      if (AI_LV.smartPick) {
+        let best = opts[0];
+        let bestU = -Infinity;
+        for (const pair of opts) {
+          const nh = removeTiles(game.hands[chiSeat], pair);
+          if (!nh) continue;
+          const u = aiHandUtility(game, chiSeat, nh);
+          if (u > bestU) {
+            bestU = u;
+            best = pair;
+          }
+        }
+        opt = best;
+      }
       game.hands[chiSeat] = removeTiles(game.hands[chiSeat], opt);
       game.melds[chiSeat].push({ type: 'chi', tiles: sortTiles([...opt, tile]), from });
       game.turn = chiSeat;

@@ -2849,9 +2849,150 @@ const t = k => (I18N[UI.lang]&&I18N[UI.lang][k])||I18N.ja[k]||k;
 const tr = (k, fallback='') => t(k)===k?(fallback||k):t(k);
 
 function aiLevel(){
-  if(UI.difficulty==='easy') return {pon:0.2,chi:0.14,chiOpen:false,claimBoost:0.82,discardNoise:0.38};
-  if(UI.difficulty==='hard') return {pon:0.82,chi:0.68,chiOpen:true,claimBoost:1.18,discardNoise:0.06};
-  return {pon:0.45,chi:0.32,chiOpen:true,claimBoost:1,discardNoise:0.2};
+  /** やさしい: 鳴き少なめ・たまにミス打牌。ふつう: 嵌張を意識。むずかしい: 積極鳴き・守備・扣聴判断 */
+  if(UI.difficulty==='easy') return {
+    pon:0.32,chi:0.22,chiOpen:false,minkan:0.06,kanRate:0.06,
+    ronTake:0.65,tsumoTake:0.82,kouTingEnter:0.3,smartPick:false,defense:false,
+    discardNoise:0.18,claimBoost:0.85,
+  };
+  if(UI.difficulty==='hard') return {
+    pon:0.9,chi:0.78,chiOpen:true,minkan:0.42,kanRate:0.38,
+    ronTake:1,tsumoTake:1,kouTingEnter:0.96,smartPick:true,defense:true,
+    discardNoise:0.02,claimBoost:1.2,
+  };
+  return {
+    pon:0.58,chi:0.48,chiOpen:true,minkan:0.18,kanRate:0.16,
+    ronTake:0.94,tsumoTake:0.97,kouTingEnter:0.62,smartPick:true,defense:false,
+    discardNoise:0.07,claimBoost:1,
+  };
+}
+
+function aiConcealedCore(hand,exp){
+  const h=sortTiles([...hand]);
+  if(h.length===exp) return h;
+  if(h.length===exp+1) return h.slice(0,exp);
+  return h;
+}
+
+function aiCountKatanBlocks(hand){
+  let n=0;
+  for(const suit of ['m','p','s']){
+    for(let num=1;num<=7;num++){
+      const a={suit,num},b={suit,num:num+2};
+      if(hand.some(x=>tileEq(x,a))&&hand.some(x=>tileEq(x,b))) n++;
+    }
+  }
+  return n;
+}
+
+/** 嵌張・開門・2色・待ち枚数を意識した手牌評価（高いほど良い） */
+function aiHandUtility(p,hand){
+  const meldN=p.melds?.length||0;
+  const exp=Math.max(1,13-meldN*3);
+  const core=aiConcealedCore(hand,exp);
+  if(core.length!==exp) return -80;
+  let u=meldN*14;
+  const waits=getKatanWaits(core);
+  u+=waits.length*48;
+  if(!meldN) u-=28;
+  const all=[...core,...p.melds.flatMap(m=>m.tiles)];
+  if(!all.some(t=>t.suit==='z'||t.num===1||t.num===9)) u-=12;
+  if(new Set(core.filter(t=>t.suit!=='z').map(t=>t.suit)).size<2&&meldN<2) u-=8;
+  u+=aiCountKatanBlocks(core)*7;
+  for(const tile of core){
+    if(tile.suit==='z'&&countTile(core,tile)===1) u-=3;
+    if(tile.suit!=='z'&&countTile(core,tile)>=2){
+      const alone=!core.some(x=>x!==tile&&x.suit===tile.suit&&Math.abs(x.num-tile.num)<=2);
+      if(alone) u-=2;
+    }
+  }
+  return u;
+}
+
+function aiScoreDiscardIndex(p,idx){
+  const nh=p.hand.filter((_,j)=>j!==idx);
+  const exp=expectedHandCount(p);
+  return aiHandUtility(p,nh.length>=exp?nh:nh.slice(0,exp));
+}
+
+function aiDiscardDanger(tile,fromPi){
+  let d=0;
+  const human=G.players[0];
+  if(human&&human.idx!==fromPi&&!human.kouTing&&checkWin(human,tile)) d+=100;
+  for(const op of G.players){
+    if(!op||op.isHuman||op.idx===fromPi||op.kouTing) continue;
+    if(checkWin(op,tile)) d+=35;
+  }
+  return d;
+}
+
+function aiPickKouTingEntryIndex(p,entry){
+  let best=entry[0],bestU=-Infinity;
+  for(const i of entry){
+    const nh=p.hand.filter((_,j)=>j!==i);
+    const w=getKatanWaits(nh);
+    const u=w.length*55+aiHandUtility({...p,hand:nh},nh);
+    if(u>bestU){bestU=u;best=i;}
+  }
+  return best;
+}
+
+function aiPickKouTingDiscardIndex(p,leg){
+  const lv=aiLevel();
+  if(!lv.smartPick||Math.random()<(lv.discardNoise||0)*0.5){
+    return leg[Math.floor(Math.random()*leg.length)];
+  }
+  let best=leg[0],bestScore=Infinity;
+  for(const i of leg){
+    const nh=p.hand.filter((_,j)=>j!==i);
+    const tile=p.hand[i];
+    const danger=lv.defense?aiDiscardDanger(tile,p.idx):0;
+    const keep=aiHandUtility(p,nh);
+    const score=danger-keep;
+    if(score<bestScore){bestScore=score;best=i;}
+  }
+  return best;
+}
+
+function aiPickBestChiOption(hand,tile,opts){
+  let best=opts[0],bestU=-Infinity;
+  for(const pair of opts){
+    const nh=removeTiles(hand,pair);
+    if(!nh) continue;
+    const pseudo={hand:nh,melds:[{type:'chi',tiles:[...pair,tile]}]};
+    const u=aiHandUtility(pseudo,nh);
+    if(u>bestU){bestU=u;best=pair;}
+  }
+  return best;
+}
+
+function aiShouldClaimMeld(p,tile,kind){
+  const lv=aiLevel();
+  if(kind==='chi'){
+    if(Math.random()>=lv.chi*(lv.claimBoost||1)) return false;
+    if(!lv.smartPick) return true;
+    const opts=getChiOptions(p.hand,tile);
+    if(!opts.length) return false;
+    const pair=aiPickBestChiOption(p.hand,tile,opts);
+    const nh=removeTiles(p.hand,pair);
+    if(!nh) return false;
+    const pseudo={hand:nh,melds:[...(p.melds||[]),{type:'chi',tiles:sortTiles([...pair,tile])}]};
+    return aiHandUtility(pseudo,nh)>=aiHandUtility(p,p.hand)-5;
+  }
+  if(kind==='minkan'){
+    if(Math.random()>=lv.minkan) return false;
+  }else if(kind==='pon'){
+    if(!p.melds.some(m=>m.type==='pon'||m.type==='kan')&&Math.random()<lv.pon*0.55) return true;
+    if(Math.random()>=lv.pon) return false;
+  }
+  if(!lv.smartPick) return true;
+  const nh=removeTiles(p.hand,kind==='minkan'?[tile,tile,tile]:[tile,tile]);
+  if(!nh) return false;
+  const meldType=kind==='minkan'?'kan':'pon';
+  const pseudo={hand:nh,melds:[...(p.melds||[]),{type:meldType,tiles:kind==='minkan'?[tile,tile,tile,tile]:[tile,tile,tile]}]};
+  const after=aiHandUtility(pseudo,nh);
+  const before=aiHandUtility(p,n.hand);
+  return after>=before-6;
 }
 
 function setLanguage(lang){
@@ -2863,6 +3004,7 @@ function setLanguage(lang){
 function setDifficulty(level){
   if(!['easy','normal','hard'].includes(level)) return;
   UI.difficulty=level;
+  saveUiPrefs();
   renderStartScreen();
 }
 
@@ -2986,11 +3128,14 @@ function loadUiPrefs(){
     const raw=localStorage.getItem('hm_api_base');
     if(raw===null) UI.apiBase=normalizeApiBase(DEFAULT_ONLINE_API_BASE);
     else UI.apiBase=normalizeApiBase(raw);
+    const diff=localStorage.getItem('hm_difficulty');
+    if(['easy','normal','hard'].includes(diff)) UI.difficulty=diff;
   }catch(_e){}
 }
 function saveUiPrefs(){
   try{
     localStorage.setItem('hm_api_base',normalizeApiBase(UI.apiBase));
+    localStorage.setItem('hm_difficulty',UI.difficulty||'normal');
   }catch(_e){}
 }
 function setOnlineServerUrl(){
@@ -4316,7 +4461,7 @@ function tryOfferPostDrawKan(fromPi){
     render();
     return true;
   }
-  if(Math.random()<(aiLevel().pon||0.3)*0.18){
+  if(Math.random()<(aiLevel().kanRate||0.12)){
     const spec=post.ankan.length
       ?{kind:'ankan',tile:post.ankan[0]}
       :{kind:'shouminkan',tile:post.shouminkan[0].tile,meldIndex:post.shouminkan[0].meldIndex};
@@ -4330,7 +4475,7 @@ function aiMaybeTurnStartKan(pi){
   if(!p||p.kouTing||G.discardedThisTurn||G.kanBranchBActive) return false;
   const ts=getTurnStartKanOptions(p);
   if(!hasPostDrawKanOffer(ts)) return false;
-  if(Math.random()>(aiLevel().pon||0.3)*0.2) return false;
+  if(Math.random()>(aiLevel().kanRate||0.12)) return false;
   const spec=ts.ankan.length
     ?{kind:'ankan',tile:ts.ankan[0]}
     :{kind:'shouminkan',tile:ts.shouminkan[0].tile,meldIndex:ts.shouminkan[0].meldIndex};
@@ -5199,7 +5344,12 @@ function autoDiscardDrawn(pi){
   const p=G.players[pi];
   const drawn=p.drawnTile||G.lastDrawn;
   if(!drawn){return;}
-  let idx=handIndexOfTileRef(p,p.drawnTile);
+  let idx=-1;
+  if(p.kouTing){
+    const leg=kouTingLegalDiscardIndices(p);
+    if(leg.length) idx=aiPickKouTingDiscardIndex(p,leg);
+  }
+  if(idx<0) idx=handIndexOfTileRef(p,p.drawnTile);
   if(idx<0) idx=p.hand.findIndex(t=>tileEq(t,drawn));
   if(idx<0){
     addLog(UI.lang==='zh'
@@ -5425,42 +5575,35 @@ function afterDiscard(fromPi, tile){
 
 function processAIResponses(fromPi, tile, done){
   const lv=aiLevel();
-  // Check AI for win first
   for(const p of G.players){
     if(p.isHuman||p.idx===fromPi) continue;
-    if(checkWin(p,tile)&&Math.random()<(lv.claimBoost||1)){
+    if(checkWin(p,tile)&&Math.random()<(lv.ronTake??lv.claimBoost??1)){
       scheduleMatch(()=>resolveWin(p.idx,tile,false,false),400);
       return;
     }
   }
-  // 大明槓（手に3枚＋捨て1枚）— ポンより先に判定
   for(const p of G.players){
     if(p.isHuman||p.idx===fromPi||p.kouTing) continue;
-    if(countTile(p.hand,tile)>=3&&p.hand.length>3){
-      if(Math.random()<lv.pon*0.22){
-        scheduleMatch(()=>{aiMinkan(p.idx,tile,fromPi);},400);
-        return;
-      }
+    if(countTile(p.hand,tile)>=3&&p.hand.length>3&&aiShouldClaimMeld(p,tile,'minkan')){
+      scheduleMatch(()=>{aiMinkan(p.idx,tile,fromPi);},400);
+      return;
     }
   }
-  // Check AI for pon (only if AI is not in 扣聴)
   for(const p of G.players){
     if(p.isHuman||p.idx===fromPi||p.kouTing) continue;
-    if(countTile(p.hand,tile)>=2&&p.hand.length>3){
-      if(Math.random()<lv.pon){
-        scheduleMatch(()=>{aiPon(p.idx,tile,fromPi);},400);
-        return;
-      }
+    if(countTile(p.hand,tile)>=2&&p.hand.length>3&&aiShouldClaimMeld(p,tile,'pon')){
+      scheduleMatch(()=>{aiPon(p.idx,tile,fromPi);},400);
+      return;
     }
   }
-  // Check next player for chi (skip if in 扣聴)
   const nextPi=nextPlayer(fromPi);
   const nxt=G.players[nextPi];
   if(!nxt.isHuman&&!nxt.kouTing){
     const chiOpts=getChiOptions(nxt.hand,tile);
     const canChi=chiOpts.length>0&&(lv.chiOpen||nxt.melds.some(m=>m.type==='pon'||m.type==='kan'));
-    if(canChi&&Math.random()<lv.chi*(lv.claimBoost||1)){
-      scheduleMatch(()=>{aiChi(nextPi,tile,chiOpts[0],fromPi);},400);
+    if(canChi&&aiShouldClaimMeld(nxt,tile,'chi')){
+      const pair=lv.smartPick?aiPickBestChiOption(nxt.hand,tile,chiOpts):chiOpts[0];
+      scheduleMatch(()=>{aiChi(nextPi,tile,pair,fromPi);},400);
       return;
     }
   }
@@ -5772,6 +5915,14 @@ function aiDiscard(pi){
   const p=G.players[pi];
   G.discardedThisTurn=true;
   G.kanBranchAOpts=null;
+  const lv=aiLevel();
+  if(!p.kouTing){
+    const entry=kouTingEntryDiscardIndices(p);
+    if(entry.length&&Math.random()<(lv.kouTingEnter||0)){
+      const pick=lv.smartPick?aiPickKouTingEntryIndex(p,entry):entry[Math.floor(Math.random()*entry.length)];
+      if(enterKouTingByDiscard(p,pick)) return;
+    }
+  }
   const tile=aiFindDiscard(p);
   const idx=p.hand.findIndex(t=>tileEq(t,tile));
   if(idx>=0){
@@ -5788,32 +5939,26 @@ function aiDiscard(pi){
 }
 
 function aiFindDiscard(p){
-  // Score each tile: lower = better to discard
-  const hand=p.hand;
-  const scores=hand.map(tile=>{
-    let sc=0;
-    // Part of pair?
-    if(countTile(hand,tile)>=2) sc+=5;
-    // Part of kanchan?
-    if(tile.suit!=='z'){
-      for(const t of hand){
-        if(t.suit===tile.suit&&Math.abs(t.num-tile.num)===2) sc+=4;
-      }
-    }
-    // Adjacent?
-    if(tile.suit!=='z'){
-      const adj=[{suit:tile.suit,num:tile.num-1},{suit:tile.suit,num:tile.num+1}];
-      for(const a of adj) if(a.num>=1&&a.num<=9&&hand.some(x=>tileEq(x,a))) sc+=2;
-    }
-    // Yaochu?
-    if(tile.suit==='z'||tile.num===1||tile.num===9) sc+=1;
-    return sc;
-  });
-  const min=Math.min(...scores);
-  const cands=hand.filter((_,i)=>scores[i]===min);
   const lv=aiLevel();
+  const hand=p.hand;
+  if(p.kouTing){
+    const leg=kouTingLegalDiscardIndices(p);
+    if(leg.length){
+      const idx=aiPickKouTingDiscardIndex(p,leg);
+      return p.hand[idx];
+    }
+  }
   if(Math.random()<(lv.discardNoise||0)) return hand[Math.floor(Math.random()*hand.length)];
-  return cands[Math.floor(Math.random()*cands.length)];
+  let bestIdx=0,bestScore=Infinity;
+  for(let i=0;i<hand.length;i++){
+    const tile=hand[i];
+    const utility=aiScoreDiscardIndex(p,i);
+    const danger=lv.defense?aiDiscardDanger(tile,p.idx):0;
+    const noise=lv.smartPick?0:(Math.random()*8);
+    const score=-utility+danger+noise;
+    if(score<bestScore){bestScore=score;bestIdx=i;}
+  }
+  return hand[bestIdx];
 }
 
 function aiWinTreasure(pi, treasureTile){
