@@ -681,8 +681,22 @@ body{
 .tile.kt-reveal-pop{
   animation:kt-reveal-pop 0.45s ease-out 1;
 }
-.tile.kt-discardable{cursor:pointer;}
-.tile.kt-discard-locked{opacity:.72;cursor:default;}
+.tile.kt-discardable{
+  cursor:pointer;
+  outline:2px solid rgba(110,230,150,.95);
+  outline-offset:2px;
+  box-shadow:0 0 14px 2px rgba(70,200,110,.45);
+  animation:ktDiscardPulse 1.15s ease-in-out infinite;
+}
+@keyframes ktDiscardPulse{
+  0%,100%{outline-color:rgba(110,230,150,.7);box-shadow:0 0 10px 1px rgba(70,200,110,.35);}
+  50%{outline-color:rgba(170,255,200,.98);box-shadow:0 0 18px 4px rgba(90,230,130,.55);}
+}
+.tile.kt-discard-locked{opacity:.42;filter:saturate(.45) grayscale(.15);cursor:not-allowed;}
+.kt-discard-hint{
+  font-size:11px;color:#b8f5c8;text-align:center;padding:3px 8px;margin:0 4px 4px;
+  background:rgba(0,0,0,.35);border-radius:6px;border:1px solid rgba(120,220,150,.35);
+}
 @keyframes kt-reveal-pop{
   0%{transform:translateY(4px) scale(.92);filter:brightness(1.8);}
   55%{transform:translateY(-14px) scale(1.08);filter:brightness(1.15);}
@@ -752,12 +766,45 @@ body{
 #left-area .side-rack{flex-direction:column-reverse;align-items:flex-start;gap:3px;}
 #right-area .side-rack{flex-direction:column-reverse;align-items:flex-end;gap:3px;}
 #left-area .side-discards-zone{align-items:flex-start;}
-#left-area .side-discards-zone .discard-strip.strip-side{
-  align-content:flex-start;
-  justify-content:flex-end;
-  max-height:100%;
+.side-discards-zone .discard-strip.strip-side{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  gap:2px;
+  align-items:flex-end;
+  justify-content:flex-start;
+  width:auto;
+  max-width:100%;
+  height:auto;
+  max-height:none;
 }
-.side-main{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;min-width:0;max-width:100%;}
+#right-area .side-discards-zone{align-items:flex-end;}
+#right-area .side-discards-zone .discard-strip.strip-side{
+  flex-direction:row-reverse;
+  align-items:flex-end;
+  justify-content:flex-end;
+}
+.side-discards-zone .discard-row-sidecol{
+  display:flex;
+  flex-direction:column;
+  flex-wrap:nowrap;
+  gap:0;
+  align-items:center;
+}
+.side-discards-zone .discard-strip.strip-side .tile{flex:0 0 auto;}
+/* 2段時は牌をやや小さく（自家捨て牌の lg 縮尺に近づける） */
+.side-discards-zone .discard-strip.strip-side-compact{
+  --side-disc-w:min(26px,calc((100vw - 96px) / 18));
+  --side-disc-h:min(37px,calc((100vw - 96px) / 18 * 1.42),8.5dvh);
+}
+.side-discards-zone .discard-strip.strip-side-compact .tile.hand-face.opp-hand{
+  --opp-face-w:var(--side-disc-w);
+  --opp-face-h:var(--side-disc-h);
+  width:var(--opp-face-w);
+  height:var(--opp-face-h);
+}
+.side-discards-zone .discard-strip.strip-side-compact .discard-row-sidecol{gap:0;}
+.side-discards-zone .discard-strip.strip-side-compact .discard-river-mat{padding:2px 3px;}
 .side-stack{
   display:flex;
   flex:1;
@@ -788,33 +835,20 @@ body{
   overflow:hidden;
 }
 #right-area .side-discards-zone{align-items:flex-end;}
-.side-discards-zone .discard-strip.strip-side{
-  display:flex;
-  flex-direction:row;
-  flex-wrap:wrap-reverse;
-  gap:1px;
-  align-content:flex-start;
-  align-items:flex-end;
-  justify-content:flex-end;
-  height:100%;
-  max-height:100%;
-  width:auto;
-}
-#right-area .side-discards-zone .discard-strip.strip-side{align-content:flex-end;}
-.side-discards-zone .discard-strip.strip-side .tile{flex:0 0 auto;}
+.side-main{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;min-width:0;max-width:100%;}
 /* 鳴き列: 面子を縦に積む（手牌列と同じ向き＝1本の縦列に見せる） */
 #left-area .side-rack .melds-row,
 #right-area .side-rack .melds-row{
   flex-direction:column;
   flex-wrap:nowrap;
-  gap:5px;
+  gap:1px;
   align-items:center;
   flex-shrink:0;
   max-width:none;
   overflow:visible;
   transform:none;
 }
-/* 1面子＝回転牌を縦に積む（手牌と同じピッチ） */
+/* 1面子＝回転牌を縦に積む（自家 meld-group と同じ gap:1px 相当） */
 #left-area .side-rack .meld-group,
 #right-area .side-rack .meld-group{
   flex-direction:column;
@@ -822,10 +856,10 @@ body{
   gap:0;
   align-items:center;
   line-height:0;
-  padding:2px;
-  border-radius:5px;
-  background:linear-gradient(180deg,rgba(255,248,214,.08),rgba(0,0,0,.1));
-  box-shadow:0 3px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08);
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
 }
 #left-area .side-rack .meld-group .tile.side,
 #right-area .side-rack .meld-group .tile.side{width:34px;height:24px;font-size:11px;overflow:hidden;padding:0;}
@@ -911,7 +945,7 @@ body{
   padding:3px 4px;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
 }
-.discard-row-6:not(.discard-row-sidecol){
+.discard-row-6:not(.discard-row-sidecol):not(.discard-row-side-river){
   display:grid;
   grid-template-columns:repeat(6,minmax(0,auto));
   gap:2px;
@@ -1748,6 +1782,24 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
 .rulebook-body p{margin:0 0 10px;}
 .rulebook-body p:last-child{margin:0;}
 .rulebook-note{color:#ffd44b;}
+#rules-primer{
+  position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;
+  padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  background:rgba(0,0,0,.82);
+}
+#rules-primer.hidden{display:none;}
+.rules-primer-box{
+  width:min(360px,94vw);max-height:min(78vh,640px);overflow:hidden;
+  display:flex;flex-direction:column;gap:12px;
+  background:linear-gradient(180deg,#1a3d28 0%,#122818 100%);
+  border:1px solid rgba(255,220,120,.35);border-radius:14px;padding:16px 18px;
+  box-shadow:0 14px 36px rgba(0,0,0,.55);
+}
+.rules-primer-box h2{margin:0;font-size:clamp(16px,4.5vw,20px);color:#fff6cf;text-align:center;}
+.rules-primer-list{margin:0;padding:0 0 0 1.1em;font-size:clamp(12px,3.4vw,13px);color:#efe;line-height:1.7;}
+.rules-primer-list li{margin:0 0 8px;}
+.rules-primer-list li:last-child{margin:0;}
+.rules-primer-skip{font-size:11px;color:#cde;display:flex;align-items:center;gap:6px;justify-content:center;}
 
 /* --- narrow phones --- */
 @media (max-width:520px){
@@ -1904,32 +1956,22 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   margin-bottom:0;
 }
 
-/* === 左右席の捨て牌・鳴き牌: 90度回転後の「見た目サイズ」で詰める ===
-   牌は portrait(opp-face-w × opp-face-h) のボックスを rotate(±90) しているので、
-   見た目は landscape(幅=opp-face-h, 高=opp-face-w)。捨て牌は .discard-cell に
-   包まれているのでセル側の縦ピッチを詰め、鳴き牌は縦積みなので牌の縦ピッチを詰める。
-   #middle-area でメディアクエリの margin:0 より詰め指定を優先させる。 */
-/* 捨て牌の列（縦積み）: セルの縦ピッチを見た目の高さへ詰めて自家のように密着させる */
-#middle-area #left-area .side-discards-zone .discard-row-sidecol,
-#middle-area #right-area .side-discards-zone .discard-row-sidecol{
-  width:var(--side-tile-h);
-  align-items:center;
-  gap:0;
+/* === 左右席の捨て牌・鳴き牌: 回転後の見た目サイズで詰める === */
+#middle-area #left-area .side-discards-zone .discard-strip.strip-side,
+#middle-area #right-area .side-discards-zone .discard-strip.strip-side{
+  gap:2px;
 }
 #middle-area #left-area .side-discards-zone .discard-row-sidecol .discard-cell,
 #middle-area #right-area .side-discards-zone .discard-row-sidecol .discard-cell{
-  margin-bottom:calc(var(--side-tile-w) - var(--side-tile-h));
+  margin-bottom:calc(var(--side-tile-w) - var(--side-tile-h) - 1px);
 }
 #middle-area #left-area .side-discards-zone .discard-row-sidecol .discard-cell:last-child,
 #middle-area #right-area .side-discards-zone .discard-row-sidecol .discard-cell:last-child{
   margin-bottom:0;
 }
-/* 捨て牌の列同士（横並び）: 見た目の幅で間隔を取り重なりを防ぐ */
-#middle-area .side-discards-zone .discard-strip.strip-side{gap:1px;}
-/* 鳴き牌: 縦積み。回転後の見た目高さへ牌の縦ピッチを詰める（手牌列と同じ） */
 #middle-area #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
 #middle-area #right-area .side-rack .meld-group .tile.hand-face.opp-hand{
-  margin:0 0 calc(var(--side-tile-w) - var(--side-tile-h)) 0;
+  margin:0 0 calc(var(--side-tile-w) - var(--side-tile-h) - 1px) 0;
 }
 #middle-area #left-area .side-rack .meld-group .tile.hand-face.opp-hand:last-child,
 #middle-area #right-area .side-rack .meld-group .tile.hand-face.opp-hand:last-child{
@@ -2088,6 +2130,17 @@ body.ron-cine-shake .table-shell{animation:ronShake .5s cubic-bezier(.36,.07,.19
     <div id="rulebook-body" class="rulebook-body"></div>
     <div class="menu-row" style="margin-top:0;">
       <button type="button" id="rulebook-close-btn" class="btn btn-ghost" onclick="closeRulebook()">閉じる</button>
+    </div>
+  </div>
+</div>
+<div id="rules-primer" class="hidden" role="dialog" aria-modal="true" aria-labelledby="rules-primer-title" onclick="if(event.target===this) closeRulesPrimer()">
+  <div class="rules-primer-box">
+    <h2 id="rules-primer-title">はじめる前に</h2>
+    <ul id="rules-primer-list" class="rules-primer-list"></ul>
+    <label class="rules-primer-skip"><input type="checkbox" id="rules-primer-skip-cb"> <span id="rules-primer-skip-label">次回から表示しない</span></label>
+    <div class="menu-row" style="margin-top:0;">
+      <button type="button" id="rules-primer-start-btn" class="btn btn-new" onclick="confirmRulesPrimerAndStart()">ゲーム開始</button>
+      <button type="button" id="rules-primer-book-btn" class="btn btn-lite" onclick="openRulebookFromPrimer()">ルールブック</button>
     </div>
   </div>
 </div>
@@ -2398,7 +2451,14 @@ function shouldArmHumanTurnTimer(){
 
 function leaveToMenu(){
   if(G&&!G.gameOver){
-    if(!confirm(t('backToMenuConfirm')))return;
+    const msg=G.online&&ONLINE.room?.id
+      ? t('backToMenuConfirmOnline').replace('{code}',ONLINE.room.id)
+      : t('backToMenuConfirm');
+    if(!confirm(msg))return;
+    if(G.online&&ONLINE.room?.id){
+      const myName=ONLINE.room.players?.find(p=>p.id===ONLINE.playerId)?.name||'';
+      saveLastOnlineRoom(ONLINE.room.id,myName);
+    }
   }
   clearTurnTimer();
   if(ONLINE.source){try{ONLINE.source.close();}catch(_e){}ONLINE.source=null;}
@@ -2421,6 +2481,7 @@ function leaveToMenu(){
   const ov=document.getElementById('overlay');
   if(ov) ov.classList.add('hidden');
   closeRulebook();
+  closeRulesPrimer();
   clearMeldFx();
   renderStartScreen();
 }
@@ -2518,6 +2579,14 @@ const I18N={
     settings:'設定',
     rulebook:'ルールブック',
     rulebookTitle:'ルールブック',
+    rulesPrimerTitle:'はじめる前に',
+    rulesPrimerStart:'ゲーム開始',
+    rulesPrimerSkip:'次回から表示しない',
+    rulesPrimer1:'和了は嵌張（夹张）待ちだけ。単騎・両面・辺張などは不可',
+    rulesPrimer2:'チー・ポン・大明槓で開門してから扣聴できる',
+    rulesPrimer3:'通常は先切後摸。扣聴中は先摸後切（本引きなし）',
+    rulesPrimer4:'宝中宝：扣聴の待ちが宝牌と一致したとき +36点',
+    rulesPrimerAgain:'ルール確認',
     close:'閉じる',
     lang:'言語',
     diff:'AI難易度',
@@ -2525,7 +2594,7 @@ const I18N={
     normal:'ふつう',
     hard:'むずかしい',
     rule1:'カタン（夹张）限定ルール',
-    rule2:'開門 or 扣聴・ヤオ九含有・2色以上',
+    rule2:'チー・ポン・大明槓で開門後に扣聴可・ヤオ九含有・2色以上',
     rule3:'刻子＋順子必須・宝牌あり',
     rule4:'通常は先切後摸。扣聴中は先摸後切。宝牌は扣聴中のみ公開',
     ovView:'盤面を見る',
@@ -2568,6 +2637,9 @@ const I18N={
     autoKouting:'扣聴中… 山から1枚引いてから、聴牌を保てる牌だけ捨ててください',
     kouTingNeedDraw:'扣聴です。「牌を引く」で山から1枚（右端に現れます）',
     kouTingTreasureWin:'扣聴！待ち牌が宝牌と一致 — 宝中宝！',
+    kouTingTreasurePrompt:'扣聴成立。待ちが宝牌と一致しています。「宝を見る」で確認してください',
+    kouTingTreasureReady:'宝牌を確認しました。「宝中宝！」で和了できます',
+    revealTreasure:'宝を見る',
     ktPickDiscard:'嵌張待ちを保てる牌だけ、タップして捨ててください',
     ktPickDiscardHint:'切った牌が誰かの和了に…と思うとヒリヒリしますね',
     ktTapHint:'聴牌を保てる牌だけクリック',
@@ -2619,8 +2691,11 @@ const I18N={
     onlineWaiting:'参加者待ち',
     onlineDisconnected:'未接続',
     onlineConnected:'接続中',
-    onlineReconnectHint:'サーバーとの接続が切れました。ページを再読み込みせずに再接続できます。',
+    onlineReconnectHint:'サーバーとの接続が切れました（部屋 {code}）。ページを再読み込みせず「再接続」を押してください。',
     onlineReconnectBtn:'再接続',
+    onlineRejoinLast:'前回の部屋に参加',
+    onlineNoSavedRoom:'保存された部屋コードがありません',
+    onlineRejoinFail:'再参加に失敗しました',
     onlineAskName:'表示名を入力してください',
     onlineAskCode:'部屋コードを入力してください',
     onlineServer:'対戦サーバーURL',
@@ -2628,7 +2703,8 @@ const I18N={
     onlineClearServer:'既定に戻す',
     onlineAiSeats:'空き席はAIが操作します（2人〜4人で開始）',
     backToMenu:'メニューに戻る',
-    backToMenuConfirm:'対局を離れてメニューに戻りますか？（オンラインは再接続が必要になる場合があります）',
+    backToMenuConfirm:'対局を離れてメニューに戻りますか？',
+    backToMenuConfirmOnline:'メニューに戻ります。部屋コード {code} は「前回の部屋に参加」から再入できます（同一席の復帰は未対応・AI代打のまま続行）。',
     turnTimeLeft:'残り',
     turnTimeSec:'秒',
   },
@@ -2638,6 +2714,14 @@ const I18N={
     settings:'设置',
     rulebook:'规则说明',
     rulebookTitle:'规则说明',
+    rulesPrimerTitle:'开始前',
+    rulesPrimerStart:'开始游戏',
+    rulesPrimerSkip:'下次不再显示',
+    rulesPrimer1:'和牌仅限嵌张（夹张）听牌。单钓、两面、边张等不可',
+    rulesPrimer2:'吃碰大明杠开门后才能扣听',
+    rulesPrimer3:'通常先出后摸。扣听为先摸后出（无补摸）',
+    rulesPrimer4:'宝中宝：扣听待牌与宝牌一致时 +36分',
+    rulesPrimerAgain:'规则确认',
     close:'关闭',
     lang:'语言',
     diff:'AI难度',
@@ -2645,7 +2729,7 @@ const I18N={
     normal:'普通',
     hard:'困难',
     rule1:'夹张限定规则',
-    rule2:'开门或扣听・含幺九・两色以上',
+    rule2:'吃碰大明杠开门后可扣听・含幺九・两色以上',
     rule3:'必须同时有刻子与顺子・含宝牌',
     rule4:'通常先出后摸。扣听为先摸后出。宝牌仅在扣听时公开',
     ovView:'查看牌局',
@@ -2688,6 +2772,9 @@ const I18N={
     autoKouting:'扣听中… 先从山里摸一张，再点击打出（仅可打出保持听牌的牌）',
     kouTingNeedDraw:'扣听中。请点击「摸牌」从山摸一张（会出现在最右侧）',
     kouTingTreasureWin:'扣听！待牌与宝牌一致 — 宝中宝！',
+    kouTingTreasurePrompt:'扣听成立，待牌与宝牌一致。请点击「看宝」确认',
+    kouTingTreasureReady:'已确认宝牌，可点击「宝中宝！」和牌',
+    revealTreasure:'看宝',
     ktPickDiscard:'只能打出保持夹张听牌的牌',
     ktPickDiscardHint:'打出去的瞬间会不会点炮…紧张感拉满',
     ktTapHint:'只能点击能保持听牌的牌',
@@ -2739,8 +2826,11 @@ const I18N={
     onlineWaiting:'等待玩家',
     onlineDisconnected:'未连接',
     onlineConnected:'已连接',
-    onlineReconnectHint:'与服务器断开。无需刷新页面即可重连。',
+    onlineReconnectHint:'与服务器断开（房间 {code}）。无需刷新页面，请点「重新连接」。',
     onlineReconnectBtn:'重新连接',
+    onlineRejoinLast:'加入上次的房间',
+    onlineNoSavedRoom:'没有保存的房间码',
+    onlineRejoinFail:'重新加入失败',
     onlineAskName:'请输入显示名',
     onlineAskCode:'请输入房间码',
     onlineServer:'对战服务器URL',
@@ -2748,7 +2838,8 @@ const I18N={
     onlineClearServer:'恢复默认',
     onlineAiSeats:'空位由电脑代打（2〜4人开始）',
     backToMenu:'返回菜单',
-    backToMenuConfirm:'要离开对局并返回菜单吗？（在线对局可能需要重新加入房间）',
+    backToMenuConfirm:'要离开对局并返回菜单吗？',
+    backToMenuConfirmOnline:'将返回菜单。房间码 {code} 可通过「加入上次的房间」再入（同一座位恢复未支持，对局由AI代打继续）。',
     turnTimeLeft:'剩余',
     turnTimeSec:'秒',
   }
@@ -2804,6 +2895,81 @@ function openRulebook(){
 function closeRulebook(){
   const panel=document.getElementById('rulebook');
   if(panel) panel.classList.add('hidden');
+}
+
+function rulesPrimerSkipped(){
+  try{return localStorage.getItem('hm_rules_primer_skip')==='1';}catch(_e){return false;}
+}
+function refreshRulesPrimerLocale(){
+  const title=document.getElementById('rules-primer-title');
+  const list=document.getElementById('rules-primer-list');
+  const startBtn=document.getElementById('rules-primer-start-btn');
+  const bookBtn=document.getElementById('rules-primer-book-btn');
+  const skipLbl=document.getElementById('rules-primer-skip-label');
+  if(!title||!list) return;
+  title.textContent=t('rulesPrimerTitle');
+  if(startBtn) startBtn.textContent=t('rulesPrimerStart');
+  if(bookBtn) bookBtn.textContent=t('rulebook');
+  if(skipLbl) skipLbl.textContent=t('rulesPrimerSkip');
+  list.innerHTML=[1,2,3,4].map(n=>`<li>${t('rulesPrimer'+n)}</li>`).join('');
+}
+function openRulesPrimer(){
+  refreshRulesPrimerLocale();
+  const panel=document.getElementById('rules-primer');
+  const cb=document.getElementById('rules-primer-skip-cb');
+  if(cb) cb.checked=false;
+  if(panel) panel.classList.remove('hidden');
+}
+function closeRulesPrimer(){
+  const panel=document.getElementById('rules-primer');
+  if(panel) panel.classList.add('hidden');
+}
+function openRulebookFromPrimer(){
+  openRulebook();
+}
+function confirmRulesPrimerAndStart(){
+  const cb=document.getElementById('rules-primer-skip-cb');
+  if(cb&&cb.checked){
+    try{localStorage.setItem('hm_rules_primer_skip','1');}catch(_e){}
+  }
+  closeRulesPrimer();
+  beginMatch();
+}
+function maybeShowRulesPrimerThen(run){
+  if(rulesPrimerSkipped()){ run(); return; }
+  UI._primerAfter=run;
+  refreshRulesPrimerLocale();
+  const panel=document.getElementById('rules-primer');
+  const startBtn=document.getElementById('rules-primer-start-btn');
+  if(startBtn){
+    startBtn.onclick=()=>{
+      const cb=document.getElementById('rules-primer-skip-cb');
+      if(cb&&cb.checked){
+        try{localStorage.setItem('hm_rules_primer_skip','1');}catch(_e){}
+      }
+      closeRulesPrimer();
+      const fn=UI._primerAfter;
+      UI._primerAfter=null;
+      fn&&fn();
+    };
+  }
+  if(panel) panel.classList.remove('hidden');
+}
+
+function getLastOnlineRoom(){
+  try{
+    const raw=localStorage.getItem('hm_last_room');
+    if(!raw) return null;
+    const o=JSON.parse(raw);
+    if(!o||!o.code) return null;
+    return {code:String(o.code).toUpperCase(),name:String(o.name||'')};
+  }catch(_e){return null;}
+}
+function saveLastOnlineRoom(code,name){
+  try{
+    if(!code) return;
+    localStorage.setItem('hm_last_room',JSON.stringify({code:String(code).toUpperCase(),name:String(name||'')}));
+  }catch(_e){}
 }
 
 function normalizeApiBase(v){
@@ -2951,6 +3117,10 @@ function buildOnlineGame(){
   if(chi){phase='after_discard';humanOptions.push('chi');chiOpts=chi.options||[];}
   if(legal.some(a=>a.type==='skip')) phase='after_discard';
   if(legal.some(a=>a.type==='tsumo')) humanOptions.push('tsumo');
+  if(legal.some(a=>a.type==='reveal_treasure')) humanOptions.push('reveal_treasure');
+  if(legal.some(a=>a.type==='treasure_win')) humanOptions.push('treasure_win');
+  const kouTingTreasurePending=room.game.kouTingTreasurePending===priv.seat;
+  const kouTingTreasureSeen=!!room.game.kouTingTreasureSeen;
   const pending=room.game.pending;
   const winner=room.game.winner;
   const handEnded=room.game.status==='ended';
@@ -3006,9 +3176,13 @@ function buildOnlineGame(){
       ? (winner.type==='draw'
         ? tr('roundDraw','流局')
         : (endMsg||`${onlinePlayerName(winner.seat)} ${winner.type}`))
-      : (room.match
-        ? tr('matchRound','第{n} / {t}局').replace('{n}',String(room.match.round)).replace('{t}',String(room.match.totalRounds))
-        : `${tr('onlineRoom','部屋コード')}: ${room.id}`),
+      : (kouTingTreasurePending
+        ? (kouTingTreasureSeen
+          ? tr('kouTingTreasureReady','宝牌を確認しました。「宝中宝！」で和了できます')
+          : tr('kouTingTreasurePrompt','扣聴成立。待ちが宝牌と一致しています。「宝を見る」で確認してください'))
+        : (room.match
+          ? tr('matchRound','第{n} / {t}局').replace('{n}',String(room.match.round)).replace('{t}',String(room.match.totalRounds))
+          : `${tr('onlineRoom','部屋コード')}: ${room.id}`)),
     log:[],
     gameOver:handEnded,
     roundOver:handEnded,
@@ -3020,6 +3194,8 @@ function buildOnlineGame(){
     pendingKouTingFrom:null,
     kouTingPick:false,
     kouTingEntryIdx:legal.find(a=>a.type==='kouting')?.indices||[],
+    kouTingTreasurePending,
+    kouTingTreasureSeen,
     ktReveal:null,
     lastWin,
     fxFlash:null,
@@ -3133,6 +3309,7 @@ async function onlineCreateRoom(){
     ONLINE.playerId=data.playerId;
     ONLINE.seat=data.seat;
     ONLINE.status=tr('onlineConnected','接続中');
+    saveLastOnlineRoom(data.room.id,name||'');
     connectOnlineEvents();
     renderStartScreen();
   }catch(e){
@@ -3140,20 +3317,37 @@ async function onlineCreateRoom(){
   }
 }
 
-async function onlineJoinRoom(){
+async function onlineJoinRoom(prefCode,prefName){
   try{
-    const code=(prompt(tr('onlineAskCode','部屋コードを入力してください'),'')||'').trim().toUpperCase();
+    const last=getLastOnlineRoom();
+    const defaultCode=prefCode||(last?.code||'');
+    const code=(prompt(tr('onlineAskCode','部屋コードを入力してください'),defaultCode)||'').trim().toUpperCase();
     if(!code) return;
-    const name=prompt(tr('onlineAskName','表示名を入力してください'),sideName(0)||'');
+    const defaultName=prefName||(last?.name||sideName(0)||'');
+    const name=prompt(tr('onlineAskName','表示名を入力してください'),defaultName);
     const data=await onlineRequest(`/api/rooms/${code}/join`,{name:name||''});
     ONLINE.room=data.room;
     ONLINE.playerId=data.playerId;
     ONLINE.seat=data.seat;
     ONLINE.status=tr('onlineConnected','接続中');
+    saveLastOnlineRoom(code,name||'');
     connectOnlineEvents();
     renderStartScreen();
   }catch(e){
     alert(`Online error: ${e.message}`);
+  }
+}
+
+async function onlineRejoinLastRoom(){
+  const last=getLastOnlineRoom();
+  if(!last?.code){
+    alert(tr('onlineNoSavedRoom','保存された部屋コードがありません'));
+    return;
+  }
+  try{
+    await onlineJoinRoom(last.code,last.name);
+  }catch(e){
+    alert(`${tr('onlineRejoinFail','再参加に失敗しました')}: ${e.message}`);
   }
 }
 
@@ -3852,7 +4046,9 @@ function showMatchSetResult(){
   refreshOverlayLocale();
 }
 
-function startGame(){ beginMatch(); }
+function startGame(){
+  maybeShowRulesPrimerThen(beginMatch);
+}
 
 // ======================================================
 // HAND ANALYSIS
@@ -3971,8 +4167,8 @@ function checkWin(player, winTile){
   // 1. Katan: winTile is in katan waits
   const waits=getKatanWaits(player.hand);
   if(!waits.some(w=>tileEq(w,winTile))) return false;
-  // 2. 開門 — at least one called meld OR 扣聴 (concealed tenpai)
-  if(player.melds.length===0 && !player.kouTing) return false;
+  // 2. 開門 — チー・ポン・大明槓のいずれか必須（鳴きなし扣聴は不可）
+  if(player.melds.length===0) return false;
   // All tiles
   const allTiles=[...player.hand,winTile,...player.melds.flatMap(m=>m.tiles)];
   // 3. ヤオ九
@@ -4222,6 +4418,8 @@ function startRound(){
     skipDrawAfterCallBy:null,
     pendingKouTingFrom:null,
     kouTingPick:false,
+    kouTingTreasurePending:false,
+    kouTingTreasureSeen:false,
     lastDiscardMeta:null,
     ktReveal:null,
     lastWin:null,
@@ -4250,7 +4448,10 @@ function updateAllTenpai(){
     if(!atDiscardReady&&!atDrawReady&&!atPostMainDraw) continue;
     const basis=atDrawReady||atPostMainDraw?concealedHandForTenpai(p):p.hand;
     const w=getKatanWaits(basis);
-    if(p.kouTing) p.waits=w;
+    if(p.kouTing){
+      if(!p.melds?.length){p.kouTing=false;p.waits=[];}
+      else p.waits=w;
+    }
     if(!p.kouTing&&(atDrawReady||atPostMainDraw)&&drawn){
       if(shouldEnterKouTing(p,drawn)){
         p.kouTing=true;
@@ -4340,7 +4541,7 @@ function concealedHandForTenpai(p){
 }
 
 function shouldEnterKouTing(p,drawn){
-  if(!drawn||p.kouTing) return false;
+  if(!drawn||p.kouTing||!p.melds?.length) return false;
   const basis=kouTingBasisHand(p,drawn);
   if(!basis||(basis.length-4)%3!==0) return false;
   const waits=getKatanWaits(basis);
@@ -4351,7 +4552,7 @@ function shouldEnterKouTing(p,drawn){
 
 /** チー/ポン直後など exp+1 枚: この牌を捨てれば扣聴に入れる手牌インデックス */
 function kouTingEntryDiscardIndices(p){
-  if(!p||p.kouTing) return [];
+  if(!p||p.kouTing||!p.melds?.length) return [];
   const exp=expectedHandCount(p);
   const hand=sortTiles([...p.hand]);
   if(hand.length!==exp+1) return [];
@@ -4371,29 +4572,113 @@ function kouTingWaitsMatchTreasure(waits){
   return !!(G?.treasure&&waits?.length&&waits.some(w=>tileEq(w,G.treasure)));
 }
 
-/** 扣聴成立直後: 待ち牌に宝牌が含まれれば宝中宝で即和了（山引き不要） */
+/** 宝引き和了が宝中宝か（和了牌を除いた手牌の嵌張待ちに宝牌が含まれるか） */
+function playerWaitsForTreasure(p,winTile){
+  if(!p?.kouTing||!G?.treasure||!winTile||!tileEq(winTile,G.treasure)) return false;
+  const handWithout=removeTile([...p.hand],winTile);
+  if(!handWithout) return false;
+  return kouTingWaitsMatchTreasure(getKatanWaits(handWithout));
+}
+
+/** 山切れ後の宝引き: 和了可なら宝中宝／通常ツモを判定して resolve */
+function resolveKouTingTreasureDraw(pi,drawn){
+  const p=G.players[pi];
+  if(!p||!checkWin(p,drawn)){
+    endRound(tr('roundDraw','流局'));
+    return;
+  }
+  const isBao=playerWaitsForTreasure(p,drawn);
+  if(p.isHuman){
+    if(isBao){
+      G.msg=tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！');
+      G.phase='discard';
+      render();
+      scheduleMatch(()=>resolveWin(pi,drawn,true,true),900);
+    }else{
+      G.tsumoTile=drawn;
+      G.msg=`${tr('tsumo','ツモ！')} ${tileName(drawn)}`;
+      G.phase='discard';
+      G.humanOptions=[];
+      render();
+      scheduleMatch(()=>resolveWin(pi,drawn,true,false),700);
+    }
+    return;
+  }
+  resolveWin(pi,drawn,true,isBao);
+}
+
+/** 扣聴中: 摸牌後は先に1枚捨ててから（手牌＝exp）宝中宝ボタンを出す */
+function canOfferKouTingTreasureNow(pi){
+  const p=G?.players?.[pi];
+  if(!p?.kouTing||!kouTingWaitsMatchTreasure(p.waits)) return false;
+  return p.hand.length===expectedHandCount(p);
+}
+
+function maybeBeginKouTingTreasureAfterReady(pi){
+  if(!canOfferKouTingTreasureNow(pi)) return false;
+  const p=G.players[pi];
+  if(!p.isHuman) return tryResolveKouTingTreasureWin(pi);
+  return beginKouTingTreasureChoice(pi);
+}
+
+/** 人間: 扣聴後・待ち＝宝牌のとき、宝確認→宝中宝ボタンで和了（即自動和了しない） */
+function beginKouTingTreasureChoice(pi){
+  if(!G||G.gameOver) return true;
+  const p=G.players[pi];
+  if(!canOfferKouTingTreasureNow(pi)||!p?.isHuman||!G.treasure) return false;
+  G.kouTingTreasurePending=true;
+  G.kouTingTreasureSeen=false;
+  G.turn=pi;
+  G.phase='discard';
+  G.humanOptions=[];
+  G.msg=tr('kouTingTreasurePrompt','扣聴成立。待ちが宝牌と一致しています。「宝を見る」で確認してください');
+  render();
+  return true;
+}
+
+function humanRevealKouTingTreasure(){
+  if(G?.online){
+    if(onlineLegal('reveal_treasure')) onlineAction('reveal_treasure');
+    return;
+  }
+  if(!G?.kouTingTreasurePending||G.kouTingTreasureSeen) return;
+  G.kouTingTreasureSeen=true;
+  G.msg=tr('kouTingTreasureReady','宝牌を確認しました。「宝中宝！」で和了できます');
+  GameSFX.play('draw');
+  fxVibrate(18);
+  render();
+}
+
+function humanClaimKouTingTreasure(){
+  if(G?.online){
+    if(onlineLegal('treasure_win')) onlineAction('treasure_win');
+    return;
+  }
+  if(!G?.kouTingTreasurePending||!G.kouTingTreasureSeen) return;
+  const p=G.players[0];
+  if(!p?.kouTing||!kouTingWaitsMatchTreasure(p.waits)||!G.treasure) return;
+  G.kouTingTreasurePending=false;
+  G.treasureUsed=true;
+  addLog(`${sideName(0)} ${tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！')}`);
+  resolveWin(0,G.treasure,true,true);
+}
+
+/** 扣聴成立直後: 待ち牌に宝牌が含まれれば宝中宝（AIは即和了・人間は手動） */
 function tryResolveKouTingTreasureWin(pi){
   if(!G||G.gameOver||G.roundOver) return false;
   const p=G.players[pi];
   if(!p?.kouTing||!kouTingWaitsMatchTreasure(p.waits)) return false;
-  const tile=G.treasure;
-  if(!tile) return false;
+  if(!G.treasure) return false;
+  if(p.isHuman) return maybeBeginKouTingTreasureAfterReady(pi);
   G.treasureUsed=true;
-  if(p.isHuman){
-    G.msg=tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！');
-    G.phase='discard';
-    render();
-    scheduleMatch(()=>resolveWin(pi,tile,true,true),900);
-  }else{
-    addLog(`${sideName(pi)} ${tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！')}`);
-    resolveWin(pi,tile,true,true);
-  }
+  addLog(`${sideName(pi)} ${tr('kouTingTreasureWin','扣聴！待ち牌が宝牌と一致 — 宝中宝！')}`);
+  resolveWin(pi,G.treasure,true,true);
   return true;
 }
 
 function enterKouTingByDiscard(p,tileIdx){
   const tile=p.hand[tileIdx];
-  if(!tile) return false;
+  if(!tile||!p.melds?.length) return false;
   const pi=p.idx;
   noteDiscardMeta(pi,tile);
   p.hand=p.hand.filter((_,i)=>i!==tileIdx);
@@ -4776,16 +5061,7 @@ function drawAndPlay(pi){
     const drawn=G.treasure;
     appendDrawToHandRight(p,drawn);
     updateAllTenpai();
-    if(p.isHuman){
-      // Auto-resolve treasure win for human in 扣聴 (or always since treasure is auto-win)
-      G.msg=UI.lang==='zh'?'摸到宝牌！宝中宝和牌！':'宝牌を引きました！宝中宝で上がります！';
-      G.phase='discard';
-      G.tsumoTile=drawn;
-      render();
-      scheduleMatch(()=>resolveWin(0,drawn,true,true),900);
-    } else {
-      resolveWin(pi,drawn,true,true);
-    }
+    resolveKouTingTreasureDraw(pi,drawn);
     return;
   }
 
@@ -4897,7 +5173,7 @@ function kouTingDrawThenAutoDiscard(pi){
     const drawn=G.treasure;
     appendDrawToHandRight(p,drawn);
     updateAllTenpai();
-    resolveWin(pi,drawn,true,true);
+    resolveKouTingTreasureDraw(pi,drawn);
     return;
   }
 
@@ -4955,7 +5231,7 @@ function drawAfterDiscard(pi){
     const drawn=G.treasure;
     appendDrawToHandRight(p,drawn);
     updateAllTenpai();
-    resolveWin(pi,drawn,true,true);
+    resolveKouTingTreasureDraw(pi,drawn);
     return false;
   }
   const expected=expectedHandCount(p);
@@ -5007,6 +5283,20 @@ function finalizeAfterDiscardCycle(fromPi){
     nextTurn(fromPi);
     return;
   }
+  if(G.kouTingTreasurePending&&!canOfferKouTingTreasureNow(fromPi)){
+    G.kouTingTreasurePending=false;
+    G.kouTingTreasureSeen=false;
+  }
+  if(G.players[fromPi]?.isHuman&&G.players[fromPi].kouTing){
+    maybeBeginKouTingTreasureAfterReady(fromPi);
+  }
+  if(G.kouTingTreasurePending&&G.players[fromPi]?.isHuman){
+    G.turn=fromPi;
+    G.phase='discard';
+    G.humanOptions=[];
+    render();
+    return;
+  }
   if(G.players[fromPi].kouTing){
     nextTurn(fromPi);
     return;
@@ -5054,6 +5344,7 @@ function humanDiscard(tileIdx){
     else onlineAction('discard',{index:tileIdx});
     return;
   }
+  if(G.kouTingTreasurePending) return;
   if(G.phase!=='discard'||G.turn!==0) return;
   if(G.kanBranchAOpts||G.kanTurnEnding) return;
   const p=G.players[0];
@@ -5358,6 +5649,7 @@ function humanDraw(){
     if(onlineLegal('draw')) onlineAction('draw');
     return;
   }
+  if(G?.kouTingTreasurePending) return;
   if(!G||G.gameOver) return;
   if(G.phase!=='discard'||G.turn!==0) return;
   const p=G.players[0];
@@ -5370,10 +5662,7 @@ function humanDraw(){
     const drawn=G.treasure;
     appendDrawToHandRight(p,drawn);
     updateAllTenpai();
-    G.msg=UI.lang==='zh'?'摸到宝牌！宝中宝和牌！':'宝牌を引きました！宝中宝で上がります！';
-    G.phase='discard';
-    render();
-    scheduleMatch(()=>resolveWin(0,drawn,true,true),900);
+    resolveKouTingTreasureDraw(0,drawn);
     return;
   }
   const drawn=G.wall.splice(0,1)[0];
@@ -5395,9 +5684,14 @@ function humanDraw(){
 }
 
 function humanWin(isTsumo, isTreasure){
-  if(G?.online){onlineAction(isTsumo?'tsumo':'ron');return;}
+  if(G?.online){
+    if(isTreasure&&onlineLegal('treasure_win')) onlineAction('treasure_win');
+    else onlineAction(isTsumo?'tsumo':'ron');
+    return;
+  }
+  if(isTreasure){humanClaimKouTingTreasure();return;}
   const tile=isTsumo?G.tsumoTile:G.pendingDiscard;
-  resolveWin(0,tile,isTsumo,isTreasure);
+  resolveWin(0,tile,isTsumo,false);
 }
 
 function aiMinkan(pi, tile, fromPi){
@@ -5523,8 +5817,7 @@ function aiFindDiscard(p){
 }
 
 function aiWinTreasure(pi, treasureTile){
-  const p=G.players[pi];
-  resolveWin(pi,treasureTile,true,true);
+  resolveKouTingTreasureDraw(pi,treasureTile);
 }
 
 // ======================================================
@@ -5802,7 +6095,8 @@ function resolveWin(pi, tile, isTsumo, isTreasure){
       scheduleMatch(finishWin,1200);
     }
   }else if(humanWinner){
-    playHumanWinCinema({kanji:isTreasure?'宝':'自',label:method,points:totalPts,tile,cb:finishWin});
+    const winKanji=isTreasure?'宝':isTsumo?'摸':'和';
+    playHumanWinCinema({kanji:winKanji,label:method,points:totalPts,tile,cb:finishWin});
   }else{
     finishWin();
   }
@@ -5819,8 +6113,8 @@ function endRound(reason){
     ? `${tr('matchTotal','合计分')}: ${scoreSummaryText()}`
     : `${tr('matchTotal','合計点')}: ${scoreSummaryText()}`;
   const body = UI.lang==='zh'
-    ? `流局。可查看四家手牌。\n${totalLine}`
-    : `流局です。四家の手牌を確認できます。\n${totalLine}`;
+    ? `${reason}。可查看四家手牌。\n${totalLine}`
+    : `${reason}。四家の手牌を確認できます。\n${totalLine}`;
   showOverlay(reason,body,totalLine);
   render();
 }
@@ -5839,6 +6133,21 @@ function feltWallTierLen(){
 }
 function renderFeltWallOrnaments(){
   return '';
+}
+
+/** 左右席: 1行あたりこの枚数を超えたら2段＋コンパクト表示 */
+const SIDE_DISCARD_ROW_CAP=5;
+
+function renderSideDiscardRiver(tiles, cls, cellHtml){
+  const compact=tiles.length>SIDE_DISCARD_ROW_CAP;
+  const perCol=compact?Math.ceil(tiles.length/2):tiles.length;
+  const cols=chunkEvery(tiles,perCol).slice(0,2);
+  const stripCls=`discard-strip ${cls} strip-side${compact?' strip-side-compact':''}`;
+  const inner=cols.map(col=>{
+    const cells=col.map(cellHtml).join('');
+    return `<div class="discard-row discard-row-sidecol">${cells}</div>`;
+  }).join('');
+  return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
 
 function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
@@ -5868,6 +6177,9 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
   if(fluidRiver){
     const inner=tiles.map(cellHtml).join('');
     return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
+  }
+  if(cls==='left'||cls==='right'){
+    return renderSideDiscardRiver(tiles, cls, cellHtml);
   }
   const rows=chunkEvery(tiles,6);
   const rowExtra=cls==='left'||cls==='right'?' discard-row-sidecol':'';
@@ -6217,6 +6529,10 @@ function renderTiles(tiles,cls,faceDown,onclickFn){
 
 function render(){
   if(!G) return;
+  if(G.kouTingTreasurePending&&!canOfferKouTingTreasureNow(0)){
+    G.kouTingTreasurePending=false;
+    G.kouTingTreasureSeen=false;
+  }
   syncDiscardClaimsFromMelds(G.players);
   const [p0,p1,p2,p3]=G.players;
   const matchObj=G.online?ONLINE.room?.match:MATCH;
@@ -6248,7 +6564,7 @@ function render(){
     ?(G.online?(G.kouTingEntryIdx||[]):kouTingEntryDiscardIndices(p0))
     :[];
   const kouTingPick=!!G.kouTingPick;
-  const canHumanDiscard=G.phase==='discard'&&G.turn===0&&(!p0.kouTing||kouTingMayDiscard)&&!G.dealCinemaActive;
+  const canHumanDiscard=G.phase==='discard'&&G.turn===0&&(!p0.kouTing||kouTingMayDiscard)&&!G.kouTingTreasurePending&&!G.dealCinemaActive;
   const ktLeg=kouTingMayDiscard?kouTingLegalDiscardIndices(p0):[];
   const kt=G.ktReveal;
   const suspenseMask=!!(kt&&kt.phase==='suspense'&&kt.pi===0&&p0.kouTing&&Number.isInteger(kt.drawIdx));
@@ -6290,10 +6606,17 @@ function render(){
   if(G.phase==='draw'&&G.turn===0&&G.humanOptions.includes('draw')){
     buttons+=`<button class="btn btn-new" onclick="humanDraw()">${tr('drawTile','牌を引く')} (${G.wall.length}${tr('wallUnit','枚')})</button>`;
   }
-  if(G.phase==='discard'&&G.turn===0){
+  if(G.phase==='discard'&&G.turn===0&&G.kouTingTreasurePending){
+    if(!G.kouTingTreasureSeen){
+      buttons+=`<button class="btn btn-new" onclick="humanRevealKouTingTreasure()">${tr('revealTreasure','宝を見る')}</button>`;
+    }else{
+      buttons+=`<button class="btn btn-win" onclick="humanClaimKouTingTreasure()">${tr('treasureWin','宝中宝！')}</button>`;
+    }
+  }
+  if(G.phase==='discard'&&G.turn===0&&!G.kouTingTreasurePending){
     const canKtDraw=G.online
       ?!!onlineLegal('draw')
-      :(p0.kouTing&&p0.hand.length===exp0&&!G.ktReveal&&(G.wall.length>0||!G.treasureUsed));
+      :(p0.kouTing&&p0.hand.length===exp0&&!G.ktReveal&&!G.kouTingTreasurePending&&(G.wall.length>0||!G.treasureUsed));
     if(canKtDraw){
       const drawLabel=G.wall.length>0
         ?`${tr('drawTile','牌を引く')} (${G.wall.length}${tr('wallUnit','枚')})`
@@ -6303,7 +6626,9 @@ function render(){
     const turnStartKan=(!p0.kouTing&&!G.discardedThisTurn&&!G.kanBranchBActive&&!G.kanBranchAOpts)?getTurnStartKanOptions(p0):{ankan:[],shouminkan:[]};
     if(G.humanOptions.includes('tsumo'))
       buttons+=`<button class="btn btn-win" onclick="humanWin(true,false)">${tr('tsumo','ツモ！')}</button>`;
-    if(G.humanOptions.includes('treasure_win'))
+    if(G.humanOptions.includes('reveal_treasure'))
+      buttons+=`<button class="btn btn-new" onclick="humanRevealKouTingTreasure()">${tr('revealTreasure','宝を見る')}</button>`;
+    if(G.humanOptions.includes('treasure_win')&&!G.kouTingTreasurePending)
       buttons+=`<button class="btn btn-win" onclick="humanWin(true,true)">${tr('treasureWin','宝中宝！')}</button>`;
     if(!G.online){
       if(G.kanBranchAOpts&&hasPostDrawKanOffer(G.kanBranchAOpts)){
@@ -6323,7 +6648,7 @@ function render(){
         });
       }
     }
-    if(p0.kouTing&&kouTingMayDiscard&&!G.humanOptions.includes('tsumo')&&!G.humanOptions.includes('treasure_win')){
+    if(p0.kouTing&&kouTingMayDiscard&&!G.kouTingTreasurePending&&!G.humanOptions.includes('tsumo')&&!G.humanOptions.includes('treasure_win')){
       buttons+=`<span style="color:#ffd44b;font-size:11px">${tr('ktTapHint','聴牌を保てる牌だけクリック')}</span>`;
     }
     if(!p0.kouTing&&ktEntry.length&&!kouTingPick&&!G.humanOptions.includes('tsumo')&&!G.humanOptions.includes('treasure_win')){
@@ -6362,8 +6687,10 @@ function render(){
   }
   }
 
-  // 宝牌は扣聴中または使用済のときだけ表向き（開局から見せるとゲームが壊れる）。
-  const treasureFaceKnown=G.treasureUsed||p0.kouTing||G.wall.length===0;
+  // 宝牌は扣聴中（宝中宝待ちの「宝を見る」前は伏せ）・使用済・山切れで表向き
+  const treasureFaceKnown=G.treasureUsed||G.wall.length===0
+    ||(p0.kouTing&&!G.kouTingTreasurePending)
+    ||(G.kouTingTreasurePending&&G.kouTingTreasureSeen);
   const treasureTileHtml=treasureFaceKnown?tileHTML(G.treasure,'sm'):tileHTML(null,'sm',true);
   const treasureUsedTag=G.treasureUsed
     ? (UI.lang==='zh'?' <span class="treasure-used">（已用）</span>':' <span class="treasure-used">（使用済）</span>')
@@ -6405,6 +6732,7 @@ function render(){
   const showKtNearHint=G.phase==='discard'&&G.turn===0&&!p0.kouTing&&!G.ktReveal&&!G.humanOptions.includes('tsumo')&&!G.humanOptions.includes('treasure_win');
   const ktNearDraws=showKtNearHint?kouTingNearDrawTiles(p0):[];
   const ktNearHint=ktNearDraws.length?`<div class="kt-near-hint">${tr('ktNearDraw','次の引きで扣聴になる牌')}: ${formatKtNearDrawHint(ktNearDraws)}</div>`:'';
+  const ktDiscardHint=kouTingMayDiscard?`<div class="kt-discard-hint">${tr('ktTapHint','聴牌を保てる牌だけクリック')}</div>`:'';
   const humanLabelText=`<span class="rim-name">${sideName(0)} ${ktBadge(p0)} ${p0.kouTing?`<span style="color:#ffd44b;font-size:10px">${tr('waiting','待ち')}: ${(p0.waits||waits).map(tileName).join(' ')}</span>`:''}</span>${dealerMark(0)}`;
 
   const html=`
@@ -6462,6 +6790,7 @@ function render(){
       <div class="player-label player-label-rim" style="font-size:11px">${humanLabelText}</div>
     </div>
     ${ktNearHint}
+    ${ktDiscardHint}
     <div id="human-discards">${humanDiscards}</div>
     <div class="human-rack-scroll">
     <div class="${humanRackCls}" id="human-rack-wrap" style="${humanRackStyle}">
@@ -6471,8 +6800,11 @@ function render(){
     </div>
   </div>
   ${G.online&&ONLINE.sseDisconnected?`<div class="online-sse-banner" role="alert" style="margin:8px 12px;padding:10px 12px;background:rgba(180,40,40,.85);border-radius:8px;color:#fff;font-size:12px;line-height:1.5">
-    ${tr('onlineReconnectHint','サーバーとの接続が切れました。ページを再読み込みせずに再接続できます。')}
-    <div style="margin-top:8px"><button type="button" class="btn btn-new" onclick="reconnectOnlineSse()">${tr('onlineReconnectBtn','再接続')}</button></div>
+    ${tr('onlineReconnectHint','サーバーとの接続が切れました。ページを再読み込みせずに再接続できます。').replace('{code}',ONLINE.room?.id||'—')}
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="btn btn-new" onclick="reconnectOnlineSse()">${tr('onlineReconnectBtn','再接続')}</button>
+      ${ONLINE.room?.id?`<button type="button" class="btn btn-lite" onclick="onlineRejoinLastRoom()">${tr('onlineRejoinLast','前回の部屋に参加')}</button>`:''}
+    </div>
   </div>`:''}
   <div id="action-bar">${buttons}<button type="button" class="btn btn-ghost" onclick="leaveToMenu()">${t('backToMenu')}</button></div>
   </div>
@@ -6534,6 +6866,7 @@ function renderStartScreen(){
           <button class="btn btn-new" onclick="onlineCreateRoom()">${t('onlineCreate')}</button>
           <button class="btn btn-lite" onclick="onlineJoinRoom()">${t('onlineJoin')}</button>
         </div>
+        ${getLastOnlineRoom()?.code?`<div class="menu-row" style="margin-top:6px;"><button type="button" class="btn btn-lite" onclick="onlineRejoinLastRoom()">${t('onlineRejoinLast')} (${getLastOnlineRoom().code})</button></div>`:''}
       `}
     </div>
   `;
@@ -6554,6 +6887,7 @@ function renderStartScreen(){
       ${UI.settingsOpen?`
       <div class="settings-panel">
         <button type="button" class="btn btn-lite" onclick="openRulebook()">${t('rulebook')}</button>
+        <button type="button" class="btn btn-lite" onclick="try{localStorage.removeItem('hm_rules_primer_skip');}catch(_e){} openRulesPrimer();">${t('rulesPrimerAgain','ルール確認')}</button>
         <div class="menu-row">
           ${langBtn('日本語','ja')}
           ${langBtn('中文','zh')}

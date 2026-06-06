@@ -15,6 +15,7 @@
     "verify:post-deal": "node scripts/verify-post-deal.mjs",
     "verify:layout": "node scripts/verify-hand-layout.mjs",
     "verify:side-parity": "node scripts/verify-side-hand-parity.mjs",
-    "verify:all": "npm run build && npm run verify:assets && npm run verify:post-deal && npm run verify:layout && npm run verify:side-parity"
+    "verify:rules": "node scripts/verify-rules.mjs",
+    "verify:all": "npm run build && npm run verify:assets && npm run verify:post-deal && npm run verify:layout && npm run verify:side-parity && npm run verify:rules"
   }
 }

@@ -1,5 +1,8 @@
 /** Playwright: ルーレット→ダイス→配牌演出をスキップして対局可能状態まで進める */
 export async function skipToPlayableHand(page){
+  await page.evaluate(() => {
+    try { localStorage.setItem('hm_rules_primer_skip', '1'); } catch (_e) {}
+  });
   await page.waitForSelector('button.btn-new', { state: 'visible', timeout: 15000 });
   await page.click('button.btn-new');
   await page.waitForFunction(

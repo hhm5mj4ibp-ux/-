@@ -158,7 +158,8 @@ function getChiOptions(hand, tile) {
   return opts;
 }
 function canWin(game, seat, tile) {
-  return isPureKatanWin(game.hands[seat], tile) && (game.melds[seat].length > 0 || game.kouTing[seat]);
+  if (!game.melds[seat].length) return false;
+  return isPureKatanWin(game.hands[seat], tile);
 }
 
 function expectedHandCount(game, seat) {
@@ -166,7 +167,7 @@ function expectedHandCount(game, seat) {
 }
 
 function shouldEnterKouTing(game, seat, drawn) {
-  if (!drawn || game.kouTing[seat]) return false;
+  if (!drawn || game.kouTing[seat] || !game.melds[seat].length) return false;
   const hand = game.hands[seat];
   const exp = expectedHandCount(game, seat);
   if (hand.length !== exp + 1) return false;
@@ -179,7 +180,7 @@ function shouldEnterKouTing(game, seat, drawn) {
 }
 
 function getKouTingEntryDiscardIndices(game, seat) {
-  if (game.kouTing[seat]) return [];
+  if (game.kouTing[seat] || !game.melds[seat].length) return [];
   const hand = sortTiles([...game.hands[seat]]);
   const exp = expectedHandCount(game, seat);
   if (hand.length !== exp + 1) return [];
@@ -201,12 +202,60 @@ function getTreasureScoreDeltas(winnerSeat, basePts = 12) {
   return d;
 }
 
-/** 扣聴成立直後: 待ち牌に宝牌が含まれれば宝中宝で即和了 */
+function kouTingWaitsMatchTreasure(game, seat) {
+  if (!game?.kouTing[seat]) return false;
+  const waits = getKatanWaits(game.hands[seat]);
+  return waits.some((w) => tileEq(w, game.treasure));
+}
+
+/** 宝引き和了が宝中宝か（和了牌を除いた嵌張待ちに宝牌が含まれるか） */
+function kouTingWaitsForTreasureTile(game, seat, winTile) {
+  if (!game?.kouTing[seat] || !game.treasure || !winTile || !tileEq(winTile, game.treasure)) return false;
+  const handWithout = removeTile([...game.hands[seat]], winTile);
+  if (!handWithout) return false;
+  return getKatanWaits(handWithout).some((w) => tileEq(w, game.treasure));
+}
+
+function finishTreasureDrawWin(room, seat, drawn) {
+  const game = room.game;
+  if (!canWin(game, seat, drawn)) return false;
+  const isBao = kouTingWaitsForTreasureTile(game, seat, drawn);
+  finishHand(room, { seat, type: 'tsumo', tile: drawn, treasure: isBao });
+  return true;
+}
+
+function canOfferKouTingTreasureNow(game, seat) {
+  if (!kouTingWaitsMatchTreasure(game, seat)) return false;
+  return game.hands[seat].length === expectedHandCount(game, seat);
+}
+
+function maybeBeginKouTingTreasurePending(room, seat) {
+  if (!canOfferKouTingTreasureNow(room.game, seat)) return false;
+  if (isHumanSeat(room, seat)) return beginKouTingTreasurePending(room, seat);
+  return tryFinishKouTingTreasureWin(room, seat);
+}
+
+/** 人間席: 宝中宝は「宝を見る」→「宝中宝」ボタンで和了（即終了しない） */
+function beginKouTingTreasurePending(room, seat) {
+  const game = room.game;
+  if (!game || !canOfferKouTingTreasureNow(game, seat)) return false;
+  game.kouTingTreasurePending = seat;
+  game.kouTingTreasureSeen = false;
+  game.treasureRevealed = game.kouTing.some((k, i) => k && i !== seat);
+  game.phase = 'discard';
+  game.turn = seat;
+  game.pending = null;
+  game.passed = [];
+  bump(room);
+  runAiUntilHuman(room);
+  return true;
+}
+
+/** 扣聴成立直後: 待ち牌に宝牌が含まれれば宝中宝（AIは即和了） */
 function tryFinishKouTingTreasureWin(room, seat) {
   const game = room.game;
-  if (!game || !game.kouTing[seat]) return false;
-  const waits = getKatanWaits(game.hands[seat]);
-  if (!waits.some((w) => tileEq(w, game.treasure))) return false;
+  if (!game || !kouTingWaitsMatchTreasure(game, seat)) return false;
+  if (isHumanSeat(room, seat)) return maybeBeginKouTingTreasurePending(room, seat);
   game.treasureUsed = true;
   game.treasureRevealed = true;
   finishHand(room, { seat, type: 'tsumo', tile: game.treasure, treasure: true });
@@ -224,6 +273,7 @@ function tryFinishKouTingTreasureWin(room, seat) {
 function maybeAutoEnterKouTing(game, seat, room) {
   const drawn = game.lastDraw?.seat === seat ? game.lastDraw.tile : null;
   if (!drawn || !shouldEnterKouTing(game, seat, drawn)) return false;
+  if (!game.melds[seat].length) return false;
   game.kouTing[seat] = true;
   game.treasureRevealed = game.kouTing.some(Boolean);
   if (room && tryFinishKouTingTreasureWin(room, seat)) return true;
@@ -302,6 +352,8 @@ function publicRoom(room) {
           treasureRevealed: room.game.treasureRevealed,
           treasureUsed: room.game.treasureUsed,
           kouTing: room.game.kouTing,
+          kouTingTreasurePending: room.game.kouTingTreasurePending ?? null,
+          kouTingTreasureSeen: !!room.game.kouTingTreasureSeen,
           discards: room.game.discards,
           melds: room.game.melds,
           handCounts: room.game.hands.map((h) => h.length),
@@ -328,7 +380,10 @@ function privateState(room, playerId) {
   return {
     seat,
     hand: sortTiles(room.game.hands[seat]),
-    treasure: room.game.kouTing[seat] ? room.game.treasure : null,
+    treasure: room.game.kouTing[seat]
+      && !(room.game.kouTingTreasurePending === seat && !room.game.kouTingTreasureSeen)
+      ? room.game.treasure
+      : null,
     lastDraw: room.game.lastDraw?.seat === seat ? room.game.lastDraw.tile : null,
     legalActions: legalActions(room.game, seat),
   };
@@ -518,9 +573,14 @@ function applyAiDiscardTurn(room, seat) {
         const drawn = game.treasure;
         game.hands[seat].push(drawn);
         game.lastDraw = { seat, tile: drawn };
-        if (canWin(game, seat, drawn)) {
-          finishHand(room, { seat, type: 'tsumo', tile: drawn, treasure: true });
-          room.log.push({ at: Date.now(), playerId: 'ai', seat, type: 'tsumo', payload: { treasure: true } });
+        if (finishTreasureDrawWin(room, seat, drawn)) {
+          room.log.push({
+            at: Date.now(),
+            playerId: 'ai',
+            seat,
+            type: 'tsumo',
+            payload: { treasure: kouTingWaitsForTreasureTile(game, seat, drawn) },
+          });
           return true;
         }
       } else {
@@ -686,6 +746,8 @@ function beginNewHand(room) {
     skipDrawAfterCallBy: null,
     dealerOpeningDiscardNoDraw: true,
     winner: null,
+    kouTingTreasurePending: null,
+    kouTingTreasureSeen: false,
     actionLog: [],
   };
   room.log.push({ at: Date.now(), type: 'hand_started', round: room.match.round, dealer });
@@ -738,7 +800,11 @@ function startGame(room, playerId) {
 
 function updateKouTing(game) {
   if (!game || game.status !== 'playing') return;
-  game.treasureRevealed = game.kouTing.some(Boolean);
+  if (game.kouTingTreasurePending != null && !game.kouTingTreasureSeen) {
+    game.treasureRevealed = game.kouTing.some((k, i) => k && i !== game.kouTingTreasurePending);
+  } else {
+    game.treasureRevealed = game.treasureUsed || game.kouTing.some(Boolean);
+  }
 }
 
 function legalActions(game, seat) {
@@ -746,6 +812,18 @@ function legalActions(game, seat) {
   const hand = game.hands[seat];
   const actions = [];
   const exp = expectedHandCount(game, seat);
+  if (game.kouTingTreasurePending === seat) {
+    if (!canOfferKouTingTreasureNow(game, seat)) {
+      game.kouTingTreasurePending = null;
+      game.kouTingTreasureSeen = false;
+    } else if (!game.kouTingTreasureSeen) {
+      actions.push({ type: 'reveal_treasure' });
+      return actions;
+    } else {
+      actions.push({ type: 'treasure_win', tile: game.treasure });
+      return actions;
+    }
+  }
   if (game.phase === 'discard' && game.turn === seat) {
     if (game.kouTing[seat]) {
       if (hand.length === exp) actions.push({ type: 'draw' });
@@ -813,6 +891,17 @@ function finishNoClaim(game, room) {
   game.phase = 'discard';
   game.pending = null;
   game.passed = [];
+  if (game.kouTingTreasurePending === from && !canOfferKouTingTreasureNow(game, from)) {
+    game.kouTingTreasurePending = null;
+    game.kouTingTreasureSeen = false;
+  }
+  if (isHumanSeat(room, from) && game.kouTing[from]) {
+    maybeBeginKouTingTreasurePending(room, from);
+  }
+  if (game.kouTingTreasurePending === from) {
+    game.turn = from;
+    return;
+  }
   if (game.skipDrawAfterCallBy === from) {
     game.skipDrawAfterCallBy = null;
   } else if (!game.kouTing[from]) {
@@ -822,6 +911,10 @@ function finishNoClaim(game, room) {
       drawFor(game, from, room);
       if (maybeAutoEnterKouTing(game, from, room)) return;
     }
+  }
+  if (game.kouTing[from]) {
+    game.turn = nextPlayer(from);
+    return;
   }
   game.turn = nextPlayer(from);
 }
@@ -872,9 +965,14 @@ function resolveOnlineAction(room, playerId, body) {
         const drawn = game.treasure;
         game.hands[seat].push(drawn);
         game.lastDraw = { seat, tile: drawn };
-        if (canWin(game, seat, drawn)) {
-          finishHand(room, { seat, type: 'tsumo', tile: drawn, treasure: true });
-          room.log.push({ at: Date.now(), playerId, seat, type: 'tsumo', payload: { treasure: true } });
+        if (finishTreasureDrawWin(room, seat, drawn)) {
+          room.log.push({
+            at: Date.now(),
+            playerId,
+            seat,
+            type: 'tsumo',
+            payload: { treasure: kouTingWaitsForTreasureTile(game, seat, drawn) },
+          });
           bump(room);
           runAiUntilHuman(room);
           return;
@@ -916,7 +1014,9 @@ function resolveOnlineAction(room, playerId, body) {
     game.lastDraw = null;
     game.kouTing[seat] = true;
     game.treasureRevealed = game.kouTing.some(Boolean);
-    if (tryFinishKouTingTreasureWin(room, seat)) return;
+    if (tryFinishKouTingTreasureWin(room, seat)) {
+      return;
+    }
     game.phase = 'claim';
     game.pending = { from: seat, tile };
     game.passed = [];
@@ -972,6 +1072,32 @@ function resolveOnlineAction(room, playerId, body) {
     const tile = game.lastDraw?.seat === seat ? game.lastDraw.tile : null;
     if (!tile || !canWin(game, seat, tile)) throw Object.assign(new Error('cannot_tsumo'), { status: 409 });
     finishHand(room, { seat, type: 'tsumo', tile });
+  } else if (type === 'reveal_treasure') {
+    if (game.kouTingTreasurePending !== seat || game.kouTingTreasureSeen) {
+      throw Object.assign(new Error('cannot_reveal_treasure'), { status: 409 });
+    }
+    game.kouTingTreasureSeen = true;
+    game.treasureRevealed = true;
+  } else if (type === 'treasure_win') {
+    if (game.kouTingTreasurePending !== seat || !game.kouTingTreasureSeen) {
+      throw Object.assign(new Error('cannot_treasure_win'), { status: 409 });
+    }
+    if (!kouTingWaitsMatchTreasure(game, seat)) {
+      throw Object.assign(new Error('cannot_treasure_win'), { status: 409 });
+    }
+    game.kouTingTreasurePending = null;
+    game.treasureUsed = true;
+    game.treasureRevealed = true;
+    finishHand(room, { seat, type: 'tsumo', tile: game.treasure, treasure: true });
+    room.log.push({
+      at: Date.now(),
+      type: 'kou_ting_treasure',
+      seat,
+      tile: game.treasure,
+    });
+    bump(room);
+    runAiUntilHuman(room);
+    return;
   } else {
     throw Object.assign(new Error('unknown_action'), { status: 400 });
   }
