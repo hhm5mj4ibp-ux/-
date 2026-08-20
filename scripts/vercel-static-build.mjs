@@ -43,4 +43,14 @@ if (fs.existsSync(tiles)) {
   fs.cpSync(tiles, path.join(pub, 'tiles'), { recursive: true });
 }
 
+for (const dir of ['audio', 'icons', 'legal']) {
+  const src = path.join(root, dir);
+  if (fs.existsSync(src)) fs.cpSync(src, path.join(pub, dir), { recursive: true });
+}
+
+for (const extra of ['manifest.webmanifest', 'sw.js', 'hero-splash.jpg']) {
+  const src = path.join(root, extra);
+  if (fs.existsSync(src)) fs.copyFileSync(src, path.join(pub, extra));
+}
+
 console.log('static build → public/');

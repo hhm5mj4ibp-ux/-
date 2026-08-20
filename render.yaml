@@ -9,3 +9,13 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_PREMIUM
+        sync: false
+      - key: SHOP_SUCCESS_URL
+        sync: false
+      - key: SHOP_SIGNING_SECRET
+        sync: false

@@ -122,3 +122,16 @@ Render URLでヘルスチェック:
 
 `https://harbin-mahjong-online.onrender.com/api/health`
 
+## 4) プレミアム課金（任意）
+
+Stripe を使う場合、Render に次を設定する。未設定ならクライアントは全機能アンロック（従来どおり）。
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_PREMIUM`（ワンタイム Price ID）
+- `SHOP_SUCCESS_URL`（Vercel の `https://…/harbin-mahjong.html`）
+- `SHOP_SIGNING_SECRET`
+
+Webhook エンドポイント: `https://＜Render ホスト＞/api/shop/webhook`（イベント `checkout.session.completed`）。
+クライアントは対戦サーバ URL と同じホストの `/api/shop/config` を見る。
+

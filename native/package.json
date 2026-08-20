@@ -1,0 +1,10 @@
+{
+  "name": "harbin-mahjong-native",
+  "private": true,
+  "description": "Capacitor shell for Harbin Mahjong. IAP is not wired yet — use StoreKit 2 / Play Billing + RevenueCat in a follow-up.",
+  "scripts": {
+    "sync": "npx --yes @capacitor/cli@6 sync",
+    "add:ios": "npx --yes @capacitor/cli@6 add ios",
+    "add:android": "npx --yes @capacitor/cli@6 add android"
+  }
+}

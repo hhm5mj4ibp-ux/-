@@ -10,6 +10,16 @@ import {
   breakColumnFromDice,
   rollD6,
 } from '../scripts/harbin-deal.mjs';
+import {
+  shopConfig,
+  createCheckoutSession,
+  retrieveCheckoutSession,
+  sessionIsPaid,
+  issuePremiumToken,
+  verifyEntitlement,
+  verifyStripeWebhook,
+  successUrlFromEnv,
+} from './shop.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -1206,11 +1216,75 @@ function sendToPlayer(roomId, playerId, event, data) {
   }
 }
 
-async function readJson(req) {
+async function readRaw(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
-  if (!chunks.length) return {};
-  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  return Buffer.concat(chunks);
+}
+
+async function readJson(req) {
+  const buf = await readRaw(req);
+  if (!buf.length) return {};
+  return JSON.parse(buf.toString('utf8'));
+}
+
+async function handleShop(req, res, url) {
+  if (req.method === 'GET' && url.pathname === '/api/shop/config') {
+    return send(res, 200, shopConfig());
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/shop/checkout') {
+    try {
+      const body = await readJson(req);
+      const origin = String(body.origin || '').replace(/\/+$/, '');
+      const successUrl = successUrlFromEnv(origin || 'https://harbin-mahjong-kaka.vercel.app');
+      const cancelUrl = origin ? `${origin}/harbin-mahjong.html?shop=cancel` : successUrl.replace('shop_session={CHECKOUT_SESSION_ID}', 'shop=cancel');
+      const session = await createCheckoutSession({ successUrl, cancelUrl });
+      return send(res, 200, { url: session.url, id: session.id });
+    } catch (err) {
+      const status = err.status || (err.message === 'shop_disabled' ? 503 : 500);
+      return send(res, status, { error: err.message || 'checkout_failed' });
+    }
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/shop/status') {
+    const sessionId = url.searchParams.get('session_id') || '';
+    if (!sessionId) return send(res, 400, { error: 'missing_session' });
+    try {
+      const session = await retrieveCheckoutSession(sessionId);
+      if (!sessionIsPaid(session)) return send(res, 200, { premium: false });
+      return send(res, 200, { premium: true, token: issuePremiumToken(session.id) });
+    } catch (err) {
+      return send(res, err.status || 500, { error: err.message || 'status_failed' });
+    }
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/shop/restore') {
+    const body = await readJson(req);
+    if (body.token) {
+      const payload = verifyEntitlement(body.token);
+      return send(res, 200, { premium: !!payload, token: payload ? body.token : null });
+    }
+    if (body.sessionId) {
+      try {
+        const session = await retrieveCheckoutSession(body.sessionId);
+        if (!sessionIsPaid(session)) return send(res, 200, { premium: false });
+        return send(res, 200, { premium: true, token: issuePremiumToken(session.id) });
+      } catch (err) {
+        return send(res, err.status || 500, { error: err.message || 'restore_failed' });
+      }
+    }
+    return send(res, 400, { error: 'missing_token' });
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/shop/webhook') {
+    const raw = await readRaw(req);
+    const v = verifyStripeWebhook(raw.toString('utf8'), req.headers['stripe-signature']);
+    if (!v.ok) return send(res, 400, { error: v.error });
+    return send(res, 200, { received: true });
+  }
+
+  return notFound(res);
 }
 
 function notFound(res) {
@@ -1231,6 +1305,9 @@ async function serveStatic(req, res) {
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.webp': 'image/webp',
+    '.ogg': 'audio/ogg',
+    '.webmanifest': 'application/manifest+json',
+    '.json': 'application/json',
   };
   res.writeHead(200, {
     'content-type': types[extname(filePath)] || 'application/octet-stream',
@@ -1254,7 +1331,11 @@ async function handleApi(req, res) {
 
   try {
     if (req.method === 'GET' && url.pathname === '/api/health') {
-      return send(res, 200, { ok: true, rooms: rooms.size });
+      return send(res, 200, { ok: true, rooms: rooms.size, shop: shopConfig().enabled });
+    }
+
+    if (url.pathname.startsWith('/api/shop/')) {
+      return handleShop(req, res, url);
     }
 
     if (req.method === 'POST' && url.pathname === '/api/rooms') {
