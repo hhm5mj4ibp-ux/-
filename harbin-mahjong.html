@@ -2139,6 +2139,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
 
 /* short screens (landscape phone) */
 @media (max-height:520px){
+  #app{padding:2px;}
   .table-shell{padding:3px;}
   .table-shell::before{inset:4px;}
   .table-corner{width:12px;height:12px;}
@@ -2414,6 +2415,183 @@ body[data-table-theme="night"] .human-rack{
   #ron-cinema.show .ron-cine-rays{animation:none;}
 }
 body.fx-skip .tile.just-drawn,body.fx-skip .kouting-badge,body.fx-skip #tile-flight .fly-clone{animation:none !important;}
+
+/* ===== Real square table (ADR-075). Title splash stays. Tile sprites / seat order unchanged. ===== */
+body.playing{
+  background:
+    radial-gradient(ellipse at 50% 32%, #3a2818 0%, #1a120c 46%, #0c0806 100%);
+}
+.mj-table.table-shell{
+  border-radius:6px;
+  padding:12px;
+  background:
+    repeating-linear-gradient(90deg,rgba(40,18,6,.18) 0 2px,transparent 2px 9px),
+    repeating-linear-gradient(0deg,rgba(255,210,140,.07) 0 1px,transparent 1px 8px),
+    linear-gradient(145deg,#9a6a38 0%,#6e4420 28%,#4a2c12 62%,#7a4e26 100%);
+  box-shadow:
+    inset 0 0 0 3px #3a2410,
+    inset 0 0 0 6px #c4a06a,
+    inset 0 0 0 8px #3a2410,
+    0 18px 36px rgba(0,0,0,.55);
+}
+.mj-table.table-shell::before{
+  inset:8px;
+  border-radius:3px;
+  border:1px solid rgba(90,50,20,.55);
+  box-shadow:inset 0 0 0 1px rgba(20,10,4,.45);
+}
+.mj-table .table-corner{
+  width:14px;height:14px;
+  background:linear-gradient(135deg,#8a8a8a,#4a4a4a 55%,#2a2a2a);
+  clip-path:polygon(0 0,100% 0,100% 34%,34% 34%,34% 100%,0 100%);
+}
+.mj-table .table-felt{
+  border-radius:3px;
+  border:1px solid rgba(20,60,30,.65);
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(90,170,110,.22) 0%, transparent 52%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,#1f7a45 0%,#156338 48%,#0e4a2c 100%);
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,.28),
+    inset 0 24px 40px rgba(255,255,255,.04);
+}
+.mj-table .felt-play-column{
+  display:grid;
+  grid-template-columns:minmax(58px,.22fr) minmax(0,1fr) minmax(58px,.22fr);
+  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:
+    "n n n"
+    "w c e"
+    "s s s";
+  gap:2px 6px;
+  flex:1;
+  min-height:0;
+}
+.mj-table #top-area{grid-area:n;justify-content:center;}
+.mj-table #middle-area{display:contents;}
+.mj-table #left-area,
+.mj-table #right-area{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  border-radius:0;
+  padding:2px 0;
+}
+.mj-table #left-area{grid-area:w;}
+.mj-table #right-area{grid-area:e;}
+.mj-table #center-area{grid-area:c;justify-content:center;padding:0;}
+.mj-table #bottom-area{grid-area:s;padding:2px 2px 0;}
+.mj-table #center-hud{
+  background:transparent;border:none;padding:2px;gap:6px;justify-content:center;
+}
+.mj-table .hub-screen{
+  width:clamp(64px,22vw,92px);
+  height:clamp(64px,22vw,92px);
+  max-width:92px;max-height:92px;
+  background:
+    radial-gradient(circle at 40% 32%, #e2c898 0%, #b08950 38%, #6a4420 78%);
+  border:3px solid #3a2410;
+  box-shadow:
+    inset 0 2px 0 rgba(255,240,210,.45),
+    inset 0 -8px 12px rgba(0,0,0,.28),
+    0 4px 10px rgba(0,0,0,.35);
+}
+.mj-table .hub-line1,
+.mj-table .hub-line2{
+  color:#2a1608;
+  text-shadow:0 1px 0 rgba(255,240,210,.4);
+  font-family:'Noto Serif JP',serif;
+}
+.mj-table .hub-wind{
+  background:linear-gradient(180deg,#efe3c8,#c9ae7c);
+  border:1px solid #5a3a18;
+  border-radius:4px;
+}
+.mj-table .hub-wind.is-turn{
+  border-color:#fff2c4;
+  box-shadow:0 0 10px rgba(255,220,120,.7);
+}
+.mj-table .seat-plate{
+  background:linear-gradient(180deg,#e8d7b4,#c4a06a);
+  border:1px solid #5c3a18;
+  border-radius:4px;
+  box-shadow:0 2px 4px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.4);
+}
+.mj-table .seat-plate-wind{
+  background:linear-gradient(180deg,#9a2a2a,#6a1414);
+  border:1px solid #3a0c0c;
+  color:#f7ead0;
+  border-radius:3px;
+}
+.mj-table .seat-plate-name{color:#2a1608;}
+.mj-table .seat-plate-score{color:#4a2c10;}
+.mj-table .seat-plate.is-turn{
+  border-color:#fff0b8;
+  box-shadow:0 0 0 2px rgba(255,230,150,.85),0 0 12px rgba(255,200,80,.4);
+}
+.mj-table .message{
+  background:#f3ead0;
+  color:#2a1608;
+  border:1px solid #c4b48a;
+  border-radius:2px;
+  font-family:'Noto Serif JP',serif;
+  box-shadow:1px 2px 0 rgba(60,40,10,.18);
+}
+.mj-table .treasure-reveal{
+  background:
+    radial-gradient(circle at 50% 35%, #a07038 0%, #5a3414 70%);
+  border:2px solid #2a1608;
+  border-radius:50%;
+  width:72px;height:72px;
+  padding:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  letter-spacing:0;
+  font-size:9px;
+  color:#f3ead0;
+  box-shadow:inset 0 2px 0 rgba(255,230,180,.25),0 4px 8px rgba(0,0,0,.35);
+}
+.mj-table .discard-river-mat{
+  background:rgba(0,30,12,.16);
+  border:1px dashed rgba(180,220,180,.18);
+  border-radius:2px;
+  box-shadow:none;
+}
+.mj-table .human-rack{
+  background:
+    repeating-linear-gradient(90deg,rgba(40,18,6,.2) 0 2px,transparent 2px 8px),
+    linear-gradient(180deg,#8a5a2c 0%,#5a3414 55%,#3a200c 100%);
+  border:1px solid #2a1608;
+  border-radius:3px;
+  box-shadow:inset 0 4px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,220,160,.2);
+}
+.mj-table #action-bar.action-dock,
+.mj-table #action-bar{
+  background:linear-gradient(180deg,#6a4420,#3a2410);
+  border:1px solid #2a1608;
+  border-radius:4px;
+  box-shadow:inset 0 1px 0 rgba(255,220,160,.18);
+}
+.mj-table #action-bar .btn-menu{color:#eadcc0;border-color:rgba(90,60,30,.8);}
+@media (max-height:520px){
+  .mj-table.table-shell{padding:1px;}
+  .mj-table.table-shell::before{inset:3px;}
+  .mj-table .treasure-reveal{width:44px;height:44px;font-size:8px;padding:3px;}
+  .mj-table .felt-play-column{gap:0 4px;}
+  .mj-table #top-area{padding:0;}
+  .mj-table .hub-screen{width:clamp(48px,14vw,68px);height:clamp(48px,14vw,68px);max-width:68px;max-height:68px;}
+}
+body.playing[data-table-theme="night"]{
+  background:radial-gradient(ellipse at 50% 32%, #16324a 0%, #050c12 70%);
+}
+body.playing[data-table-theme="night"] .mj-table .table-felt{
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(80,140,190,.2) 0%, transparent 52%),
+    linear-gradient(180deg,#0c3a48 0%,#072028 100%);
+}
+body.playing[data-table-theme="gold"] .mj-table.table-shell{
+  box-shadow:inset 0 0 0 3px #3a2410,inset 0 0 0 6px #e0b056,inset 0 0 0 8px #3a2410,0 18px 36px rgba(0,0,0,.55);
+}
 </style>
 </head>
 <body>
@@ -7356,6 +7534,7 @@ function renderTiles(tiles,cls,faceDown,onclickFn){
 
 function render(){
   if(!G) return;
+  document.body.classList.add('playing');
   if(G.kouTingTreasurePending&&!canOfferKouTingTreasureNow(0)){
     G.kouTingTreasurePending=false;
     G.kouTingTreasureSeen=false;
@@ -7523,7 +7702,7 @@ function render(){
     ? (UI.lang==='zh'?' <span class="treasure-used">（已用）</span>':' <span class="treasure-used">（使用済）</span>')
     : '';
   const treasureInfo=
-    `<div class="treasure-reveal">${tr('treasure','宝牌')}: ${treasureTileHtml}${treasureUsedTag}</div>`;
+    `<div class="treasure-reveal mj-dish" title="${tr('treasure','宝牌')}">${tr('treasure','宝牌')}${treasureTileHtml}${treasureUsedTag}</div>`;
 
   const playerLabelByIdx=[sideName(0),sideName(1),sideName(2),sideName(3)];
   const showCallHint = G.phase==='after_discard' && G.humanOptions.length>0 && G.pendingDiscard && G.pendingFrom>=0;
@@ -7560,7 +7739,7 @@ function render(){
     <span class="hub-wind-face">${escapeHtmlText(windLabelForView(seat,dealerRealHub))}</span>
     <span class="hub-wind-score">${escapeHtmlText(hubScoreTxt(seat))}</span>
   </div>`;
-  const tableHub=`<div class="table-hub" role="group" aria-label="卓心">
+  const tableHub=`<div class="table-hub mj-compass" role="group" aria-label="卓心">
     <span class="hub-crosshair" aria-hidden="true"></span>
     <div class="hub-arm hub-arm-n">${hubW(2,'n')}</div>
     <div class="hub-arm hub-arm-w">${hubW(1,'w')}</div>
@@ -7577,7 +7756,7 @@ function render(){
   const humanWaitExtra=p0.kouTing?` <span style="color:#ffd44b;font-size:10px">${tr('waiting','待ち')}: ${(p0.waits||waits).map(tileName).join(' ')}</span>`:'';
 
   const html=`
-  <div class="table-shell">
+  <div class="table-shell mj-table">
   <span class="table-corner tl" aria-hidden="true"></span>
   <span class="table-corner tr" aria-hidden="true"></span>
   <span class="table-corner bl" aria-hidden="true"></span>
@@ -7611,7 +7790,7 @@ function render(){
     <div id="center-area">
       <div id="center-hud">
         ${tableHub}
-        <div class="message">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
+        <div class="message mj-slip">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
         ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
         ${pendingTilePopup}
         ${treasureInfo}
@@ -7689,6 +7868,7 @@ function renderStartScreen(){
   }
   clearTurnTimer();
   G=null;
+  document.body.classList.remove('playing');
   const themeBtn=(key,val)=>`<button type="button" class="btn btn-lite theme-chip ${UI.tableTheme===val?'active':''}" onclick="setTableTheme('${val}')">${t(key)}${(val!=='classic'&&UI.shopEnabled&&!UI.premium)?' *':''}</button>`;
   const hardLocked=UI.shopEnabled&&!UI.premium;
   const diffBtn = (key,val)=>`<button class="btn btn-lite ${UI.difficulty===val?'active':''}" onclick="setDifficulty('${val}')">${t(key)}${(val==='hard'&&hardLocked)?' *':''}</button>`;
