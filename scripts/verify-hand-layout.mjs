@@ -29,6 +29,51 @@ function clipReport(page, selector, label){
   }, { selector, label });
 }
 
+function overlapReport(page){
+  return page.evaluate(() => {
+    const boxes = (sel) => [...document.querySelectorAll(sel)].map(el => {
+      const r = el.getBoundingClientRect();
+      return { t: r.top, b: r.bottom, l: r.left, r: r.right };
+    });
+    const hits = (a, b) => {
+      let n = 0;
+      for(const x of a){
+        for(const y of b){
+          const ox = Math.min(x.r, y.r) - Math.max(x.l, y.l);
+          const oy = Math.min(x.b, y.b) - Math.max(x.t, y.t);
+          if(ox > 0.5 && oy > 0.5) n++;
+        }
+      }
+      return n;
+    };
+    const left = boxes('#left-area .side-col .tile');
+    const right = boxes('#right-area .side-col .tile');
+    const north = boxes('#top-area .north-hand-row .tile');
+    const human = boxes('#human-hand .tile');
+    return {
+      leftHuman: hits(left, human),
+      rightHuman: hits(right, human),
+      northHuman: hits(north, human),
+      leftNorth: hits(left, north),
+      rightNorth: hits(right, north),
+      counts: { left: left.length, right: right.length, north: north.length, human: human.length },
+    };
+  });
+}
+
+async function forceFourteenTileHands(page){
+  await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    for(const p of G.players){
+      const hand = p.hand || [];
+      while(hand.length < 14) hand.push({ suit: 'z', num: 5 });
+      p.hand = hand;
+    }
+    if(typeof render === 'function') render();
+  });
+  await page.waitForTimeout(80);
+}
+
 const viewports = [
   { width: 390, height: 844, name: 'iphone-portrait' },
   { width: 844, height: 390, name: 'iphone-landscape' },
@@ -73,6 +118,23 @@ for(const vp of viewports){
       failed = true;
     }else{
       console.log(`[${vp.name}] ${report.label}: ok (${report.tileCount} tiles)`);
+    }
+  }
+
+  const overlapPasses = [
+    { name: '13', setup: null },
+    { name: '14', setup: () => forceFourteenTileHands(page) },
+  ];
+  for(const pass of overlapPasses){
+    if(pass.setup) await pass.setup();
+    const ov = await overlapReport(page);
+    const pairs = ['leftHuman', 'rightHuman', 'northHuman', 'leftNorth', 'rightNorth'];
+    const bad = pairs.filter(k => ov[k] > 0);
+    if(bad.length){
+      console.error(`[${vp.name}] overlap ${pass.name}: ${bad.map(k => `${k}=${ov[k]}`).join(' ')} counts=${JSON.stringify(ov.counts)}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] overlap ${pass.name}: ok (${ov.counts.left}/${ov.counts.north}/${ov.counts.right}/${ov.counts.human})`);
     }
   }
   await page.close();

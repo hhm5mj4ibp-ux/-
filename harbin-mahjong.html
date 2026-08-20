@@ -2455,6 +2455,7 @@ body.playing{
   box-shadow:
     inset 0 0 80px rgba(0,0,0,.28),
     inset 0 24px 40px rgba(255,255,255,.04);
+  --hand-rack-pad:120px;
 }
 .mj-table .felt-play-column{
   display:grid;
@@ -2463,12 +2464,13 @@ body.playing{
   grid-template-areas:
     "n n n"
     "w c e"
-    "s s s";
-  gap:2px 6px;
+    "w s e";
+  gap:4px 8px;
   flex:1;
   min-height:0;
+  align-items:stretch;
 }
-.mj-table #top-area{grid-area:n;justify-content:center;}
+.mj-table #top-area{grid-area:n;justify-content:center;overflow:hidden;}
 .mj-table #middle-area{display:contents;}
 .mj-table #left-area,
 .mj-table #right-area{
@@ -2477,11 +2479,27 @@ body.playing{
   box-shadow:none;
   border-radius:0;
   padding:2px 0;
+  overflow:hidden;
+  min-height:0;
+  max-height:100%;
+  justify-content:flex-start;
 }
 .mj-table #left-area{grid-area:w;}
 .mj-table #right-area{grid-area:e;}
-.mj-table #center-area{grid-area:c;justify-content:center;padding:0;}
-.mj-table #bottom-area{grid-area:s;padding:2px 2px 0;}
+.mj-table #center-area{grid-area:c;justify-content:center;padding:0;min-width:0;}
+.mj-table #bottom-area{
+  grid-area:s;
+  padding:2px 2px 0;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  z-index:3;
+}
+.mj-table .human-rack-scroll{max-width:100%;}
+.mj-table .human-rack{--hand-rack-pad:120px;}
+@media (max-width:520px){
+  .mj-table .human-rack{--hand-rack-pad:120px;}
+}
 .mj-table #center-hud{
   background:transparent;border:none;padding:2px;gap:6px;justify-content:center;
 }
@@ -2576,8 +2594,10 @@ body.playing{
 @media (max-height:520px){
   .mj-table.table-shell{padding:1px;}
   .mj-table.table-shell::before{inset:3px;}
+  .mj-table .table-felt{--hand-rack-pad:56px;}
+  .mj-table .human-rack{--hand-rack-pad:56px;}
   .mj-table .treasure-reveal{width:44px;height:44px;font-size:8px;padding:3px;}
-  .mj-table .felt-play-column{gap:0 4px;}
+  .mj-table .felt-play-column{gap:2px 8px;}
   .mj-table #top-area{padding:0;}
   .mj-table .hub-screen{width:clamp(48px,14vw,68px);height:clamp(48px,14vw,68px);max-width:68px;max-height:68px;}
 }
