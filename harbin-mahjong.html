@@ -2150,7 +2150,21 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   }
   #top-area{min-height:0;}
   #left-area,#right-area{overflow:visible;max-width:min(54vw,108px);}
-  #bottom-area{padding:2px 4px 0;}
+  #bottom-area{padding:2px 4px 0;flex:0 0 auto;overflow:visible;gap:1px;}
+  .player-label-row{max-width:100%;margin:0 auto;}
+  .seat-plate{
+    padding:1px 6px 1px 2px;
+    gap:4px;
+  }
+  .seat-plate-body{
+    flex-direction:row;
+    align-items:center;
+    gap:6px;
+  }
+  .seat-plate-wind{min-width:16px;height:16px;font-size:9px;}
+  .seat-plate-name,.seat-plate-score{font-size:9px;line-height:1.1;}
+  #bottom-area .player-label{padding:0;}
+  .dealer-wind-pip{min-width:16px;height:16px;padding:0 3px;font-size:9px;}
   .hub-screen{width:clamp(56px,16vw,76px);height:clamp(56px,16vw,76px);max-width:76px;max-height:76px;padding:5px 4px;border-width:2px;}
   .hub-line1{font-size:9px;}
   .hub-line2{font-size:8px;}
@@ -2178,9 +2192,9 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     font-size:13px;
   }
   #action-bar .btn-menu{min-height:28px;padding:4px 8px;font-size:10px;}
-  .human-rack-scroll{padding-right:min(42vw, 236px);}
+  .human-rack-scroll{padding-right:min(28vw, 140px);overflow:visible;}
   .tile.lg{width:min(20px,calc((100vw - 72px) / 16));height:min(28px,calc((100vw - 72px) / 16 * 1.42),7.8dvh);font-size:9px;}
-  .human-rack{--hand-rack-pad:56px;padding:3px 6px 3px;}
+  .human-rack{--hand-rack-pad:56px;padding:2px 5px 2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
   #human-discards .tile.lg{width:min(21px,calc((100vw - 72px) / 19));height:min(30px,calc((100vw - 72px) / 19 * 1.42),8dvh);font-size:9px;}
@@ -2222,7 +2236,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     margin:0;
     border-radius:14px;
   }
-  .human-rack-scroll{padding-right:min(42vw, 236px);}
+  .human-rack-scroll{padding-right:min(28vw, 140px);}
 }
 
 /* 東西の伏せ手牌列は90度回転後の見た目の高さで縦送りする */
