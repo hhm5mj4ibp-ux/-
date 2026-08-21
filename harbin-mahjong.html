@@ -7862,11 +7862,6 @@ function render(){
       </span>
     </div>`;
   };
-  const hubW=(seat,pos)=>`<div class="hub-wind hub-wind-${pos} ${G.turn===seat?'is-turn':''}" title="${escapeHtmlText(sideName(seat))}">
-    ${G.turn===seat?'<span class="hub-turn-arrow" aria-hidden="true"></span>':''}
-    <span class="hub-wind-face">${escapeHtmlText(windLabelForView(seat,dealerRealHub))}</span>
-    <span class="hub-wind-score">${escapeHtmlText(hubScoreTxt(seat))}</span>
-  </div>`;
   const tableHub=`<div class="table-hub mj-compass felt-compass" role="group" aria-label="卓心">
     <div class="hub-core-wrap"><div class="hub-screen"><div class="hub-line1">${escapeHtmlText(hubPrimary)}</div><div class="hub-line2">${hubSubLine}</div></div></div>
   </div>`;
