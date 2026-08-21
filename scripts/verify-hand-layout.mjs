@@ -148,10 +148,15 @@ function scrollbarReport(page){
       document.querySelector('.north-discards'),
     ];
     const vw = window.innerWidth;
-    const overflow = nodes.filter(Boolean).filter(el => el.scrollWidth > el.clientWidth + 1).map(el => ({
+    const overflow = nodes.filter(Boolean).filter(el => {
+      const ox = getComputedStyle(el).overflowX;
+      if(ox === 'hidden' || ox === 'clip') return false;
+      return el.scrollWidth > el.clientWidth + 1;
+    }).map(el => ({
       name: el.id || el.className?.toString?.().split(' ')[0] || el.tagName,
       sw: Math.round(el.scrollWidth),
       cw: Math.round(el.clientWidth),
+      ox: getComputedStyle(el).overflowX,
     }));
     const docOverflow = document.documentElement.scrollWidth > vw + 1;
     return { docOverflow, vw, overflow };

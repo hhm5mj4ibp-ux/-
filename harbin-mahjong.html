@@ -2189,7 +2189,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     font-size:13px;
   }
   #action-bar .btn-menu{min-height:28px;padding:4px 8px;font-size:10px;}
-  .human-rack-scroll{padding-right:min(28vw, 140px);overflow:visible;}
+  .mj-table .human-rack-scroll{padding-right:min(28vw, 140px);overflow-x:auto;overflow-y:hidden;}
   .tile.lg{width:min(20px,calc((100vw - 72px) / 16));height:min(28px,calc((100vw - 72px) / 16 * 1.42),7.8dvh);font-size:9px;}
   .human-rack{--hand-rack-pad:56px;padding:2px 5px 2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
@@ -2233,7 +2233,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     margin:0;
     border-radius:14px;
   }
-  .human-rack-scroll{padding-right:min(28vw, 140px);}
+  .human-rack-scroll{padding-right:min(28vw, 140px);overflow-x:auto;}
 }
 
 /* 東西の伏せ手牌列は90度回転後の見た目の高さで縦送りする */
@@ -2250,6 +2250,10 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
 .felt-heart .west-discards .discard-strip.strip-side,
 .felt-heart .east-discards .discard-strip.strip-side{
   gap:2px;
+}
+.felt-heart .west-discards .discard-row-sidecol,
+.felt-heart .east-discards .discard-row-sidecol{
+  width:var(--side-tile-h);
 }
 .felt-heart .west-discards .discard-row-sidecol .discard-cell,
 .felt-heart .east-discards .discard-row-sidecol .discard-cell{
@@ -2457,7 +2461,7 @@ body.playing{
 }
 .mj-table .felt-play-column{
   display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-columns:minmax(52px,.18fr) minmax(0,1fr) minmax(52px,.18fr);
   grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-areas:
     "n n n"
@@ -2484,7 +2488,7 @@ body.playing{
   max-height:100%;
   justify-content:center;
   width:auto;
-  max-width:none;
+  max-width:min(28vw,88px);
 }
 .mj-table #left-area{grid-area:w;}
 .mj-table #right-area{grid-area:e;}
@@ -2512,11 +2516,28 @@ body.playing{
   justify-items:center;
   justify-content:center;
   align-content:center;
-  gap:4px 6px;
+  gap:2px 4px;
   width:100%;
   height:100%;
-  --river-tile-w:clamp(14px,4.4vw,24px);
-  --river-tile-h:clamp(20px,calc(4.4vw * 1.42),34px);
+  max-width:100%;
+  overflow:hidden;
+  --river-tile-w:clamp(12px, min(4.2vw, 3.2dvh), 22px);
+  --river-tile-h:clamp(17px, calc(var(--river-tile-w) * 1.42), 31px);
+}
+.mj-table .felt-compass.table-hub{
+  display:block;
+  width:auto;
+  margin:0;
+  padding:0;
+  gap:0;
+}
+.mj-table .felt-heart #center-hud{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:0;
 }
 .mj-table .felt-heart .north-discards{
   grid-area:n;
@@ -2559,7 +2580,7 @@ body.playing{
   overflow:hidden;
   z-index:3;
 }
-.mj-table .human-rack-scroll{max-width:100%;}
+.mj-table .human-rack-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden;}
 .mj-table .human-rack{--hand-rack-pad:120px;}
 .mj-table .side-player{
   flex:0 0 auto;
@@ -2567,9 +2588,17 @@ body.playing{
   align-items:center;
   justify-content:center;
 }
-.mj-table #left-area .side-player,
-.mj-table #right-area .side-player{
-  align-items:center;
+.mj-table #left-area .seat-plate,
+.mj-table #right-area .seat-plate{
+  max-width:100%;
+  padding:1px 3px 1px 1px;
+  gap:2px;
+}
+.mj-table #left-area .seat-plate-name,
+.mj-table #right-area .seat-plate-name,
+.mj-table #left-area .seat-plate-score,
+.mj-table #right-area .seat-plate-score{
+  font-size:9px;
 }
 @media (max-width:520px){
   .mj-table .human-rack{--hand-rack-pad:120px;}
@@ -2682,6 +2711,8 @@ body.playing{
   .mj-table .felt-play-column{gap:2px 4px;}
   .mj-table #top-area{padding:0;}
   .mj-table .hub-screen{width:clamp(44px,12vw,60px);height:clamp(44px,12vw,60px);max-width:60px;max-height:60px;}
+  .mj-table #left-area,
+  .mj-table #right-area{max-width:min(22vw,80px);}
   .mj-table #center-area.felt-heart{
     gap:2px 4px;
     --river-tile-w:clamp(12px,2.4vw,18px);
@@ -7836,13 +7867,8 @@ function render(){
     <span class="hub-wind-face">${escapeHtmlText(windLabelForView(seat,dealerRealHub))}</span>
     <span class="hub-wind-score">${escapeHtmlText(hubScoreTxt(seat))}</span>
   </div>`;
-  const tableHub=`<div class="table-hub mj-compass" role="group" aria-label="卓心">
-    <span class="hub-crosshair" aria-hidden="true"></span>
-    <div class="hub-arm hub-arm-n">${hubW(2,'n')}</div>
-    <div class="hub-arm hub-arm-w">${hubW(1,'w')}</div>
+  const tableHub=`<div class="table-hub mj-compass felt-compass" role="group" aria-label="卓心">
     <div class="hub-core-wrap"><div class="hub-screen"><div class="hub-line1">${escapeHtmlText(hubPrimary)}</div><div class="hub-line2">${hubSubLine}</div></div></div>
-    <div class="hub-arm hub-arm-e">${hubW(3,'e')}</div>
-    <div class="hub-arm hub-arm-s">${hubW(0,'s')}</div>
   </div>`;
   const feltWallOrnaments=renderFeltWallOrnaments();
 
@@ -7888,9 +7914,6 @@ function render(){
       <div id="center-hud">
         ${tableHub}
         ${treasureInfo}
-        <div class="message mj-slip">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
-        ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
-        ${pendingTilePopup}
       </div>
       <div class="side-discards-zone east-discards" id="right-discards">${rightDiscards}</div>
       <div id="human-discards">${humanDiscards}</div>
@@ -7913,6 +7936,9 @@ function render(){
     </div>
     ${ktNearHint}
     ${ktDiscardHint}
+    <div class="message mj-slip">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
+    ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
+    ${pendingTilePopup}
     <div class="human-rack-scroll">
     <div class="${humanRackCls}" id="human-rack-wrap" style="${humanRackStyle}">
       <div class="melds-row">${humanMelds}</div>
