@@ -71,7 +71,7 @@ body{
   position:relative;
   height:100%;
   min-height:0;
-  overflow-x:visible;
+  overflow-x:hidden;
   overflow-y:hidden;
   border-radius:12px;
   display:flex;
@@ -417,8 +417,8 @@ body{
 #right-area .side-col .tile.hand-face.opp-hand,
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand,
-#left-area .side-discards-zone .tile.hand-face.opp-hand,
-#right-area .side-discards-zone .tile.hand-face.opp-hand{
+.west-discards .tile.hand-face.opp-hand,
+.east-discards .tile.hand-face.opp-hand{
   --opp-face-w:var(--side-tile-w);
   --opp-face-h:var(--side-tile-h);
   width:var(--opp-face-w);
@@ -464,9 +464,9 @@ body{
   pointer-events:none;
   z-index:1;
 }
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+.west-discards .tile.hand-face.opp-hand:not(.back),
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back),
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+.east-discards .tile.hand-face.opp-hand:not(.back),
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back){
   border:1px solid #b8d4ea;
   border-bottom:1px solid #b8d4ea;
@@ -474,8 +474,8 @@ body{
 /* 左右の捨て・鳴き・手牌列: 自家と同じ CSS 下駄（デザイン2 PNG の青縁を隠して統一） */
 #left-area .side-col .tile.hand-face.opp-hand:not(.back),
 #right-area .side-col .tile.hand-face.opp-hand:not(.back),
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+.west-discards .tile.hand-face.opp-hand:not(.back),
+.east-discards .tile.hand-face.opp-hand:not(.back),
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back),
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back){
   position:relative;
@@ -486,8 +486,8 @@ body{
 }
 #left-area .side-col .tile.hand-face.opp-hand:not(.back)::before,
 #right-area .side-col .tile.hand-face.opp-hand:not(.back)::before,
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back)::before,
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back)::before,
+.west-discards .tile.hand-face.opp-hand:not(.back)::before,
+.east-discards .tile.hand-face.opp-hand:not(.back)::before,
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back)::before,
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back)::before{
   display:block;
@@ -506,8 +506,8 @@ body{
 }
 #left-area .side-col .tile.hand-face.opp-hand:not(.back) .tile-art,
 #right-area .side-col .tile.hand-face.opp-hand:not(.back) .tile-art,
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back) .tile-art,
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back) .tile-art,
+.west-discards .tile.hand-face.opp-hand:not(.back) .tile-art,
+.east-discards .tile.hand-face.opp-hand:not(.back) .tile-art,
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back) .tile-art,
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back) .tile-art{
   position:absolute;
@@ -547,8 +547,8 @@ body{
 /* 左右席: 旧 side 立体（hand-face / lg opp-hand 以外） */
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand),
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand),
-#left-area .side-discards-zone .tile:not(.hand-face),
-#right-area .side-discards-zone .tile:not(.hand-face),
+.west-discards .tile:not(.hand-face),
+.east-discards .tile:not(.hand-face),
 #left-area .side-rack .meld-group .tile:not(.hand-face),
 #right-area .side-rack .meld-group .tile:not(.hand-face){
   transform-origin:50% 100%;
@@ -559,8 +559,8 @@ body{
 }
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back),
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back),
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back),
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back),
+.west-discards .tile:not(.hand-face):not(.back),
+.east-discards .tile:not(.hand-face):not(.back),
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back),
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back){
   background:#fbfdff;
@@ -570,8 +570,8 @@ body{
 }
 /* 捨て牌・鳴り牌の奥行き: 親の overflow:hidden にクリップされる 0 3px box-shadow の代わりに
    border-bottom + inset shadow で卓上手前エッジの立体感を出す */
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back),
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back),
+.west-discards .tile:not(.hand-face):not(.back),
+.east-discards .tile:not(.hand-face):not(.back),
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back),
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back){
   border-bottom:3px solid rgba(50,100,158,.65);
@@ -581,8 +581,8 @@ body{
 }
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::before,
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::before,
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back)::before,
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back)::before,
+.west-discards .tile:not(.hand-face):not(.back)::before,
+.east-discards .tile:not(.hand-face):not(.back)::before,
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::before,
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::before{
   left:1px;right:1px;top:auto;bottom:0;
@@ -598,8 +598,8 @@ body{
 }
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::after,
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::after,
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back)::after,
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back)::after,
+.west-discards .tile:not(.hand-face):not(.back)::after,
+.east-discards .tile:not(.hand-face):not(.back)::after,
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::after,
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::after{
   left:1px;right:1px;top:2px;bottom:auto;height:26%;
@@ -620,24 +620,16 @@ body{
 /* 配牌中も対面（北）は1列で並べる（飛んできた牌がそのまま横一列に着地する演出） */
 #top-area .north-hand-row.deal-staging{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:flex-end;gap:1px;max-width:100%;justify-content:center;overflow-x:auto;}
 #top-area .north-melds{display:flex;flex-wrap:nowrap;gap:2px;justify-content:flex-start;align-items:flex-end;flex-shrink:0;}
-#top-area .top-discards.north-discards{display:flex;flex-direction:column;align-items:stretch;gap:3px;width:100%;max-width:98vw;margin:4px auto 0;padding:0 4px;box-sizing:border-box;}
 #top-area .north-melds .meld-group .tile,
 #top-area .north-hand-row .tile{
   width:min(32px,calc((100vw - 96px) / 14));
   height:min(45px,calc((100vw - 96px) / 14 * 1.42),10dvh);
   font-size:clamp(9px,2.2vw,16px);
 }
-#top-area .top-discards .tile.lg{
-  width:min(28px,calc((100vw - 88px) / 19));
-  height:min(40px,calc((100vw - 88px) / 19 * 1.42),9dvh);
-  font-size:clamp(8px,2vw,14px);
-}
-#top-area .top-discards .discard-river-mat{width:100%;}
-.top-seat .tiles-row.top-discards.north-discards{align-self:stretch;justify-content:flex-start;}
 #left-area .side-col .tile.back:not(.hand-face),
 #right-area .side-col .tile.back:not(.hand-face),
-#left-area .side-discards-zone .tile.back:not(.hand-face),
-#right-area .side-discards-zone .tile.back:not(.hand-face),
+.west-discards .tile.back:not(.hand-face),
+.east-discards .tile.back:not(.hand-face),
 #left-area .side-rack .meld-group .tile.back:not(.hand-face),
 #right-area .side-rack .meld-group .tile.back:not(.hand-face){
   background:linear-gradient(0deg,var(--tile-geta-shadow) 0%,var(--tile-geta-deep) 24%,var(--tile-geta-mid) 52%,var(--tile-geta-top) 82%,#6a94c8 100%);
@@ -648,8 +640,8 @@ body{
 }
 #left-area .side-col .tile.back:not(.hand-face)::before,
 #right-area .side-col .tile.back:not(.hand-face)::before,
-#left-area .side-discards-zone .tile.back:not(.hand-face)::before,
-#right-area .side-discards-zone .tile.back:not(.hand-face)::before,
+.west-discards .tile.back:not(.hand-face)::before,
+.east-discards .tile.back:not(.hand-face)::before,
 #left-area .side-rack .meld-group .tile.back:not(.hand-face)::before,
 #right-area .side-rack .meld-group .tile.back:not(.hand-face)::before{
   display:block;
@@ -665,8 +657,8 @@ body{
 }
 #left-area .side-col .tile.back:not(.hand-face)::after,
 #right-area .side-col .tile.back:not(.hand-face)::after,
-#left-area .side-discards-zone .tile.back:not(.hand-face)::after,
-#right-area .side-discards-zone .tile.back:not(.hand-face)::after,
+.west-discards .tile.back:not(.hand-face)::after,
+.east-discards .tile.back:not(.hand-face)::after,
 #left-area .side-rack .meld-group .tile.back:not(.hand-face)::after,
 #right-area .side-rack .meld-group .tile.back:not(.hand-face)::after{
   inset:auto;left:0;right:0;top:0;height:24%;
@@ -745,7 +737,7 @@ body{
 
 /* === LAYOUT === */
 #top-area{display:flex;justify-content:center;align-items:flex-start;gap:4px;padding:2px;min-height:0;flex:0 1 auto;overflow:visible;}
-#middle-area{display:flex;flex:1 1 auto;gap:2px;overflow-x:visible;overflow-y:hidden;min-height:0;align-items:stretch;}
+#middle-area{display:flex;flex:1 1 auto;gap:2px;overflow-x:hidden;overflow-y:hidden;min-height:0;align-items:stretch;}
 #left-area,#right-area{display:flex;flex-direction:column;justify-content:center;align-items:stretch;width:auto;min-width:0;max-width:min(48vw,168px);flex:0 0 auto;background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.1));border-radius:6px;padding:3px 4px;gap:2px;overflow:visible;border:1px solid rgba(255,235,190,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 5px 16px rgba(0,0,0,.12);}
 .side-main{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 1 auto;min-width:0;max-width:100%;min-height:0;max-height:100%;}
 #left-area .side-main{align-items:flex-start;}
@@ -844,7 +836,7 @@ body{
 .top-seat{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;width:100%;max-width:100%;min-height:0;}
 .top-rack{display:flex;align-items:flex-end;justify-content:center;gap:6px;max-width:100%;flex-shrink:0;}
 .top-rack .melds-row{flex-shrink:0;margin:0;}
-.top-discards{justify-content:flex-start;margin-top:0;width:100%;max-width:98vw;}
+.top-discards{justify-content:center;margin-top:0;width:max-content;max-width:100%;}
 .side-player{display:flex;align-items:flex-end;gap:3px;width:100%;min-height:0;flex:1 1 auto;overflow:visible;}
 #left-area .side-player{flex-direction:row;justify-content:flex-start;align-items:flex-end;}
 #right-area .side-player{flex-direction:row;justify-content:flex-end;align-items:flex-end;}
@@ -852,7 +844,7 @@ body{
    左席=上から[鳴き][手牌]、右席=上から[手牌][鳴き] → 両席ともプレイヤー視点で鳴きが手牌の左。 */
 #left-area .side-rack{flex-direction:column-reverse;align-items:flex-start;gap:3px;}
 #right-area .side-rack{flex-direction:column-reverse;align-items:flex-end;gap:3px;}
-#left-area .side-discards-zone{align-items:flex-start;}
+.west-discards{align-items:flex-end;justify-content:center;}
 .side-discards-zone .discard-strip.strip-side{
   display:flex;
   flex-direction:row;
@@ -865,8 +857,8 @@ body{
   height:auto;
   max-height:none;
 }
-#right-area .side-discards-zone{align-items:flex-end;}
-#right-area .side-discards-zone .discard-strip.strip-side{
+.east-discards{align-items:flex-start;justify-content:center;}
+.east-discards .discard-strip.strip-side{
   flex-direction:row-reverse;
   align-items:flex-end;
   justify-content:flex-end;
@@ -912,16 +904,19 @@ body{
   max-width:100%;
 }
 .side-discards-zone{
-  flex:1 1 auto;
+  flex:0 0 auto;
   min-width:0;
   min-height:0;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
-  align-items:flex-start;
+  justify-content:center;
+  align-items:center;
   overflow:hidden;
+  --side-tile-w:var(--hand-face-w);
+  --side-tile-h:var(--hand-face-h);
 }
-#right-area .side-discards-zone{align-items:flex-end;}
+.west-discards{align-items:flex-end;}
+.east-discards{align-items:flex-start;}
 .side-main{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;min-width:0;max-width:100%;}
 /* 鳴き列: 面子を縦に積む（手牌列と同じ向き＝1本の縦列に見せる） */
 #left-area .side-rack .melds-row,
@@ -1515,9 +1510,9 @@ body{
 .human-rack #human-hand .tile.hand-face.lg{width:min(34px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(48px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),10dvh);font-size:clamp(9px,2.2vw,16px);}
 /* 自家捨て・鳴き: 7198（手札 hand-face とは別） */
 #human-discards .tile.lg{
-  width:min(28px,calc((100vw - 88px) / 19));
-  height:min(40px,calc((100vw - 88px) / 19 * 1.42),9dvh);
-  font-size:clamp(8px,2.2vw,14px);
+  width:var(--river-tile-w, min(24px, 5.2vw));
+  height:var(--river-tile-h, min(34px, calc(5.2vw * 1.42), 8.5dvh));
+  font-size:clamp(8px,2vw,12px);
 }
 .human-rack .meld-group .tile.lg{
   width:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));
@@ -1566,34 +1561,40 @@ body{
 /* human hand */
 #human-hand{display:flex;gap:0;align-items:flex-end;justify-content:flex-start;flex-wrap:nowrap;padding:1px 2px 0;flex:0 0 auto;flex-shrink:0;min-width:0;}
 #human-discards{
-  display:flex;flex-direction:column;align-items:stretch;
-  width:100%;
-  max-width:98vw;
-  margin:0 auto 2px;
-  padding:0 4px;
+  display:flex;flex-direction:column;align-items:center;
+  width:max-content;
+  max-width:100%;
+  margin:0 auto;
+  padding:0;
   box-sizing:border-box;
-  overflow:visible;
+  overflow:hidden;
   flex-shrink:0;
+  min-width:0;
 }
 #human-discards .discard-river-mat{
-  width:100%;
-  padding:4px 6px;
-  overflow:visible;
+  width:max-content;
+  max-width:100%;
+  padding:3px 4px;
+  overflow:hidden;
   box-sizing:border-box;
 }
 .discard-strip{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;}
-/* 自家・対面: 横いっぱいに並べ、はみ出したら折り返し（6枚固定行なし） */
+/* 自家・対面: 卓心に6枚で改行（実卓の牌河） */
 .discard-strip.human,
 .discard-strip.opp-top{
   display:flex;
-  flex-wrap:wrap;
+  flex-direction:column;
+  flex-wrap:nowrap;
   gap:2px;
-  width:100%;
+  width:max-content;
   max-width:100%;
   justify-content:flex-start;
-  align-items:flex-end;
-  align-content:flex-start;
-  overflow:visible;
+  align-items:center;
+  align-content:center;
+  overflow:hidden;
+}
+.discard-strip.human{
+  flex-direction:column-reverse;
 }
 .discard-strip.human .discard-cell,
 .discard-strip.opp-top .discard-cell{flex:0 0 auto;}
@@ -2067,8 +2068,8 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   #right-area .side-col .tile.hand-face.opp-hand,
   #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
   #right-area .side-rack .meld-group .tile.hand-face.opp-hand,
-  #left-area .side-discards-zone .tile.hand-face.opp-hand,
-  #right-area .side-discards-zone .tile.hand-face.opp-hand{
+  .west-discards .tile.hand-face.opp-hand,
+  .east-discards .tile.hand-face.opp-hand{
     --opp-face-w:var(--side-tile-w);
     --opp-face-h:var(--side-tile-h);
     width:var(--opp-face-w);
@@ -2081,11 +2082,6 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     height:min(36px,calc((100vw - 72px) / 16 * 1.42),9dvh);
     font-size:10px;
   }
-  #top-area .top-discards .tile.lg{
-    width:min(22px,calc((100vw - 72px) / 19));
-    height:min(32px,calc((100vw - 72px) / 19 * 1.42),8.5dvh);
-    font-size:9px;
-  }
   #left-area .side-rack .meld-group .tile.side,
   #right-area .side-rack .meld-group .tile.side{
     --meld-w:clamp(20px,4.5vw,38px);
@@ -2097,9 +2093,9 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .human-rack{padding:4px 6px 4px;gap:2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(26px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(36px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),9dvh);font-size:10px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(26px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(36px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),9dvh);font-size:10px;}
-  #human-discards .tile.lg{width:min(22px,calc((100vw - 72px) / 19));height:min(32px,calc((100vw - 72px) / 19 * 1.42),8.5dvh);font-size:9px;}
+  #human-discards .tile.lg{width:var(--river-tile-w, min(20px, 5vw));height:var(--river-tile-h, min(28px, 7.2dvh));font-size:8px;}
   .human-rack .meld-group .tile.lg{width:min(22px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(32px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8.5dvh);font-size:9px;}
-  #human-discards{max-width:98vw;}
+  #human-discards{max-width:100%;}
   .table-hub{width:100%;max-width:100%;gap:4px 6px;grid-template-columns:minmax(36px,1fr) auto minmax(36px,1fr);}
   .hub-wind{min-width:38px;padding:2px 5px;}
   .hub-wind-face{font-size:10px;}
@@ -2131,9 +2127,9 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .human-rack{--hand-rack-pad:48px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(23px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(32px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8.5dvh);font-size:9px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(23px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(32px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8.5dvh);font-size:9px;}
-  #human-discards .tile.lg{width:min(20px,calc((100vw - 64px) / 19));height:min(28px,calc((100vw - 64px) / 19 * 1.42),8dvh);font-size:8px;}
+  #human-discards .tile.lg{width:var(--river-tile-w, min(18px, 5vw));height:var(--river-tile-h, min(26px, 7dvh));font-size:8px;}
   .human-rack .meld-group .tile.lg{width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8dvh);font-size:8px;}
-  #human-discards{max-width:98vw;}
+  #human-discards{max-width:100%;}
   .tile.xs{width:12px;height:18px;font-size:6px;}
 }
 
@@ -2150,7 +2146,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     padding:2px;gap:1px;
   }
   #top-area{min-height:0;}
-  #left-area,#right-area{overflow:visible;max-width:min(54vw,108px);}
+  #left-area,#right-area{overflow:hidden;max-width:min(54vw,108px);}
   #bottom-area{padding:2px 4px 0;flex:0 0 auto;overflow:visible;gap:1px;}
   .player-label-row{max-width:100%;margin:0 auto;}
   .seat-plate{
@@ -2198,9 +2194,9 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .human-rack{--hand-rack-pad:56px;padding:2px 5px 2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
-  #human-discards .tile.lg{width:min(21px,calc((100vw - 72px) / 19));height:min(30px,calc((100vw - 72px) / 19 * 1.42),8dvh);font-size:9px;}
+  #human-discards .tile.lg{width:var(--river-tile-w, min(18px, 3.2vw));height:var(--river-tile-h, min(26px, 7.2dvh));font-size:8px;}
   .human-rack .meld-group .tile.lg{width:min(21px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(30px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8dvh);font-size:9px;}
-  #human-discards{max-width:98vw;}
+  #human-discards{max-width:100%;}
   #left-area,#right-area{
     --side-tile-w:var(--hand-face-w);
     --side-tile-h:var(--hand-face-h);
@@ -2209,8 +2205,8 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   #right-area .side-col .tile.hand-face.opp-hand,
   #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
   #right-area .side-rack .meld-group .tile.hand-face.opp-hand,
-  #left-area .side-discards-zone .tile.hand-face.opp-hand,
-  #right-area .side-discards-zone .tile.hand-face.opp-hand{
+  .west-discards .tile.hand-face.opp-hand,
+  .east-discards .tile.hand-face.opp-hand{
     --opp-face-w:var(--side-tile-w);
     --opp-face-h:var(--side-tile-h);
     width:var(--opp-face-w);
@@ -2251,16 +2247,16 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
 }
 
 /* === 左右席の捨て牌・鳴き牌: 回転後の見た目サイズで詰める === */
-#middle-area #left-area .side-discards-zone .discard-strip.strip-side,
-#middle-area #right-area .side-discards-zone .discard-strip.strip-side{
+.felt-heart .west-discards .discard-strip.strip-side,
+.felt-heart .east-discards .discard-strip.strip-side{
   gap:2px;
 }
-#middle-area #left-area .side-discards-zone .discard-row-sidecol .discard-cell,
-#middle-area #right-area .side-discards-zone .discard-row-sidecol .discard-cell{
+.felt-heart .west-discards .discard-row-sidecol .discard-cell,
+.felt-heart .east-discards .discard-row-sidecol .discard-cell{
   margin-bottom:calc(var(--side-tile-w) - var(--side-tile-h) - 1px);
 }
-#middle-area #left-area .side-discards-zone .discard-row-sidecol .discard-cell:last-child,
-#middle-area #right-area .side-discards-zone .discard-row-sidecol .discard-cell:last-child{
+.felt-heart .west-discards .discard-row-sidecol .discard-cell:last-child,
+.felt-heart .east-discards .discard-row-sidecol .discard-cell:last-child{
   margin-bottom:0;
 }
 #middle-area #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
@@ -2424,6 +2420,7 @@ body.playing{
 .mj-table.table-shell{
   border-radius:6px;
   padding:12px;
+  overflow:hidden;
   background:
     repeating-linear-gradient(90deg,rgba(40,18,6,.18) 0 2px,transparent 2px 9px),
     repeating-linear-gradient(0deg,rgba(255,210,140,.07) 0 1px,transparent 1px 8px),
@@ -2448,6 +2445,7 @@ body.playing{
 .mj-table .table-felt{
   border-radius:3px;
   border:1px solid rgba(20,60,30,.65);
+  overflow:hidden;
   background:
     radial-gradient(ellipse at 50% 42%, rgba(90,170,110,.22) 0%, transparent 52%),
     repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),
@@ -2459,16 +2457,18 @@ body.playing{
 }
 .mj-table .felt-play-column{
   display:grid;
-  grid-template-columns:minmax(58px,.22fr) minmax(0,1fr) minmax(58px,.22fr);
+  grid-template-columns:auto minmax(0,1fr) auto;
   grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-areas:
     "n n n"
     "w c e"
     "w s e";
-  gap:4px 8px;
+  gap:4px 6px;
   flex:1;
   min-height:0;
+  min-width:0;
   align-items:stretch;
+  overflow:hidden;
 }
 .mj-table #top-area{grid-area:n;justify-content:center;overflow:hidden;}
 .mj-table #middle-area{display:contents;}
@@ -2482,11 +2482,75 @@ body.playing{
   overflow:hidden;
   min-height:0;
   max-height:100%;
-  justify-content:flex-start;
+  justify-content:center;
+  width:auto;
+  max-width:none;
 }
 .mj-table #left-area{grid-area:w;}
 .mj-table #right-area{grid-area:e;}
-.mj-table #center-area{grid-area:c;justify-content:center;padding:0;min-width:0;}
+.mj-table #left-area .side-col,
+.mj-table #right-area .side-col{
+  overflow-x:hidden;
+}
+.mj-table #center-area{
+  grid-area:c;
+  justify-content:center;
+  padding:0;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.mj-table #center-area.felt-heart{
+  display:grid;
+  grid-template-columns:max-content max-content max-content;
+  grid-template-rows:max-content max-content max-content;
+  grid-template-areas:
+    ". n ."
+    "w hub e"
+    ". s .";
+  align-items:center;
+  justify-items:center;
+  justify-content:center;
+  align-content:center;
+  gap:4px 6px;
+  width:100%;
+  height:100%;
+  --river-tile-w:clamp(14px,4.4vw,24px);
+  --river-tile-h:clamp(20px,calc(4.4vw * 1.42),34px);
+}
+.mj-table .felt-heart .north-discards{
+  grid-area:n;
+  display:flex;
+  flex-direction:column;
+  flex-wrap:nowrap;
+  align-items:center;
+  justify-content:flex-end;
+  width:max-content;
+  max-width:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+.mj-table .felt-heart .west-discards{grid-area:w;justify-self:end;align-self:center;}
+.mj-table .felt-heart .east-discards{grid-area:e;justify-self:start;align-self:center;}
+.mj-table .felt-heart #human-discards{grid-area:s;justify-self:center;align-self:start;}
+.mj-table .felt-heart #center-hud{
+  grid-area:hub;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.mj-table .felt-heart .north-discards .tile.lg,
+.mj-table .felt-heart #human-discards .tile.lg{
+  width:var(--river-tile-w);
+  height:var(--river-tile-h);
+  font-size:clamp(7px,1.8vw,11px);
+}
+.mj-table .felt-heart .north-discards .discard-river-mat,
+.mj-table .felt-heart #human-discards .discard-river-mat{
+  width:max-content;
+  max-width:100%;
+}
 .mj-table #bottom-area{
   grid-area:s;
   padding:2px 2px 0;
@@ -2497,11 +2561,22 @@ body.playing{
 }
 .mj-table .human-rack-scroll{max-width:100%;}
 .mj-table .human-rack{--hand-rack-pad:120px;}
+.mj-table .side-player{
+  flex:0 0 auto;
+  overflow:hidden;
+  align-items:center;
+  justify-content:center;
+}
+.mj-table #left-area .side-player,
+.mj-table #right-area .side-player{
+  align-items:center;
+}
 @media (max-width:520px){
   .mj-table .human-rack{--hand-rack-pad:120px;}
 }
 .mj-table #center-hud{
-  background:transparent;border:none;padding:2px;gap:6px;justify-content:center;
+  background:transparent;border:none;padding:2px;gap:4px;justify-content:center;
+  overflow:hidden;min-width:0;max-width:100%;
 }
 .mj-table .hub-screen{
   width:clamp(64px,22vw,92px);
@@ -2555,17 +2630,24 @@ body.playing{
   border-radius:2px;
   font-family:'Noto Serif JP',serif;
   box-shadow:1px 2px 0 rgba(60,40,10,.18);
+  max-width:min(160px,100%);
+}
+.mj-table .table-hub{
+  width:auto;
+  max-width:100%;
+  margin:2px auto;
+  gap:4px 6px;
 }
 .mj-table .treasure-reveal{
   background:
     radial-gradient(circle at 50% 35%, #a07038 0%, #5a3414 70%);
   border:2px solid #2a1608;
   border-radius:50%;
-  width:72px;height:72px;
-  padding:6px;
+  width:56px;height:56px;
+  padding:4px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   letter-spacing:0;
-  font-size:9px;
+  font-size:8px;
   color:#f3ead0;
   box-shadow:inset 0 2px 0 rgba(255,230,180,.25),0 4px 8px rgba(0,0,0,.35);
 }
@@ -2596,10 +2678,15 @@ body.playing{
   .mj-table.table-shell::before{inset:3px;}
   .mj-table .table-felt{--hand-rack-pad:56px;}
   .mj-table .human-rack{--hand-rack-pad:56px;}
-  .mj-table .treasure-reveal{width:44px;height:44px;font-size:8px;padding:3px;}
-  .mj-table .felt-play-column{gap:2px 8px;}
+  .mj-table .treasure-reveal{width:40px;height:40px;font-size:7px;padding:2px;}
+  .mj-table .felt-play-column{gap:2px 4px;}
   .mj-table #top-area{padding:0;}
-  .mj-table .hub-screen{width:clamp(48px,14vw,68px);height:clamp(48px,14vw,68px);max-width:68px;max-height:68px;}
+  .mj-table .hub-screen{width:clamp(44px,12vw,60px);height:clamp(44px,12vw,60px);max-width:60px;max-height:60px;}
+  .mj-table #center-area.felt-heart{
+    gap:2px 4px;
+    --river-tile-w:clamp(12px,2.4vw,18px);
+    --river-tile-h:clamp(17px,calc(2.4vw * 1.42),26px);
+  }
 }
 body.playing[data-table-theme="night"]{
   background:radial-gradient(ellipse at 50% 32%, #16324a 0%, #050c12 70%);
@@ -3941,9 +4028,12 @@ function armDiscardFlight(fromPi, tile, fromEl){
   }
   _pendingFlight={fromPi,tile,origin};
 }
+function discardRiverRoot(pi){
+  return ['#human-discards','#left-discards','#north-discards','#right-discards'][pi]||'';
+}
 function lastDiscardCellRect(fromPi){
-  const map={0:'#human-discards .discard-cell',1:'#left-area .discard-cell',2:'#top-area .discard-cell, .north-discards .discard-cell',3:'#right-area .discard-cell'};
-  const nodes=document.querySelectorAll(map[fromPi]||'');
+  const root=discardRiverRoot(fromPi);
+  const nodes=document.querySelectorAll(root?`${root} .discard-cell`:'.north-discards .discard-cell');
   const el=nodes[nodes.length-1];
   if(!el) return null;
   const r=el.getBoundingClientRect();
@@ -5906,15 +5996,8 @@ function seatAnchorRect(pi, role){
     const groups=area.querySelectorAll('.meld-group');
     el=groups.length?groups[groups.length-1]:area.querySelector('.melds-row')||area.querySelector('#human-rack-wrap')||area;
   }else if(role==='discard'){
-    if(pi===1){
-      el=area.querySelector('.side-discards-zone .tile:last-child');
-    }else if(pi===3){
-      el=area.querySelector('.side-discards-zone .tile:last-child');
-    }else if(pi===0){
-      el=area.querySelector('#human-discards .tile:last-child');
-    }else{
-      el=area.querySelector('.top-discards .tile:last-child')||area.querySelector('.discard-strip .tile:last-child');
-    }
+    const root=discardRiverRoot(pi);
+    el=root?document.querySelector(`${root} .tile:last-child`):null;
   }else if(role==='hand'){
     el=area.querySelector('#human-hand')||area.querySelector('.tiles-row:last-child')||area.querySelector('.side-col')||area;
   }
@@ -6923,7 +7006,8 @@ function ronRevealBannerHtml(winnerSeat, fromSeat, tile){
 }
 
 function seatAnchorRonDiscard(fromPi, tile){
-  const area=document.querySelector(MELD_FX_SEAT_ROOT[fromPi]);
+  const root=discardRiverRoot(fromPi);
+  const area=root?document.querySelector(root):document.querySelector(MELD_FX_SEAT_ROOT[fromPi]);
   if(!area||!tile) return null;
   const cells=area.querySelectorAll('.discard-cell.ron-fired');
   if(cells.length){
@@ -7160,13 +7244,12 @@ function renderFeltWallOrnaments(){
   return '';
 }
 
-/** 左右席: 1行あたりこの枚数を超えたら2段＋コンパクト表示 */
-const SIDE_DISCARD_ROW_CAP=5;
+/** 左右席: 1列6枚で次列（実卓の牌河。3列超えたらコンパクト） */
+const SIDE_DISCARD_ROW_CAP=6;
 
 function renderSideDiscardRiver(tiles, cls, cellHtml){
-  const compact=tiles.length>SIDE_DISCARD_ROW_CAP;
-  const perCol=compact?Math.ceil(tiles.length/2):tiles.length;
-  const cols=chunkEvery(tiles,perCol).slice(0,2);
+  const cols=chunkEvery(tiles,SIDE_DISCARD_ROW_CAP);
+  const compact=cols.length>3;
   const stripCls=`discard-strip ${cls} strip-side${compact?' strip-side-compact':''}`;
   const inner=cols.map(col=>{
     const cells=col.map(cellHtml).join('');
@@ -7187,7 +7270,6 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
   const pinPending=G&&G.phase==='after_discard'&&G.pendingDiscard&&pendingFromSeat!=null&&stripSeat===pendingFromSeat;
   const ronWin=G&&G.lastWin&&!G.lastWin.isTsumo&&!G.lastWin.isTreasure&&G.lastWin.from!=null?G.lastWin:null;
   const ronLabel=ronRevealLabel();
-  const fluidRiver=cls==='human'||cls==='opp-top';
   let flat=0;
   const cellHtml=entry=>{
     const d=normalizeDiscardEntry(entry);
@@ -7199,18 +7281,13 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
     return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
   };
-  if(fluidRiver){
-    const inner=tiles.map(cellHtml).join('');
-    return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
-  }
   if(cls==='left'||cls==='right'){
     return renderSideDiscardRiver(tiles, cls, cellHtml);
   }
   const rows=chunkEvery(tiles,6);
-  const rowExtra=cls==='left'||cls==='right'?' discard-row-sidecol':'';
   const inner=rows.map(row=>{
     const cells=row.map(cellHtml).join('');
-    return `<div class="discard-row discard-row-6${rowExtra}">${cells}</div>`;
+    return `<div class="discard-row discard-row-6">${cells}</div>`;
   }).join('');
   return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
@@ -7791,7 +7868,6 @@ function render(){
         <div class="tiles-row north-hand-row${dealActive&&!G.dealFaceReveal?' deal-staging':''}">${topHand}</div>
         ${topMelds?`<div class="melds-row north-melds">${topMelds}</div>`:''}
       </div>
-      <div class="tiles-row top-discards north-discards">${topDiscards}</div>
     </div>
   </div>
   <div id="middle-area">
@@ -7804,21 +7880,23 @@ function render(){
             ${leftMelds?`<div class="melds-row">${leftMelds}</div>`:''}
           </div>
         </div>
-        <div class="side-discards-zone">${leftDiscards}</div>
       </div>
     </div>
-    <div id="center-area">
+    <div id="center-area" class="felt-heart">
+      <div class="tiles-row top-discards north-discards" id="north-discards">${topDiscards}</div>
+      <div class="side-discards-zone west-discards" id="left-discards">${leftDiscards}</div>
       <div id="center-hud">
         ${tableHub}
+        ${treasureInfo}
         <div class="message mj-slip">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
         ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
         ${pendingTilePopup}
-        ${treasureInfo}
       </div>
+      <div class="side-discards-zone east-discards" id="right-discards">${rightDiscards}</div>
+      <div id="human-discards">${humanDiscards}</div>
     </div>
     <div id="right-area">
       <div class="side-player">
-        <div class="side-discards-zone">${rightDiscards}</div>
         <div class="side-main">
           ${seatPlateHtml(3)}
           <div class="side-rack">
@@ -7835,7 +7913,6 @@ function render(){
     </div>
     ${ktNearHint}
     ${ktDiscardHint}
-    <div id="human-discards">${humanDiscards}</div>
     <div class="human-rack-scroll">
     <div class="${humanRackCls}" id="human-rack-wrap" style="${humanRackStyle}">
       <div class="melds-row">${humanMelds}</div>
