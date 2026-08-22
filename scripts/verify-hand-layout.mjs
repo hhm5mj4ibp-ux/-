@@ -17,9 +17,14 @@ function clipReport(page, selector, label){
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const tiles = [...el.querySelectorAll('.tile')];
+    const scroller = el.closest('.human-rack-scroll') || document.querySelector('.human-rack-scroll');
+    const allowX = !!(scroller && (label === 'human-hand' || label === 'human-rack') &&
+      ['auto', 'scroll'].includes(getComputedStyle(scroller).overflowX));
     const clipped = tiles.filter(tile => {
       const t = tile.getBoundingClientRect();
-      return t.top < -0.5 || t.left < -0.5 || t.bottom > vh + 0.5 || t.right > vw + 0.5;
+      if(t.top < -0.5 || t.bottom > vh + 0.5) return true;
+      if(allowX) return false;
+      return t.left < -0.5 || t.right > vw + 0.5;
     }).length;
     return {
       label,
@@ -69,6 +74,20 @@ async function forceFourteenTileHands(page){
     for(const p of G.players){
       const hand = p.hand || [];
       while(hand.length < 14) hand.push({ suit: 'z', num: 5 });
+      p.hand = hand;
+    }
+    if(typeof render === 'function') render();
+  });
+  await page.waitForTimeout(80);
+}
+
+async function forceThirteenTileHands(page){
+  await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    G.dealCinemaActive = false;
+    for(const p of G.players){
+      const hand = p.hand || [];
+      while(hand.length < 13) hand.push({ suit: 'z', num: 5 });
       p.hand = hand;
     }
     if(typeof render === 'function') render();
@@ -297,6 +316,7 @@ for(const vp of viewports){
   await page.goto(htmlUrl);
   await skipToPlayableHand(page);
   await page.waitForSelector('#human-hand .tile.hand-face', { timeout: 8000 });
+  await forceThirteenTileHands(page);
 
   const reports = await Promise.all([
     clipReport(page, '#left-area .side-col', 'left-hand'),
@@ -345,13 +365,23 @@ for(const vp of viewports){
     }else{
       console.log(`[${vp.name}] overlap ${pass.name}: ok (${ov.counts.left}/${ov.counts.north}/${ov.counts.right}/${ov.counts.human})`);
     }
+    if(pass.name === '13'){
+      const thirteen = await humanHandSelfOverlap(page);
+      if(thirteen.hits > 0){
+        console.error(`[${vp.name}] human-hand self-overlap@13 hits=${thirteen.hits} minW=${thirteen.minW}`);
+        failed = true;
+      }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && thirteen.minW < 27.5){
+        console.error(`[${vp.name}] human-hand minW=${thirteen.minW} (want >=28)`);
+        failed = true;
+      }
+    }
   }
 
   const selfOv = await humanHandSelfOverlap(page);
   if(selfOv.hits > 0 || selfOv.outside > 0){
     console.error(`[${vp.name}] human-hand self-overlap hits=${selfOv.hits} outside=${selfOv.outside} minW=${selfOv.minW} n=${selfOv.count}`);
     failed = true;
-  }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && selfOv.minW < 27.5){
+  }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && selfOv.count <= 13 && selfOv.minW < 27.5){
     console.error(`[${vp.name}] human-hand minW=${selfOv.minW} (want >=28)`);
     failed = true;
   }else{
