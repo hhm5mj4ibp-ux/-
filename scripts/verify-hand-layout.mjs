@@ -163,8 +163,54 @@ function scrollbarReport(page){
   });
 }
 
+function humanHandSelfOverlap(page){
+  return page.evaluate(() => {
+    const tiles = [...document.querySelectorAll('#human-hand .tile')].map(el => el.getBoundingClientRect());
+    let hits = 0;
+    for(let i = 0; i < tiles.length; i++){
+      for(let j = i + 1; j < tiles.length; j++){
+        const a = tiles[i], b = tiles[j];
+        const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+        const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        if(ox > 0.5 && oy > 0.5) hits++;
+      }
+    }
+    const minW = tiles.reduce((m, r) => Math.min(m, r.width), 99);
+    const rack = document.querySelector('#bottom-area');
+    const rr = rack?.getBoundingClientRect();
+    const outside = tiles.filter(t => rr && (t.left < rr.left - 1 || t.right > rr.right + 1)).length;
+    return { hits, count: tiles.length, minW: Math.round(minW * 10) / 10, outside };
+  });
+}
+
+function dockReport(page){
+  return page.evaluate(() => {
+    const dock = document.querySelector('#action-bar');
+    const col = document.querySelector('.felt-play-column');
+    const menu = document.querySelector('#action-bar .btn-menu');
+    if(!dock) return { missing: true };
+    const r = dock.getBoundingClientRect();
+    const mr = menu?.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const inGrid = !!(col && col.contains(dock));
+    const menuClipped = !!(mr && (mr.left < -0.5 || mr.right > vw + 0.5 || mr.bottom > vh + 0.5));
+    return {
+      missing: false,
+      inGrid,
+      width: Math.round(r.width),
+      left: Math.round(r.left),
+      vw,
+      tall: vh >= vw,
+      menuClipped,
+      clickToDiscard: /クリックして捨てる/.test(dock.textContent || ''),
+    };
+  });
+}
+
 const viewports = [
   { width: 390, height: 844, name: 'iphone-portrait' },
+  { width: 390, height: 810, name: 'iphone-portrait-safari' },
   { width: 844, height: 390, name: 'iphone-landscape' },
   { width: 360, height: 780, name: 'android-narrow' },
 ];
@@ -227,6 +273,40 @@ for(const vp of viewports){
     }
   }
 
+  const selfOv = await humanHandSelfOverlap(page);
+  if(selfOv.hits > 0 || selfOv.outside > 0){
+    console.error(`[${vp.name}] human-hand self-overlap hits=${selfOv.hits} outside=${selfOv.outside} minW=${selfOv.minW} n=${selfOv.count}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] human-hand tiles separate (minW=${selfOv.minW})`);
+  }
+
+  const dock = await dockReport(page);
+  if(dock.missing){
+    console.error(`[${vp.name}] action-bar missing`);
+    failed = true;
+  }else{
+    if(dock.inGrid){
+      console.error(`[${vp.name}] action-bar is inside .felt-play-column`);
+      failed = true;
+    }
+    if(dock.clickToDiscard){
+      console.error(`[${vp.name}] clickToDiscard still in dock`);
+      failed = true;
+    }
+    if(dock.tall && dock.width < dock.vw * 0.7){
+      console.error(`[${vp.name}] portrait dock too narrow w=${dock.width} vw=${dock.vw}`);
+      failed = true;
+    }
+    if(dock.menuClipped){
+      console.error(`[${vp.name}] menu button clipped`);
+      failed = true;
+    }
+    if(!dock.inGrid && !dock.clickToDiscard && !dock.menuClipped && !(dock.tall && dock.width < dock.vw * 0.7)){
+      console.log(`[${vp.name}] dock ok (w=${dock.width})`);
+    }
+  }
+
   await injectCenteredRivers(page);
   const rivers = await riverOverlapReport(page);
   if(!rivers.inHeart){
@@ -261,7 +341,26 @@ for(const vp of viewports){
     failed = true;
   }
 
-  if(vp.name === 'iphone-portrait' || vp.name === 'iphone-landscape'){
+  await page.evaluate((discards) => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    for(let i = 0; i < 4; i++) G.players[i].discards = discards;
+    if(typeof render === 'function') render();
+  }, sampleTiles(2));
+  await page.waitForTimeout(80);
+  const ghosts = await page.evaluate(() => ({
+    south: document.querySelectorAll('#human-discards .discard-cell.river-ghost').length,
+    north: document.querySelectorAll('#north-discards .discard-cell.river-ghost').length,
+    west: document.querySelectorAll('#left-discards .discard-cell.river-ghost').length,
+    east: document.querySelectorAll('#right-discards .discard-cell.river-ghost').length,
+  }));
+  if(ghosts.south < 4 || ghosts.north < 4 || ghosts.west < 4 || ghosts.east < 4){
+    console.error(`[${vp.name}] river ghosts short: ${JSON.stringify(ghosts)}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] river mats: ok ${JSON.stringify(ghosts)}`);
+  }
+
+  if(vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari' || vp.name === 'iphone-landscape'){
     const shotPath = join(root, 'scripts', 'screenshots', `rivers-${vp.name}.png`);
     await page.screenshot({ path: shotPath, fullPage: false });
     console.log(`[${vp.name}] screenshot ${shotPath}`);

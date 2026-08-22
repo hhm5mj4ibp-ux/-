@@ -14,16 +14,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html{height:100%;height:100dvh;overflow:hidden;}
+html{height:100%;height:100svh;overflow:hidden;}
 body{
   background:
     radial-gradient(circle at 48% 42%, rgba(107,205,137,.24) 0%, rgba(33,120,69,.08) 34%, transparent 58%),
     radial-gradient(circle at 50% 48%, #2f9a5c 0%, #1f6c42 35%, #133d28 75%, #0a2418 100%);
   font-family:'Noto Sans JP','Hiragino Kaku Gothic Pro',sans-serif;
-  height:100dvh;max-height:100dvh;overflow:hidden;user-select:none;touch-action:manipulation;
+  height:100svh;max-height:100svh;overflow:hidden;user-select:none;touch-action:manipulation;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-#app{height:100%;min-height:0;max-height:100dvh;overflow:hidden;padding:clamp(2px,1.2vw,8px);box-sizing:border-box;}
+#app{height:100%;min-height:0;max-height:100svh;overflow:hidden;padding:clamp(2px,1.2vw,8px);box-sizing:border-box;}
 .table-shell{
   position:relative;
   height:100%;
@@ -781,7 +781,7 @@ body{
   justify-content:center;
   gap:8px;
   flex-wrap:wrap;
-  padding:8px 10px max(10px, env(safe-area-inset-bottom));
+  padding:8px 10px;
   flex-shrink:0;
   margin:4px 4px 0;
   background:linear-gradient(180deg,rgba(42,28,12,.92),rgba(16,10,6,.94));
@@ -1069,6 +1069,15 @@ body{
   align-items:center;
 }
 .discard-cell{display:flex;align-items:center;justify-content:center;}
+.discard-cell.river-ghost{
+  width:var(--river-tile-w, 18px);
+  height:var(--river-tile-h, 26px);
+  border:1px dashed rgba(180,220,180,.28);
+  border-radius:2px;
+  background:rgba(0,20,8,.12);
+  pointer-events:none;
+  opacity:.7;
+}
 .discard-cell.discard-pending-target{
   border-radius:5px;
   outline:2px solid rgba(255,220,100,.92);
@@ -1559,7 +1568,7 @@ body{
 .turn-arrow{color:#ff0;font-size:16px;}
 
 /* human hand */
-#human-hand{display:flex;gap:0;align-items:flex-end;justify-content:flex-start;flex-wrap:nowrap;padding:1px 2px 0;flex:0 0 auto;flex-shrink:0;min-width:0;}
+#human-hand{display:flex;gap:1px;align-items:flex-end;justify-content:flex-start;flex-wrap:nowrap;padding:1px 2px 0;flex:0 0 auto;flex-shrink:0;min-width:0;}
 #human-discards{
   display:flex;flex-direction:column;align-items:center;
   width:max-content;
@@ -2219,9 +2228,9 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   #bottom-area #human-hand .tile.hand-face.just-drawn:not(.back){transform:translateY(-3px) scale(1.02);}
 }
 
-@media (orientation: landscape) and (max-height: 640px){
-  #action-bar.action-dock,
-  #action-bar{
+@media (max-height:520px){
+  body.playing #action-bar.action-dock,
+  body.playing #action-bar{
     position:absolute;
     right:max(6px, env(safe-area-inset-right));
     bottom:max(4px, env(safe-area-inset-bottom));
@@ -2230,10 +2239,26 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     max-width:min(72vw, 440px);
     flex-wrap:nowrap;
     z-index:8;
+    padding:5px 8px;
     margin:0;
     border-radius:14px;
+    border:1px solid #2a1608;
   }
-  .human-rack-scroll{padding-right:min(28vw, 140px);overflow-x:auto;}
+}
+@media (orientation: landscape) and (max-height: 640px){
+  body.playing #action-bar.action-dock,
+  body.playing #action-bar{
+    position:absolute;
+    right:max(6px, env(safe-area-inset-right));
+    bottom:max(4px, env(safe-area-inset-bottom));
+    left:auto;
+    width:auto;
+    max-width:min(72vw, 440px);
+    padding:5px 8px;
+    margin:0;
+    border-radius:14px;
+    border:1px solid #2a1608;
+  }
 }
 
 /* 東西の伏せ手牌列は90度回転後の見た目の高さで縦送りする */
@@ -2420,6 +2445,32 @@ body.fx-skip .tile.just-drawn,body.fx-skip .kouting-badge,body.fx-skip #tile-fli
 body.playing{
   background:
     radial-gradient(ellipse at 50% 32%, #3a2818 0%, #1a120c 46%, #0c0806 100%);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+body.playing #app{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  max-height:100svh;
+  min-height:0;
+  overflow:hidden;
+}
+body.playing .mj-table.table-shell{
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+}
+body.playing #action-bar.action-dock,
+body.playing #action-bar{
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  margin:0;
+  border-radius:0;
+  position:relative;
+  z-index:8;
+  padding:6px 10px max(8px, env(safe-area-inset-bottom));
+  box-sizing:border-box;
 }
 .mj-table.table-shell{
   border-radius:6px;
@@ -2461,12 +2512,12 @@ body.playing{
 }
 .mj-table .felt-play-column{
   display:grid;
-  grid-template-columns:minmax(52px,.18fr) minmax(0,1fr) minmax(52px,.18fr);
+  grid-template-columns:minmax(40px,.14fr) minmax(0,1fr) minmax(40px,.14fr);
   grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-areas:
     "n n n"
     "w c e"
-    "w s e";
+    "s s s";
   gap:4px 6px;
   flex:1;
   min-height:0;
@@ -2555,6 +2606,15 @@ body.playing{
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:end;align-self:center;}
 .mj-table .felt-heart .east-discards{grid-area:e;justify-self:start;align-self:center;}
 .mj-table .felt-heart #human-discards{grid-area:s;justify-self:center;align-self:start;}
+.mj-table .felt-heart .discard-cell.river-ghost{
+  width:var(--river-tile-w);
+  height:var(--river-tile-h);
+}
+.mj-table .felt-heart .west-discards .discard-cell.river-ghost,
+.mj-table .felt-heart .east-discards .discard-cell.river-ghost{
+  width:var(--river-tile-h);
+  height:var(--river-tile-w);
+}
 .mj-table .felt-heart #center-hud{
   grid-area:hub;
   min-width:0;
@@ -2580,8 +2640,34 @@ body.playing{
   overflow:hidden;
   z-index:3;
 }
-.mj-table .human-rack-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden;}
-.mj-table .human-rack{--hand-rack-pad:120px;}
+.mj-table .human-rack-scroll{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  overflow-y:hidden;
+  container-type:inline-size;
+  container-name:humanrack;
+}
+.mj-table .human-rack{
+  --hand-rack-pad:16px;
+  width:100%;
+  max-width:100%;
+  justify-content:center;
+  box-sizing:border-box;
+}
+.mj-table .human-rack #human-hand{
+  gap:1px;
+  justify-content:center;
+}
+.mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
+.mj-table .human-rack #human-hand .tile.hand-face.lg{
+  width:min(34px,calc((100cqi - 16px) / var(--human-rack-slots)));
+  height:min(48px,calc((100cqi - 16px) / var(--human-rack-slots) * 1.42),11svh);
+}
+.mj-table .human-rack .meld-group .tile.lg{
+  width:min(28px,calc((100cqi - 16px) / var(--human-rack-slots)));
+  height:min(40px,calc((100cqi - 16px) / var(--human-rack-slots) * 1.42),9svh);
+}
 .mj-table .side-player{
   flex:0 0 auto;
   overflow:hidden;
@@ -2601,7 +2687,7 @@ body.playing{
   font-size:9px;
 }
 @media (max-width:520px){
-  .mj-table .human-rack{--hand-rack-pad:120px;}
+  .mj-table .human-rack{--hand-rack-pad:16px;}
 }
 .mj-table #center-hud{
   background:transparent;border:none;padding:2px;gap:4px;justify-content:center;
@@ -2695,18 +2781,27 @@ body.playing{
   box-shadow:inset 0 4px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,220,160,.2);
 }
 .mj-table #action-bar.action-dock,
-.mj-table #action-bar{
+.mj-table #action-bar,
+body.playing #action-bar.action-dock,
+body.playing #action-bar{
   background:linear-gradient(180deg,#6a4420,#3a2410);
   border:1px solid #2a1608;
-  border-radius:4px;
   box-shadow:inset 0 1px 0 rgba(255,220,160,.18);
 }
-.mj-table #action-bar .btn-menu{color:#eadcc0;border-color:rgba(90,60,30,.8);}
+body.playing #action-bar.action-dock,
+body.playing #action-bar{
+  border-radius:0;
+  border-left:none;
+  border-right:none;
+  border-bottom:none;
+}
+.mj-table #action-bar .btn-menu,
+body.playing #action-bar .btn-menu{color:#eadcc0;border-color:rgba(90,60,30,.8);}
 @media (max-height:520px){
   .mj-table.table-shell{padding:1px;}
   .mj-table.table-shell::before{inset:3px;}
-  .mj-table .table-felt{--hand-rack-pad:56px;}
-  .mj-table .human-rack{--hand-rack-pad:56px;}
+  .mj-table .table-felt{--hand-rack-pad:16px;}
+  .mj-table .human-rack{--hand-rack-pad:16px;}
   .mj-table .treasure-reveal{width:40px;height:40px;font-size:7px;padding:2px;}
   .mj-table .felt-play-column{gap:2px 4px;}
   .mj-table #top-area{padding:0;}
@@ -4064,7 +4159,7 @@ function discardRiverRoot(pi){
 }
 function lastDiscardCellRect(fromPi){
   const root=discardRiverRoot(fromPi);
-  const nodes=document.querySelectorAll(root?`${root} .discard-cell`:'.north-discards .discard-cell');
+  const nodes=document.querySelectorAll(root?`${root} .discard-cell:not(.river-ghost)`:'.north-discards .discard-cell:not(.river-ghost)');
   const el=nodes[nodes.length-1];
   if(!el) return null;
   const r=el.getBoundingClientRect();
@@ -7278,26 +7373,36 @@ function renderFeltWallOrnaments(){
 /** 左右席: 1列6枚で次列（実卓の牌河。3列超えたらコンパクト） */
 const SIDE_DISCARD_ROW_CAP=6;
 
+function riverGhostCell(){
+  return '<div class="discard-cell river-ghost" aria-hidden="true"></div>';
+}
+function padRiverCells(htmlCells, cap){
+  const out=htmlCells.slice();
+  while(out.length<cap) out.push(riverGhostCell());
+  return out;
+}
 function renderSideDiscardRiver(tiles, cls, cellHtml){
-  const cols=chunkEvery(tiles,SIDE_DISCARD_ROW_CAP);
+  let cols=chunkEvery(tiles||[],SIDE_DISCARD_ROW_CAP);
+  if(!cols.length) cols=[[]];
   const compact=cols.length>3;
   const stripCls=`discard-strip ${cls} strip-side${compact?' strip-side-compact':''}`;
-  const inner=cols.map(col=>{
-    const cells=col.map(cellHtml).join('');
-    return `<div class="discard-row discard-row-sidecol">${cells}</div>`;
+  const inner=cols.map((col,i)=>{
+    let cells=col.map(cellHtml);
+    if(cols.length===1||i===cols.length-1) cells=padRiverCells(cells,SIDE_DISCARD_ROW_CAP);
+    return `<div class="discard-row discard-row-sidecol">${cells.join('')}</div>`;
   }).join('');
   return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
 
 function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
-  if(!tiles||!tiles.length) return '';
+  const list=tiles||[];
   const tileCls=cls==='left'?'lg hand-face opp-hand opp-disc opp-rot-left'
     :cls==='right'?'lg hand-face opp-hand opp-disc opp-rot-right'
     :size;
   const stripCls=cls==='left'||cls==='right'?`discard-strip ${cls} strip-side`:`discard-strip ${cls}`;
   const seatByCls={'opp-top':2,left:1,right:3,human:0};
   const stripSeat=Object.prototype.hasOwnProperty.call(seatByCls,cls)?seatByCls[cls]:-1;
-  const lastIdx=tiles.length-1;
+  const lastIdx=list.length-1;
   const pinPending=G&&G.phase==='after_discard'&&G.pendingDiscard&&pendingFromSeat!=null&&stripSeat===pendingFromSeat;
   const ronWin=G&&G.lastWin&&!G.lastWin.isTsumo&&!G.lastWin.isTreasure&&G.lastWin.from!=null?G.lastWin:null;
   const ronLabel=ronRevealLabel();
@@ -7313,12 +7418,14 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
     return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
   };
   if(cls==='left'||cls==='right'){
-    return renderSideDiscardRiver(tiles, cls, cellHtml);
+    return renderSideDiscardRiver(list, cls, cellHtml);
   }
-  const rows=chunkEvery(tiles,6);
-  const inner=rows.map(row=>{
-    const cells=row.map(cellHtml).join('');
-    return `<div class="discard-row discard-row-6">${cells}</div>`;
+  let rows=chunkEvery(list,6);
+  if(!rows.length) rows=[[]];
+  const inner=rows.map((row,i)=>{
+    let cells=row.map(cellHtml);
+    if(rows.length===1||i===rows.length-1) cells=padRiverCells(cells,6);
+    return `<div class="discard-row discard-row-6">${cells.join('')}</div>`;
   }).join('');
   return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
@@ -7792,8 +7899,6 @@ function render(){
       buttons+=`<span style="color:#ffd44b;font-size:11px">${tr('kouTingPick','聴に入る牌をタップして捨ててください')}</span>`;
       buttons+=`<button class="btn btn-skip" onclick="humanKouTingPickCancel()">${tr('kouTingPickCancel','通常の捨てに戻る')}</button>`;
     }
-    if(!p0.kouTing&&!kouTingPick&&!G.humanOptions.includes('tsumo')&&!G.humanOptions.includes('treasure_win'))
-      buttons+=`<span style="color:#ffe;font-size:11px">${tr('clickToDiscard','クリックして捨てる')}</span>`;
   }
   if(G.phase==='after_discard'){
     if(G.humanOptions.includes('win'))
@@ -7940,6 +8045,9 @@ function render(){
       <div id="human-hand"${dealActive&&!G.dealFaceReveal?' class="deal-staging"':''}>${humanTiles}</div>
     </div>
     </div>
+    </div>
+  </div>
+  </div>
   </div>
   ${G.online&&ONLINE.sseDisconnected?`<div class="online-sse-banner" role="alert" style="margin:8px 12px;padding:10px 12px;background:rgba(180,40,40,.85);border-radius:8px;color:#fff;font-size:12px;line-height:1.5">
     ${tr('onlineReconnectHint','サーバーとの接続が切れました。ページを再読み込みせずに再接続できます。').replace('{code}',ONLINE.room?.id||'—')}
@@ -7949,9 +8057,6 @@ function render(){
     </div>
   </div>`:''}
   <div id="action-bar" class="action-dock"><div class="action-dock-main">${buttons}</div><button type="button" class="btn btn-menu" onclick="leaveToMenu()">${t('backToMenu')}</button></div>
-  </div>
-  </div>
-  </div>
   `;
   document.getElementById('app').innerHTML=html;
 
