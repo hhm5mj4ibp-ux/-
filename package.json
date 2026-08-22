@@ -18,6 +18,7 @@
     "verify:rules": "node scripts/verify-rules.mjs",
     "verify:shop": "node scripts/verify-shop.mjs",
     "audio": "node scripts/generate-audio.mjs",
-    "verify:all": "npm run build && npm run verify:assets && npm run verify:post-deal && npm run verify:layout && npm run verify:side-parity && npm run verify:rules && npm run verify:shop"
+    "verify:all": "npm run build && npm run verify:assets && npm run verify:post-deal && npm run verify:layout && npm run verify:side-parity && npm run verify:rules && npm run verify:shop",
+    "preview": "node scripts/preview-tunnel.mjs"
   }
 }
