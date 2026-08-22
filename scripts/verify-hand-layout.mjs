@@ -149,6 +149,7 @@ function scrollbarReport(page){
     ];
     const vw = window.innerWidth;
     const overflow = nodes.filter(Boolean).filter(el => {
+      if(el.classList?.contains('human-rack-scroll')) return false;
       const ox = getComputedStyle(el).overflowX;
       if(ox === 'hidden' || ox === 'clip') return false;
       return el.scrollWidth > el.clientWidth + 1;
@@ -176,9 +177,14 @@ function humanHandSelfOverlap(page){
       }
     }
     const minW = tiles.reduce((m, r) => Math.min(m, r.width), 99);
-    const rack = document.querySelector('#bottom-area');
-    const rr = rack?.getBoundingClientRect();
-    const outside = tiles.filter(t => rr && (t.left < rr.left - 1 || t.right > rr.right + 1)).length;
+    const scroller = document.querySelector('.human-rack-scroll') || document.querySelector('#bottom-area');
+    const rr = scroller?.getBoundingClientRect();
+    const ox = scroller ? getComputedStyle(scroller).overflowX : 'hidden';
+    const allowX = ox === 'auto' || ox === 'scroll';
+    const outside = tiles.filter(t => rr && (
+      t.top < rr.top - 1 || t.bottom > rr.bottom + 1 ||
+      (!allowX && (t.left < rr.left - 1 || t.right > rr.right + 1))
+    )).length;
     return { hits, count: tiles.length, minW: Math.round(minW * 10) / 10, outside };
   });
 }
@@ -204,6 +210,74 @@ function dockReport(page){
       tall: vh >= vw,
       menuClipped,
       clickToDiscard: /クリックして捨てる/.test(dock.textContent || ''),
+    };
+  });
+}
+
+function dockHandOverlap(page){
+  return page.evaluate(() => {
+    const dock = document.querySelector('#action-bar');
+    const hand = document.querySelector('#human-hand');
+    if(!dock || !hand) return { missing: true, hits: 0 };
+    const a = dock.getBoundingClientRect();
+    const tiles = [...hand.querySelectorAll('.tile')].map(el => el.getBoundingClientRect());
+    let hits = 0;
+    for(const t of tiles){
+      const ox = Math.min(a.right, t.right) - Math.max(a.left, t.left);
+      const oy = Math.min(a.bottom, t.bottom) - Math.max(a.top, t.top);
+      if(ox > 0.5 && oy > 0.5) hits++;
+    }
+    return { missing: false, hits };
+  });
+}
+
+function promptHandOverlap(page){
+  return page.evaluate(() => {
+    const prompts = [...document.querySelectorAll('#table-prompt, #table-prompt .message, #table-prompt .callout-tile, .message.mj-slip, .callout-tile')];
+    const tiles = [...document.querySelectorAll('#human-hand .tile')].map(el => el.getBoundingClientRect());
+    let hits = 0;
+    for(const p of prompts){
+      const a = p.getBoundingClientRect();
+      if(a.width < 1 || a.height < 1) continue;
+      for(const t of tiles){
+        const ox = Math.min(a.right, t.right) - Math.max(a.left, t.left);
+        const oy = Math.min(a.bottom, t.bottom) - Math.max(a.top, t.top);
+        if(ox > 0.5 && oy > 0.5) hits++;
+      }
+    }
+    return { hits, promptCount: prompts.length };
+  });
+}
+
+function ghostShapeReport(page){
+  return page.evaluate(() => {
+    const measure = (rootSel, axis) => {
+      const root = document.querySelector(rootSel);
+      if(!root) return { missing: true };
+      const ghosts = [...root.querySelectorAll('.discard-cell.river-ghost')].map(el => el.getBoundingClientRect());
+      const tiles = [...root.querySelectorAll('.tile')].map(el => el.getBoundingClientRect());
+      const g = ghosts[0];
+      const t = tiles[0];
+      const rows = new Set(ghosts.map(r => Math.round(r.top / 2) * 2));
+      const cols = new Set(ghosts.map(r => Math.round(r.left / 2) * 2));
+      return {
+        missing: false,
+        axis,
+        ghostCount: ghosts.length,
+        tileCount: tiles.length,
+        gw: g ? Math.round(g.width * 10) / 10 : 0,
+        gh: g ? Math.round(g.height * 10) / 10 : 0,
+        tw: t ? Math.round(t.width * 10) / 10 : 0,
+        th: t ? Math.round(t.height * 10) / 10 : 0,
+        uniqueRows: rows.size,
+        uniqueCols: cols.size,
+      };
+    };
+    return {
+      south: measure('#human-discards', 'row'),
+      north: measure('#north-discards', 'row'),
+      west: measure('#left-discards', 'col'),
+      east: measure('#right-discards', 'col'),
     };
   });
 }
@@ -277,6 +351,9 @@ for(const vp of viewports){
   if(selfOv.hits > 0 || selfOv.outside > 0){
     console.error(`[${vp.name}] human-hand self-overlap hits=${selfOv.hits} outside=${selfOv.outside} minW=${selfOv.minW} n=${selfOv.count}`);
     failed = true;
+  }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && selfOv.minW < 27.5){
+    console.error(`[${vp.name}] human-hand minW=${selfOv.minW} (want >=28)`);
+    failed = true;
   }else{
     console.log(`[${vp.name}] human-hand tiles separate (minW=${selfOv.minW})`);
   }
@@ -298,13 +375,45 @@ for(const vp of viewports){
       console.error(`[${vp.name}] portrait dock too narrow w=${dock.width} vw=${dock.vw}`);
       failed = true;
     }
+    if(!dock.tall && dock.width < dock.vw * 0.85){
+      console.error(`[${vp.name}] landscape dock not full-width w=${dock.width} vw=${dock.vw}`);
+      failed = true;
+    }
     if(dock.menuClipped){
       console.error(`[${vp.name}] menu button clipped`);
       failed = true;
     }
-    if(!dock.inGrid && !dock.clickToDiscard && !dock.menuClipped && !(dock.tall && dock.width < dock.vw * 0.7)){
+    if(!dock.inGrid && !dock.clickToDiscard && !dock.menuClipped && !(dock.tall && dock.width < dock.vw * 0.7) && !(!dock.tall && dock.width < dock.vw * 0.85)){
       console.log(`[${vp.name}] dock ok (w=${dock.width})`);
     }
+  }
+
+  const dockOv = await dockHandOverlap(page);
+  if(dockOv.missing){
+    console.error(`[${vp.name}] dock/hand missing for overlap`);
+    failed = true;
+  }else if(dockOv.hits > 0){
+    console.error(`[${vp.name}] action-bar covers human-hand hits=${dockOv.hits}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] dock vs hand: ok`);
+  }
+
+  await page.evaluate(() => {
+    if(typeof G === 'undefined') return;
+    G.msg = 'どうしますか？';
+    if(typeof render === 'function') render();
+  });
+  await page.waitForTimeout(50);
+  const promptOv = await promptHandOverlap(page);
+  if(promptOv.promptCount < 1){
+    console.error(`[${vp.name}] table prompt missing`);
+    failed = true;
+  }else if(promptOv.hits > 0){
+    console.error(`[${vp.name}] prompt covers human-hand hits=${promptOv.hits}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] prompt vs hand: ok`);
   }
 
   await injectCenteredRivers(page);
@@ -358,6 +467,26 @@ for(const vp of viewports){
     failed = true;
   }else{
     console.log(`[${vp.name}] river mats: ok ${JSON.stringify(ghosts)}`);
+  }
+  const shape = await ghostShapeReport(page);
+  for(const [seat, info] of Object.entries(shape)){
+    if(info.missing){
+      console.error(`[${vp.name}] ${seat} river missing for ghost shape`);
+      failed = true;
+      continue;
+    }
+    if(info.tileCount > 0 && (Math.abs(info.gw - info.tw) > 2 || Math.abs(info.gh - info.th) > 2)){
+      console.error(`[${vp.name}] ${seat} ghost size ${info.gw}x${info.gh} vs tile ${info.tw}x${info.th}`);
+      failed = true;
+    }
+    if(info.axis === 'row' && info.uniqueRows !== 1){
+      console.error(`[${vp.name}] ${seat} ghosts not one row rows=${info.uniqueRows} cols=${info.uniqueCols}`);
+      failed = true;
+    }
+    if(info.axis === 'col' && info.uniqueCols !== 1){
+      console.error(`[${vp.name}] ${seat} ghosts not one column rows=${info.uniqueRows} cols=${info.uniqueCols}`);
+      failed = true;
+    }
   }
 
   if(vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari' || vp.name === 'iphone-landscape'){

@@ -810,17 +810,19 @@ body{
 }
 #action-bar .btn-menu{
   min-width:0;
-  min-height:32px;
-  padding:6px 10px;
+  min-height:22px;
+  padding:2px 8px;
   font-size:11px;
   font-weight:600;
   flex:0 0 auto;
   letter-spacing:.02em;
   background:transparent;
   color:#d4c4a0;
-  border:1px solid rgba(255,220,140,.28);
+  border:none;
   box-shadow:none;
-  opacity:.88;
+  opacity:.8;
+  text-decoration:underline;
+  text-underline-offset:3px;
 }
 
 /* player info */
@@ -1049,18 +1051,20 @@ body{
 
 /* 捨て牌リバー */
 .discard-river-mat{
-  border:1px solid rgba(255,230,170,.18);
-  border-radius:6px;
-  background:rgba(0,18,10,.2);
-  padding:3px 4px;
-  box-shadow:inset 0 0 12px rgba(0,0,0,.14),inset 0 0 0 1px rgba(0,0,0,.1);
+  border:none;
+  border-radius:4px;
+  background:transparent;
+  padding:2px;
+  box-shadow:none;
 }
 .discard-row-6:not(.discard-row-sidecol):not(.discard-row-side-river){
   display:grid;
-  grid-template-columns:repeat(6,minmax(0,auto));
+  grid-template-columns:repeat(6, var(--river-tile-w, 18px));
   gap:2px;
   justify-content:center;
   align-items:end;
+  width:max-content;
+  max-width:100%;
 }
 .discard-row-sidecol{
   display:flex;
@@ -1072,11 +1076,15 @@ body{
 .discard-cell.river-ghost{
   width:var(--river-tile-w, 18px);
   height:var(--river-tile-h, 26px);
-  border:1px dashed rgba(180,220,180,.28);
-  border-radius:2px;
-  background:rgba(0,20,8,.12);
+  min-width:var(--river-tile-w, 18px);
+  min-height:var(--river-tile-h, 26px);
+  box-sizing:border-box;
+  border:none;
+  border-radius:3px;
+  background:rgba(255,255,255,.05);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
   pointer-events:none;
-  opacity:.7;
+  opacity:.4;
 }
 .discard-cell.discard-pending-target{
   border-radius:5px;
@@ -2171,34 +2179,43 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .seat-plate-name,.seat-plate-score{font-size:9px;line-height:1.1;}
   #bottom-area .player-label{padding:0;}
   .dealer-wind-pip{min-width:16px;height:16px;padding:0 3px;font-size:9px;}
-  .hub-screen{width:clamp(56px,16vw,76px);height:clamp(56px,16vw,76px);max-width:76px;max-height:76px;padding:5px 4px;border-width:2px;}
+  .hub-screen{width:clamp(44px,12vw,56px);height:clamp(44px,12vw,56px);max-width:56px;max-height:56px;padding:4px 3px;border-width:2px;}
   .hub-line1{font-size:9px;}
   .hub-line2{font-size:8px;}
   .hub-wind{min-width:34px;padding:1px 4px;}
+  body.playing #action-bar.action-dock,
+  body.playing #action-bar,
   #action-bar.action-dock,
   #action-bar{
-    position:absolute;
-    right:max(6px, env(safe-area-inset-right));
-    bottom:max(4px, env(safe-area-inset-bottom));
+    position:relative;
+    right:auto;
+    bottom:auto;
     left:auto;
-    width:auto;
-    max-width:min(72vw, 440px);
+    width:100%;
+    max-width:100%;
     flex-wrap:nowrap;
     z-index:8;
-    padding:5px 8px;
+    padding:4px 8px max(6px, env(safe-area-inset-bottom));
     margin:0;
-    border-radius:14px;
+    border-radius:0;
     gap:6px;
   }
   .action-dock-main{flex-wrap:nowrap;gap:6px;}
   #action-bar .btn{
-    min-height:36px;
-    min-width:52px;
-    padding:6px 10px;
+    min-height:32px;
+    min-width:48px;
+    padding:5px 10px;
     font-size:13px;
   }
-  #action-bar .btn-menu{min-height:28px;padding:4px 8px;font-size:10px;}
-  .mj-table .human-rack-scroll{padding-right:min(28vw, 140px);overflow-x:auto;overflow-y:hidden;}
+  #action-bar .btn-menu{
+    min-height:22px;
+    min-width:0;
+    padding:2px 6px;
+    font-size:10px;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+  }
   .tile.lg{width:min(20px,calc((100vw - 72px) / 16));height:min(28px,calc((100vw - 72px) / 16 * 1.42),7.8dvh);font-size:9px;}
   .human-rack{--hand-rack-pad:56px;padding:2px 5px 2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
@@ -2226,39 +2243,6 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .tile.just-drawn{transform:translateY(-3px) scale(1.02);}
   #bottom-area #human-hand .tile.just-drawn:not(.back):not(.hand-face){transform:scaleY(-1) translateY(3px) scale(1.02);}
   #bottom-area #human-hand .tile.hand-face.just-drawn:not(.back){transform:translateY(-3px) scale(1.02);}
-}
-
-@media (max-height:520px){
-  body.playing #action-bar.action-dock,
-  body.playing #action-bar{
-    position:absolute;
-    right:max(6px, env(safe-area-inset-right));
-    bottom:max(4px, env(safe-area-inset-bottom));
-    left:auto;
-    width:auto;
-    max-width:min(72vw, 440px);
-    flex-wrap:nowrap;
-    z-index:8;
-    padding:5px 8px;
-    margin:0;
-    border-radius:14px;
-    border:1px solid #2a1608;
-  }
-}
-@media (orientation: landscape) and (max-height: 640px){
-  body.playing #action-bar.action-dock,
-  body.playing #action-bar{
-    position:absolute;
-    right:max(6px, env(safe-area-inset-right));
-    bottom:max(4px, env(safe-area-inset-bottom));
-    left:auto;
-    width:auto;
-    max-width:min(72vw, 440px);
-    padding:5px 8px;
-    margin:0;
-    border-radius:14px;
-    border:1px solid #2a1608;
-  }
 }
 
 /* 東西の伏せ手牌列は90度回転後の見た目の高さで縦送りする */
@@ -2572,8 +2556,8 @@ body.playing #action-bar{
   height:100%;
   max-width:100%;
   overflow:hidden;
-  --river-tile-w:clamp(12px, min(4.2vw, 3.2dvh), 22px);
-  --river-tile-h:clamp(17px, calc(var(--river-tile-w) * 1.42), 31px);
+  --river-tile-w:clamp(16px, min(5.2vw, 4.2dvh), 26px);
+  --river-tile-h:clamp(22px, calc(var(--river-tile-w) * 1.42), 37px);
 }
 .mj-table .felt-compass.table-hub{
   display:block;
@@ -2606,14 +2590,39 @@ body.playing #action-bar{
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:end;align-self:center;}
 .mj-table .felt-heart .east-discards{grid-area:e;justify-self:start;align-self:center;}
 .mj-table .felt-heart #human-discards{grid-area:s;justify-self:center;align-self:start;}
+.mj-table .felt-heart .discard-cell{
+  box-sizing:border-box;
+}
+.mj-table .felt-heart .north-discards .discard-cell,
+.mj-table .felt-heart #human-discards .discard-cell{
+  width:var(--river-tile-w);
+  min-width:var(--river-tile-w);
+  height:var(--river-tile-h);
+  min-height:var(--river-tile-h);
+}
+.mj-table .felt-heart .west-discards .discard-cell,
+.mj-table .felt-heart .east-discards .discard-cell{
+  width:var(--river-tile-h);
+  min-width:var(--river-tile-h);
+  height:var(--river-tile-w);
+  min-height:var(--river-tile-w);
+}
 .mj-table .felt-heart .discard-cell.river-ghost{
   width:var(--river-tile-w);
   height:var(--river-tile-h);
+  min-width:var(--river-tile-w);
+  min-height:var(--river-tile-h);
+  border:none;
+  background:rgba(255,255,255,.06);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  opacity:.38;
 }
 .mj-table .felt-heart .west-discards .discard-cell.river-ghost,
 .mj-table .felt-heart .east-discards .discard-cell.river-ghost{
   width:var(--river-tile-h);
   height:var(--river-tile-w);
+  min-width:var(--river-tile-h);
+  min-height:var(--river-tile-w);
 }
 .mj-table .felt-heart #center-hud{
   grid-area:hub;
@@ -2627,6 +2636,13 @@ body.playing #action-bar{
   height:var(--river-tile-h);
   font-size:clamp(7px,1.8vw,11px);
 }
+.mj-table .felt-heart .west-discards .tile.hand-face.opp-hand,
+.mj-table .felt-heart .east-discards .tile.hand-face.opp-hand{
+  --opp-face-w:var(--river-tile-w);
+  --opp-face-h:var(--river-tile-h);
+  width:var(--river-tile-w);
+  height:var(--river-tile-h);
+}
 .mj-table .felt-heart .north-discards .discard-river-mat,
 .mj-table .felt-heart #human-discards .discard-river-mat{
   width:max-content;
@@ -2637,13 +2653,44 @@ body.playing #action-bar{
   padding:2px 2px 0;
   min-width:0;
   max-width:100%;
-  overflow:hidden;
+  overflow:visible;
   z-index:3;
+}
+#table-prompt{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  min-height:0;
+  padding:0 6px 2px;
+  box-sizing:border-box;
+  pointer-events:none;
+  z-index:4;
+}
+#table-prompt:empty{display:none;}
+#table-prompt .message,
+#table-prompt .callout-tile{
+  pointer-events:auto;
+  margin:0;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:11px;
+  line-height:1.25;
+  padding:3px 10px;
+}
+.mj-table #table-prompt .message{
+  max-width:min(96%, 440px);
 }
 .mj-table .human-rack-scroll{
   width:100%;
   max-width:100%;
-  overflow-x:hidden;
+  overflow-x:auto;
   overflow-y:hidden;
   container-type:inline-size;
   container-name:humanrack;
@@ -2661,8 +2708,8 @@ body.playing #action-bar{
 }
 .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
 .mj-table .human-rack #human-hand .tile.hand-face.lg{
-  width:min(34px,calc((100cqi - 16px) / var(--human-rack-slots)));
-  height:min(48px,calc((100cqi - 16px) / var(--human-rack-slots) * 1.42),11svh);
+  width:min(34px, max(28px, calc((100cqi - 8px) / var(--human-rack-slots))));
+  height:min(48px, calc((100cqi - 8px) / var(--human-rack-slots) * 1.42), 11svh);
 }
 .mj-table .human-rack .meld-group .tile.lg{
   width:min(28px,calc((100cqi - 16px) / var(--human-rack-slots)));
@@ -2684,9 +2731,10 @@ body.playing #action-bar{
 .mj-table #right-area .seat-plate-name,
 .mj-table #left-area .seat-plate-score,
 .mj-table #right-area .seat-plate-score{
-  font-size:9px;
+  font-size:11px;
 }
 @media (max-width:520px){
+  .mj-table.table-shell{padding:4px;}
   .mj-table .human-rack{--hand-rack-pad:16px;}
 }
 .mj-table #center-hud{
@@ -2694,9 +2742,9 @@ body.playing #action-bar{
   overflow:hidden;min-width:0;max-width:100%;
 }
 .mj-table .hub-screen{
-  width:clamp(64px,22vw,92px);
-  height:clamp(64px,22vw,92px);
-  max-width:92px;max-height:92px;
+  width:clamp(48px,14vw,64px);
+  height:clamp(48px,14vw,64px);
+  max-width:64px;max-height:64px;
   background:
     radial-gradient(circle at 40% 32%, #e2c898 0%, #b08950 38%, #6a4420 78%);
   border:3px solid #3a2410;
@@ -2745,7 +2793,7 @@ body.playing #action-bar{
   border-radius:2px;
   font-family:'Noto Serif JP',serif;
   box-shadow:1px 2px 0 rgba(60,40,10,.18);
-  max-width:min(160px,100%);
+  max-width:min(92%,440px);
 }
 .mj-table .table-hub{
   width:auto;
@@ -2767,10 +2815,11 @@ body.playing #action-bar{
   box-shadow:inset 0 2px 0 rgba(255,230,180,.25),0 4px 8px rgba(0,0,0,.35);
 }
 .mj-table .discard-river-mat{
-  background:rgba(0,30,12,.16);
-  border:1px dashed rgba(180,220,180,.18);
+  background:transparent;
+  border:none;
   border-radius:2px;
   box-shadow:none;
+  padding:1px;
 }
 .mj-table .human-rack{
   background:
@@ -2796,7 +2845,19 @@ body.playing #action-bar{
   border-bottom:none;
 }
 .mj-table #action-bar .btn-menu,
-body.playing #action-bar .btn-menu{color:#eadcc0;border-color:rgba(90,60,30,.8);}
+body.playing #action-bar .btn-menu{
+  color:#eadcc0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+  min-height:22px;
+  min-width:0;
+  padding:2px 8px;
+  font-size:11px;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  opacity:.82;
+}
 @media (max-height:520px){
   .mj-table.table-shell{padding:1px;}
   .mj-table.table-shell::before{inset:3px;}
@@ -2805,27 +2866,31 @@ body.playing #action-bar .btn-menu{color:#eadcc0;border-color:rgba(90,60,30,.8);
   .mj-table .treasure-reveal{width:40px;height:40px;font-size:7px;padding:2px;}
   .mj-table .felt-play-column{gap:2px 4px;}
   .mj-table #top-area{padding:0;}
-  .mj-table .hub-screen{width:clamp(44px,12vw,60px);height:clamp(44px,12vw,60px);max-width:60px;max-height:60px;}
+  .mj-table .hub-screen{width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);max-width:52px;max-height:52px;}
   .mj-table #left-area,
   .mj-table #right-area{max-width:min(22vw,80px);}
   .mj-table #center-area.felt-heart{
     gap:2px 4px;
-    --river-tile-w:clamp(12px,2.4vw,18px);
-    --river-tile-h:clamp(17px,calc(2.4vw * 1.42),26px);
+    --river-tile-w:clamp(14px,2.8vw,22px);
+    --river-tile-h:clamp(20px,calc(2.8vw * 1.42),31px);
+  }
+  .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
+  .mj-table .human-rack #human-hand .tile.hand-face.lg{
+    width:min(28px, calc((100cqi - 8px) / var(--human-rack-slots)));
+    height:min(36px, calc((100cqi - 8px) / var(--human-rack-slots) * 1.42), 9svh);
   }
   body.playing #action-bar.action-dock,
   body.playing #action-bar{
-    position:absolute;
-    right:max(6px, env(safe-area-inset-right));
-    bottom:max(4px, env(safe-area-inset-bottom));
+    position:relative;
+    right:auto;
+    bottom:auto;
     left:auto;
-    width:auto;
-    max-width:min(72vw, 440px);
+    width:100%;
+    max-width:100%;
     flex-wrap:nowrap;
-    padding:5px 8px;
+    padding:4px 8px max(6px, env(safe-area-inset-bottom));
     margin:0;
-    border-radius:14px;
-    border:1px solid #2a1608;
+    border-radius:0;
   }
 }
 body.playing[data-table-theme="night"]{
@@ -7953,11 +8018,15 @@ function render(){
 
   const playerLabelByIdx=[sideName(0),sideName(1),sideName(2),sideName(3)];
   const showCallHint = G.phase==='after_discard' && G.humanOptions.length>0 && G.pendingDiscard && G.pendingFrom>=0;
-  const pendingTilePopup = showCallHint ? `
-    <div class="callout-tile callout-compact" role="status">
-      <span><strong>${playerLabelByIdx[G.pendingFrom]}</strong> ${tr('callHintDiscard','の捨て牌')}: <strong>${tileName(G.pendingDiscard)}</strong> · ${tr('callHintAction','に対して行動できます')}</span>
-    </div>
-  ` : '';
+  const pendingTilePopup = showCallHint
+    ? `<span class="callout-tile callout-compact" role="status"><strong>${playerLabelByIdx[G.pendingFrom]}</strong>${tr('callHintDiscard','の捨て牌')} <strong>${tileName(G.pendingDiscard)}</strong> ${tr('callHintAction','に対して行動できます')}</span>`
+    : '';
+  const slipHtml = !showCallHint && (G.msg||'').trim()
+    ? `<div class="message mj-slip">${escapeHtmlText(G.msg).replace(/\n/g,' ')}</div>`
+    : '';
+  const tablePrompt = (slipHtml || pendingTilePopup)
+    ? `<div id="table-prompt">${slipHtml}${pendingTilePopup}</div>`
+    : '';
   const dealerRealHub=G.dealerReal??MATCH?.dealer??G.dealer??0;
   const hubPrimary=matchObj
     ? tr('matchRound','第{n} / {t}局').replace('{n}',String(matchObj.round)).replace('{t}',String(matchObj.totalRounds))
@@ -8050,9 +8119,8 @@ function render(){
     </div>
     ${ktNearHint}
     ${ktDiscardHint}
-    <div class="message mj-slip">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
+    ${tablePrompt}
     ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
-    ${pendingTilePopup}
     <div class="human-rack-scroll">
     <div class="${humanRackCls}" id="human-rack-wrap" style="${humanRackStyle}">
       <div class="melds-row">${humanMelds}</div>
