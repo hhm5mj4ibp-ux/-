@@ -97,8 +97,23 @@ function urlReturns200(url) {
   return String(r.stdout || '').trim() === '200';
 }
 
+function isPublicTunnelUrl(host) {
+  let hostname = '';
+  try {
+    hostname = new URL(String(host).includes('://') ? host : `https://${host}`).hostname;
+  } catch (_e) {
+    return false;
+  }
+  if (hostname === 'admin.localhost.run' || hostname === 'localhost.run') return false;
+  return /\.lhr\.life$|\.loca\.lt$|\.trycloudflare\.com$/.test(hostname);
+}
+
 async function confirmTunnel(tun) {
-  if (!tun?.url) return false;
+  if (!tun?.url || !isPublicTunnelUrl(tun.url)) {
+    if (tun?.url) log('ignored non-tunnel URL:', tun.url);
+    try { tun?.child?.kill('SIGTERM'); } catch (_e) {}
+    return false;
+  }
   await sleep(1200);
   const play = playUrl(tun.url);
   if (urlReturns200(play)) return true;
@@ -172,7 +187,7 @@ async function tunnelLocalhostRun() {
   try {
     const host = await waitForMatch(
       child,
-      /https:\/\/[a-zA-Z0-9.-]+\.(?:lhr\.life|localhost\.run)/,
+      /https:\/\/[a-z0-9]+\.lhr\.life/,
       25000
     );
     return { url: host, child, kind: 'localhost.run' };
