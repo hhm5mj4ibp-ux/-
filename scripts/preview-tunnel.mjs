@@ -46,7 +46,7 @@ function waitForMatch(child, re, timeoutMs) {
       const m = buf.match(re);
       if (m) {
         cleanup();
-        resolve(m[1] || m[0]);
+        resolve(m[0]);
       }
     };
     const cleanup = () => {
@@ -172,7 +172,7 @@ async function tunnelLocalhostRun() {
   try {
     const host = await waitForMatch(
       child,
-      /https:\/\/[a-zA-Z0-9.-]+\.(lhr\.life|localhost\.run)/,
+      /https:\/\/[a-zA-Z0-9.-]+\.(?:lhr\.life|localhost\.run)/,
       25000
     );
     return { url: host, child, kind: 'localhost.run' };
