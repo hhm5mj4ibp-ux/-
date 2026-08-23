@@ -2,10 +2,10 @@
 /**
  * ユーザーがブラウザで開ける公開 URL を出す。
  * Vercel preview は SSO で入れないので使わない。
- * 優先: cloudflared trycloudflare → SSH localhost.run
+ * 優先: localhost.run → localtunnel → cloudflared。切れたら張り直す（2本並行）。
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
@@ -16,9 +16,26 @@ const URL_FILE = join(ROOT, '.preview-url');
 const BIN_DIR = join(homedir(), '.local', 'bin');
 const CF_BIN = join(BIN_DIR, 'cloudflared');
 const CF_URL = 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64';
+const HEALTH_MS = 15000;
+
+const live = new Map();
 
 function log(...args) {
   console.log('[preview]', ...args);
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function playUrl(host) {
+  return String(host).replace(/\/$/, '') + '/harbin-mahjong.html';
+}
+
+function publish() {
+  const lines = [...live.values()].map((u) => playUrl(u));
+  writeFileSync(URL_FILE, (lines.join('\n') || '') + (lines.length ? '\n' : ''), 'utf8');
+  if (lines.length) log('TRY:', lines.join('  /  '));
 }
 
 function waitForMatch(child, re, timeoutMs) {
@@ -71,13 +88,6 @@ function ensureCloudflared() {
   return existsSync(CF_BIN) ? CF_BIN : null;
 }
 
-function saveUrl(url) {
-  const play = url.replace(/\/$/, '') + '/harbin-mahjong.html';
-  writeFileSync(URL_FILE, `${play}\n`, 'utf8');
-  log('TRY:', play);
-  return play;
-}
-
 function urlReturns200(url) {
   const r = spawnSync(
     'curl',
@@ -89,10 +99,10 @@ function urlReturns200(url) {
 
 async function confirmTunnel(tun) {
   if (!tun?.url) return false;
-  const play = saveUrl(tun.url);
-  await new Promise((r) => setTimeout(r, 1200));
+  await sleep(1200);
+  const play = playUrl(tun.url);
   if (urlReturns200(play)) return true;
-  log('tunnel URL not reachable, trying next:', play);
+  log('tunnel URL not reachable:', play);
   try { tun.child.kill('SIGTERM'); } catch (_e) {}
   return false;
 }
@@ -115,10 +125,13 @@ async function startApp() {
   app.stdout.pipe(process.stdout);
   app.stderr.pipe(process.stderr);
   const ok = await waitForMatch(app, /listening|http:\/\/|serving|PORT/i, 8000).catch(() => null);
-  if (!ok) {
-    await new Promise((r) => setTimeout(r, 800));
-  }
+  if (!ok) await sleep(800);
   log(`local http://127.0.0.1:${PORT}/harbin-mahjong.html`);
+}
+
+function pipeChild(child) {
+  child.stdout?.pipe(process.stdout);
+  child.stderr?.pipe(process.stderr);
 }
 
 async function tunnelCloudflared() {
@@ -127,15 +140,14 @@ async function tunnelCloudflared() {
   const child = spawn(bin, ['tunnel', '--no-autoupdate', '--url', `http://127.0.0.1:${PORT}`], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
-  child.stdout.pipe(process.stdout);
-  child.stderr.pipe(process.stderr);
+  pipeChild(child);
   try {
     const host = await waitForMatch(
       child,
       /https:\/\/[a-z0-9-]+\.trycloudflare\.com/,
       25000
     );
-    return { url: host, child };
+    return { url: host, child, kind: 'cloudflared' };
   } catch (err) {
     log('cloudflared failed:', err.message);
     child.kill('SIGTERM');
@@ -156,15 +168,14 @@ async function tunnelLocalhostRun() {
     ],
     { stdio: ['ignore', 'pipe', 'pipe'] }
   );
-  child.stdout.pipe(process.stdout);
-  child.stderr.pipe(process.stderr);
+  pipeChild(child);
   try {
     const host = await waitForMatch(
       child,
       /https:\/\/[a-zA-Z0-9.-]+\.(lhr\.life|localhost\.run)/,
       25000
     );
-    return { url: host, child };
+    return { url: host, child, kind: 'localhost.run' };
   } catch (err) {
     log('localhost.run failed:', err.message);
     child.kill('SIGTERM');
@@ -172,21 +183,69 @@ async function tunnelLocalhostRun() {
   }
 }
 
+async function tunnelLocaltunnel() {
+  const child = spawn('npx', ['--yes', 'localtunnel', '--port', String(PORT)], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: ROOT,
+  });
+  pipeChild(child);
+  try {
+    const host = await waitForMatch(
+      child,
+      /https:\/\/[a-zA-Z0-9.-]+\.loca\.lt/,
+      40000
+    );
+    return { url: host, child, kind: 'localtunnel' };
+  } catch (err) {
+    log('localtunnel failed:', err.message);
+    child.kill('SIGTERM');
+    return null;
+  }
+}
+
+async function openOneTunnel() {
+  for (const fn of [tunnelLocalhostRun, tunnelLocaltunnel, tunnelCloudflared]) {
+    const tun = await fn();
+    if (await confirmTunnel(tun)) return tun;
+  }
+  return null;
+}
+
+async function watch(slot, tun) {
+  const play = playUrl(tun.url);
+  live.set(slot, tun.url);
+  publish();
+  while (true) {
+    await sleep(HEALTH_MS);
+    if (!urlReturns200(play)) {
+      log(slot, 'lost', play);
+      live.delete(slot);
+      publish();
+      try { tun.child.kill('SIGTERM'); } catch (_e) {}
+      return;
+    }
+  }
+}
+
+async function runSlot(slot) {
+  for (;;) {
+    const tun = await openOneTunnel();
+    if (!tun) {
+      log(slot, 'no tunnel, retry');
+      await sleep(8000);
+      continue;
+    }
+    log(slot, tun.kind, playUrl(tun.url));
+    await watch(slot, tun);
+  }
+}
+
 async function main() {
   await startApp();
-  let tun = await tunnelCloudflared();
-  if (!(await confirmTunnel(tun))) tun = await tunnelLocalhostRun();
-  if (!(await confirmTunnel(tun))) tun = null;
-  if (!tun) {
-    console.error('[preview] no public tunnel. local only: http://127.0.0.1:' + PORT + '/harbin-mahjong.html');
-    process.exit(1);
-  }
-  const stop = () => {
-    tun.child.kill('SIGTERM');
-    process.exit(0);
-  };
+  const stop = () => process.exit(0);
   process.on('SIGINT', stop);
   process.on('SIGTERM', stop);
+  await Promise.all([runSlot('a'), runSlot('b')]);
 }
 
 await main();
