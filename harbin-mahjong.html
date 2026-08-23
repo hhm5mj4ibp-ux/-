@@ -221,9 +221,9 @@ body{
 #bottom-area #human-hand .tile:not(.back):not(.hand-face):hover{transform:scaleY(-1) translateY(4px);}
 #bottom-area #human-hand .tile.hand-face:not(.back):hover{transform:translateY(-4px);}
 }
-.tile.selected{transform:translateY(-8px);outline:2px solid #ff0;}
-#bottom-area #human-hand .tile:not(.back):not(.hand-face).selected{transform:scaleY(-1) translateY(8px);}
-#bottom-area #human-hand .tile.hand-face:not(.back).selected{transform:translateY(-8px);outline:2px solid #ff0;}
+.tile.selected{transform:translateY(-14px);outline:2px solid #ffd44b;z-index:3;}
+#bottom-area #human-hand .tile:not(.back):not(.hand-face).selected{transform:scaleY(-1) translateY(14px);z-index:3;}
+#bottom-area #human-hand .tile.hand-face:not(.back).selected{transform:translateY(-14px);outline:2px solid #ffd44b;z-index:3;}
 #bottom-area #human-hand .tile.hand-face.tsumo-separated{
   margin-left:clamp(10px,2.8vw,16px);
 }
@@ -1600,7 +1600,9 @@ body{
 .discard-strip{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;}
 /* 自家・対面: 卓心に6枚で改行（実卓の牌河） */
 .discard-strip.human,
-.discard-strip.opp-top{
+.discard-strip.opp-top,
+.discard-strip.left,
+.discard-strip.right{
   display:flex;
   flex-direction:column;
   flex-wrap:nowrap;
@@ -1612,11 +1614,10 @@ body{
   align-content:center;
   overflow:hidden;
 }
-.discard-strip.human{
-  flex-direction:column-reverse;
-}
 .discard-strip.human .discard-cell,
-.discard-strip.opp-top .discard-cell{flex:0 0 auto;}
+.discard-strip.opp-top .discard-cell,
+.discard-strip.left .discard-cell,
+.discard-strip.right .discard-cell{flex:0 0 auto;}
 .discard-strip.opp-top{margin-top:2px;}
 .dealer-badge{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:8px;background:rgba(255,215,0,.22);border:1px solid rgba(255,220,120,.55);color:#fff2b8;font-size:9px;font-weight:bold;}
 .match-round{color:#d8f5d8;font-size:10px;text-align:center;}
@@ -2543,12 +2544,12 @@ body.playing #action-bar{
 }
 .mj-table #center-area.felt-heart{
   display:grid;
-  grid-template-columns:max-content max-content max-content;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
   grid-template-rows:max-content max-content max-content;
   grid-template-areas:
-    ". n ."
+    "n n n"
     "w hub e"
-    ". s .";
+    "s s s";
   align-items:center;
   justify-items:center;
   justify-content:center;
@@ -2558,8 +2559,8 @@ body.playing #action-bar{
   height:100%;
   max-width:100%;
   overflow:hidden;
-  --river-tile-w:clamp(16px, min(5.2vw, 4.2dvh), 26px);
-  --river-tile-h:clamp(22px, calc(var(--river-tile-w) * 1.42), 37px);
+  --river-tile-w:max(11px, min(22px, calc((100% - 108px) / 12)));
+  --river-tile-h:calc(var(--river-tile-w) * 1.42);
 }
 .mj-table .felt-compass.table-hub{
   display:block;
@@ -2583,7 +2584,7 @@ body.playing #action-bar{
   flex-wrap:nowrap;
   align-items:center;
   justify-content:flex-end;
-  width:max-content;
+  width:100%;
   max-width:100%;
   margin:0;
   padding:0;
@@ -2592,29 +2593,21 @@ body.playing #action-bar{
 .mj-table .felt-heart .west-discards,
 .mj-table .felt-heart .east-discards{
   overflow:visible;
-  min-width:max-content;
-  flex-shrink:0;
+  min-width:0;
+  width:100%;
+  max-width:100%;
+  flex-shrink:1;
 }
-.mj-table .felt-heart .west-discards{grid-area:w;justify-self:end;align-self:center;}
-.mj-table .felt-heart .east-discards{grid-area:e;justify-self:start;align-self:center;}
+.mj-table .felt-heart .west-discards{grid-area:w;justify-self:stretch;align-self:center;display:flex;justify-content:flex-end;}
+.mj-table .felt-heart .east-discards{grid-area:e;justify-self:stretch;align-self:center;display:flex;justify-content:flex-start;}
 .mj-table .felt-heart #human-discards{grid-area:s;justify-self:center;align-self:start;}
 .mj-table .felt-heart .discard-cell{
   box-sizing:border-box;
   flex-shrink:0;
-}
-.mj-table .felt-heart .north-discards .discard-cell,
-.mj-table .felt-heart #human-discards .discard-cell{
   width:var(--river-tile-w);
   min-width:var(--river-tile-w);
   height:var(--river-tile-h);
   min-height:var(--river-tile-h);
-}
-.mj-table .felt-heart .west-discards .discard-cell,
-.mj-table .felt-heart .east-discards .discard-cell{
-  width:var(--river-tile-h);
-  min-width:var(--river-tile-h);
-  height:var(--river-tile-w);
-  min-height:var(--river-tile-w);
 }
 .mj-table .felt-heart .discard-cell.river-ghost{
   width:var(--river-tile-w);
@@ -2626,14 +2619,6 @@ body.playing #action-bar{
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
   opacity:.38;
 }
-.mj-table .felt-heart .west-discards .discard-cell.river-ghost,
-.mj-table .felt-heart .east-discards .discard-cell.river-ghost{
-  width:var(--river-tile-h);
-  height:var(--river-tile-w);
-  min-width:var(--river-tile-h);
-  min-height:var(--river-tile-w);
-  flex-shrink:0;
-}
 .mj-table .felt-heart #center-hud{
   grid-area:hub;
   min-width:0;
@@ -2641,26 +2626,23 @@ body.playing #action-bar{
   overflow:hidden;
 }
 .mj-table .felt-heart .north-discards .tile.lg,
+.mj-table .felt-heart .west-discards .tile.lg,
+.mj-table .felt-heart .east-discards .tile.lg,
 .mj-table .felt-heart #human-discards .tile.lg{
   width:var(--river-tile-w);
   height:var(--river-tile-h);
   font-size:clamp(7px,1.8vw,11px);
 }
-.mj-table .felt-heart .west-discards .tile.hand-face.opp-hand,
-.mj-table .felt-heart .east-discards .tile.hand-face.opp-hand{
-  --opp-face-w:var(--river-tile-w);
-  --opp-face-h:var(--river-tile-h);
-  width:var(--river-tile-w);
-  height:var(--river-tile-h);
-}
 .mj-table .felt-heart .north-discards .discard-river-mat,
+.mj-table .felt-heart .west-discards .discard-river-mat,
+.mj-table .felt-heart .east-discards .discard-river-mat,
 .mj-table .felt-heart #human-discards .discard-river-mat{
   width:max-content;
   max-width:100%;
 }
 .mj-table #bottom-area{
   grid-area:s;
-  padding:2px 2px 0;
+  padding:8px 2px 8px;
   min-width:0;
   max-width:100%;
   overflow:visible;
@@ -2701,9 +2683,11 @@ body.playing #action-bar{
   width:100%;
   max-width:100%;
   overflow-x:auto;
-  overflow-y:hidden;
+  overflow-y:visible;
   container-type:inline-size;
   container-name:humanrack;
+  padding:0 2px;
+  box-sizing:border-box;
 }
 .mj-table .human-rack{
   --hand-rack-pad:16px;
@@ -2711,15 +2695,19 @@ body.playing #action-bar{
   max-width:100%;
   justify-content:center;
   box-sizing:border-box;
+  padding:16px 4px 10px;
+  align-items:flex-end;
 }
 .mj-table .human-rack #human-hand{
   gap:1px;
   justify-content:center;
+  max-width:100%;
 }
 .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
 .mj-table .human-rack #human-hand .tile.hand-face.lg{
-  width:min(34px, max(28px, calc((100cqi - 16px) / var(--human-rack-slots))));
-  height:min(48px, calc((100cqi - 16px) / var(--human-rack-slots) * 1.42), 11svh);
+  width:min(34px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
+  height:min(46px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 10svh);
+  flex-shrink:0;
 }
 .mj-table .human-rack .meld-group .tile.lg{
   width:min(28px,calc((100cqi - 16px) / var(--human-rack-slots)));
@@ -2881,13 +2869,13 @@ body.playing #action-bar .btn-menu{
   .mj-table #right-area{max-width:min(22vw,80px);}
   .mj-table #center-area.felt-heart{
     gap:2px 4px;
-    --river-tile-w:clamp(14px,2.8vw,22px);
-    --river-tile-h:clamp(20px,calc(2.8vw * 1.42),31px);
+    --river-tile-w:max(11px, min(20px, calc((100% - 96px) / 12)));
+    --river-tile-h:calc(var(--river-tile-w) * 1.42);
   }
   .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
   .mj-table .human-rack #human-hand .tile.hand-face.lg{
-    width:min(28px, calc((100cqi - 16px) / var(--human-rack-slots)));
-    height:min(36px, calc((100cqi - 16px) / var(--human-rack-slots) * 1.42), 9svh);
+    width:min(28px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
+    height:min(36px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 9svh);
   }
   body.playing #action-bar.action-dock,
   body.playing #action-bar{
@@ -3121,6 +3109,7 @@ const UI={
   shopMsg:'',
   muted:false,
   fxSkip:false,
+  handSelectIdx:null,
 };
 
 const ONLINE={
@@ -6659,6 +6648,7 @@ function humanKouTingPickCancel(){
 }
 
 function humanDiscard(tileIdx, fromEl){
+  if(typeof UI!=='undefined') UI.handSelectIdx=null;
   if(G?.online){
     if(G.kouTingPick&&onlineLegal('kouting')) onlineAction('kouting',{index:tileIdx});
     else onlineAction('discard',{index:tileIdx});
@@ -7487,10 +7477,8 @@ function renderSideDiscardRiver(tiles, cls, cellHtml){
 
 function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
   const list=tiles||[];
-  const tileCls=cls==='left'?'lg hand-face opp-hand opp-disc opp-rot-left'
-    :cls==='right'?'lg hand-face opp-hand opp-disc opp-rot-right'
-    :size;
-  const stripCls=cls==='left'||cls==='right'?`discard-strip ${cls} strip-side`:`discard-strip ${cls}`;
+  const tileCls=size;
+  const stripCls=`discard-strip ${cls}`;
   const seatByCls={'opp-top':2,left:1,right:3,human:0};
   const stripSeat=Object.prototype.hasOwnProperty.call(seatByCls,cls)?seatByCls[cls]:-1;
   const lastIdx=list.length-1;
@@ -7508,9 +7496,6 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
     return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
   };
-  if(cls==='left'||cls==='right'){
-    return renderSideDiscardRiver(list, cls, cellHtml);
-  }
   let rows=chunkEvery(list,6);
   if(!rows.length) rows=[[]];
   const inner=rows.map((row,i)=>{
@@ -7881,12 +7866,12 @@ function render(){
   // === LEFT PLAYER (p1, 西) ===
   const leftHand=`<div class="side-col${dealActive?' deal-staging':''}">${renderSeatHand(p1,'',true,'west')}</div>`;
   const leftMelds=p1.melds.length?renderSideMeldGroups(p1.melds,'left'):'';
-  const leftDiscards=renderDiscardStrip(p1.discards,'left','xs',pendingForStrip);
+  const leftDiscards=renderDiscardStrip(p1.discards,'left',HUMAN_RIVER_TILE_CLS,pendingForStrip);
 
   // === RIGHT PLAYER (p3, 東) ===
   const rightHand=`<div class="side-col${dealActive?' deal-staging':''}">${renderSeatHand(p3,'',true,'east')}</div>`;
   const rightMelds=p3.melds.length?renderSideMeldGroups(p3.melds,'right'):'';
-  const rightDiscards=renderDiscardStrip(p3.discards,'right','xs',pendingForStrip);
+  const rightDiscards=renderDiscardStrip(p3.discards,'right',HUMAN_RIVER_TILE_CLS,pendingForStrip);
 
   // === HUMAN (p0) ===
   const waits=p0.waits&&p0.waits.length?p0.waits:getKatanWaits(p0.hand);
@@ -7897,6 +7882,10 @@ function render(){
     :[];
   const kouTingPick=!!G.kouTingPick;
   const canHumanDiscard=G.phase==='discard'&&G.turn===0&&(!p0.kouTing||kouTingMayDiscard)&&!G.kouTingTreasurePending&&!G.dealCinemaActive;
+  if(!canHumanDiscard||UI.handSelectIdx==null||UI.handSelectIdx<0||UI.handSelectIdx>=p0.hand.length){
+    if(!canHumanDiscard) UI.handSelectIdx=null;
+    else if(UI.handSelectIdx!=null&&(UI.handSelectIdx<0||UI.handSelectIdx>=p0.hand.length)) UI.handSelectIdx=null;
+  }
   const ktLeg=kouTingMayDiscard?kouTingLegalDiscardIndices(p0):[];
   const kt=G.ktReveal;
   const suspenseMask=!!(kt&&kt.phase==='suspense'&&kt.pi===0&&p0.kouTing&&Number.isInteger(kt.drawIdx));
@@ -7927,6 +7916,7 @@ function render(){
     if(kouTingMayDiscard) cls+=ktLeg.includes(i)?' kt-discardable':' kt-discard-locked';
     else if(kouTingPick&&ktEntry.includes(i)) cls+=' kt-discardable';
     else if(kouTingPick) cls+=' kt-discard-locked';
+    if(canHumanDiscard&&UI.handSelectIdx===i) cls+=' selected';
     return tileHTML(t,cls,false,null,`data-hand-i="${i}"`);
   }).join('');
   const humanMelds=renderMeldGroups(p0.melds,HUMAN_MELD_TILE_CLS);
@@ -8158,18 +8148,22 @@ function render(){
   `;
   document.getElementById('app').innerHTML=html;
 
-  // attach tile click for discard (only when human can choose discard, i.e., not 扣聴)
+  // 1タップ目は選択（ポップアップ）、同じ牌の2タップ目で捨て
   if(canHumanDiscard&&!G.kanBranchAOpts&&!G.kanTurnEnding){
     document.querySelectorAll('#human-hand .tile[data-hand-i]').forEach(el=>{
       const i=parseInt(el.getAttribute('data-hand-i'),10);
       if(Number.isNaN(i)) return;
-      if(p0.kouTing){
-        if(ktLeg.includes(i)) el.onclick=()=>humanDiscard(i,el);
-      }else if(kouTingPick){
-        if(ktEntry.includes(i)) el.onclick=()=>humanDiscard(i,el);
-      }else{
-        el.onclick=()=>humanDiscard(i,el);
-      }
+      const legal=p0.kouTing?ktLeg.includes(i):kouTingPick?ktEntry.includes(i):true;
+      if(!legal) return;
+      el.onclick=()=>{
+        if(UI.handSelectIdx===i){
+          humanDiscard(i,el);
+          return;
+        }
+        UI.handSelectIdx=i;
+        document.querySelectorAll('#human-hand .tile.selected').forEach(n=>n.classList.remove('selected'));
+        el.classList.add('selected');
+      };
     });
   }
   armTurnTimer();

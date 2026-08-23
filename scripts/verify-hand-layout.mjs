@@ -295,10 +295,46 @@ function ghostShapeReport(page){
     return {
       south: measure('#human-discards', 'row'),
       north: measure('#north-discards', 'row'),
-      west: measure('#left-discards', 'col'),
-      east: measure('#right-discards', 'col'),
+      west: measure('#left-discards', 'row'),
+      east: measure('#right-discards', 'row'),
     };
   });
+}
+
+function riverSelfOverlap(page, sel){
+  return page.evaluate((sel) => {
+    const tiles = [...document.querySelectorAll(sel)].map(el => el.getBoundingClientRect());
+    let hits = 0;
+    for(let i = 0; i < tiles.length; i++){
+      for(let j = i + 1; j < tiles.length; j++){
+        const a = tiles[i], b = tiles[j];
+        const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+        const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        if(ox > 0.5 && oy > 0.5) hits++;
+      }
+    }
+    return { hits, count: tiles.length };
+  }, sel);
+}
+
+function riverFillOrder(page, rootSel){
+  return page.evaluate((rootSel) => {
+    const root = document.querySelector(rootSel);
+    if(!root) return { missing: true };
+    const cells = [...root.querySelectorAll('.discard-cell:not(.river-ghost)')].map(el => el.getBoundingClientRect());
+    if(cells.length < 8) return { missing: false, short: true, n: cells.length };
+    const a = cells[0], b = cells[1], g = cells[6];
+    return {
+      missing: false,
+      short: false,
+      ltr: b.left > a.left + 1,
+      nextRowBelow: g.top > a.top + 2,
+      firstTop: Math.round(a.top),
+      seventhTop: Math.round(g.top),
+      firstLeft: Math.round(a.left),
+      secondLeft: Math.round(b.left),
+    };
+  }, rootSel);
 }
 
 const viewports = [
@@ -370,8 +406,8 @@ for(const vp of viewports){
       if(thirteen.hits > 0){
         console.error(`[${vp.name}] human-hand self-overlap@13 hits=${thirteen.hits} minW=${thirteen.minW}`);
         failed = true;
-      }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && thirteen.minW < 27.5){
-        console.error(`[${vp.name}] human-hand minW=${thirteen.minW} (want >=28)`);
+      }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && thirteen.minW < 18){
+        console.error(`[${vp.name}] human-hand minW=${thirteen.minW} (want >=18)`);
         failed = true;
       }
     }
@@ -381,11 +417,19 @@ for(const vp of viewports){
   if(selfOv.hits > 0 || selfOv.outside > 0){
     console.error(`[${vp.name}] human-hand self-overlap hits=${selfOv.hits} outside=${selfOv.outside} minW=${selfOv.minW} n=${selfOv.count}`);
     failed = true;
-  }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && selfOv.count <= 13 && selfOv.minW < 27.5){
-    console.error(`[${vp.name}] human-hand minW=${selfOv.minW} (want >=28)`);
+  }else if((vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari') && selfOv.count <= 13 && selfOv.minW < 18){
+    console.error(`[${vp.name}] human-hand minW=${selfOv.minW} (want >=18)`);
     failed = true;
   }else{
     console.log(`[${vp.name}] human-hand tiles separate (minW=${selfOv.minW})`);
+  }
+
+  const fourteenClip = await clipReport(page, '#human-hand', 'human-hand-14');
+  if(!fourteenClip.missing && fourteenClip.clipped > 0){
+    console.error(`[${vp.name}] human-hand-14: ${fourteenClip.clipped}/${fourteenClip.tileCount} tiles clipped`);
+    failed = true;
+  }else if(!fourteenClip.missing){
+    console.log(`[${vp.name}] human-hand-14: ok (${fourteenClip.tileCount} tiles)`);
   }
 
   const dock = await dockReport(page);
@@ -466,6 +510,40 @@ for(const vp of viewports){
   }else{
     console.log(`[${vp.name}] river overlap: ok (${rivers.counts.n}/${rivers.counts.w}/${rivers.counts.e}/${rivers.counts.s})`);
   }
+  for(const [seat, sel] of [
+    ['west', '#left-discards .tile'],
+    ['east', '#right-discards .tile'],
+    ['south', '#human-discards .tile'],
+    ['north', '#north-discards .tile'],
+  ]){
+    const self = await riverSelfOverlap(page, sel);
+    if(self.hits > 0){
+      console.error(`[${vp.name}] ${seat} river self-overlap hits=${self.hits} n=${self.count}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] ${seat} river tiles separate (${self.count})`);
+    }
+  }
+  for(const [seat, sel] of [
+    ['south', '#human-discards'],
+    ['north', '#north-discards'],
+    ['west', '#left-discards'],
+    ['east', '#right-discards'],
+  ]){
+    const fill = await riverFillOrder(page, sel);
+    if(fill.missing){
+      console.error(`[${vp.name}] ${seat} river missing for fill order`);
+      failed = true;
+    }else if(fill.short){
+      console.error(`[${vp.name}] ${seat} river fill short n=${fill.n}`);
+      failed = true;
+    }else if(!fill.ltr || !fill.nextRowBelow){
+      console.error(`[${vp.name}] ${seat} river fill not top-left LTR then down ltr=${fill.ltr} below=${fill.nextRowBelow} firstTop=${fill.firstTop} seventhTop=${fill.seventhTop} firstLeft=${fill.firstLeft} secondLeft=${fill.secondLeft}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] ${seat} river fill: ok`);
+    }
+  }
   const scroll = await scrollbarReport(page);
   if(scroll.docOverflow || scroll.overflow.length){
     console.error(`[${vp.name}] horizontal overflow: doc=${scroll.docOverflow} nodes=${JSON.stringify(scroll.overflow)}`);
@@ -513,25 +591,58 @@ for(const vp of viewports){
       console.error(`[${vp.name}] ${seat} ghosts not one row rows=${info.uniqueRows} cols=${info.uniqueCols}`);
       failed = true;
     }
-    if(info.axis === 'col' && info.uniqueCols !== 1){
-      console.error(`[${vp.name}] ${seat} ghosts not one column rows=${info.uniqueRows} cols=${info.uniqueCols}`);
-      failed = true;
-    }
   }
   const southG = shape.south;
   if(!southG.missing && southG.gw > 0 && southG.gh > 0){
-    for(const seat of ['west', 'east']){
+    for(const seat of ['west', 'east', 'north']){
       const info = shape[seat];
       if(info.missing) continue;
-      if(Math.abs(info.gw - southG.gh) > 2 || Math.abs(info.gh - southG.gw) > 2){
-        console.error(`[${vp.name}] ${seat} ghost ${info.gw}x${info.gh} not rotated south ${southG.gw}x${southG.gh}`);
-        failed = true;
-      }
-      if(info.gw + 0.5 < southG.gw){
-        console.error(`[${vp.name}] ${seat} ghost thinner than south ${info.gw} < ${southG.gw}`);
+      if(Math.abs(info.gw - southG.gw) > 2 || Math.abs(info.gh - southG.gh) > 2){
+        console.error(`[${vp.name}] ${seat} ghost ${info.gw}x${info.gh} not same as south ${southG.gw}x${southG.gh}`);
         failed = true;
       }
     }
+  }
+
+  await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    G.dealCinemaActive = false;
+    G.gameOver = false;
+    G.phase = 'discard';
+    G.turn = 0;
+    G.kouTingTreasurePending = false;
+    G.kanBranchAOpts = null;
+    G.kanTurnEnding = false;
+    G.kouTingPick = false;
+    G.players[0].kouTing = false;
+    if(typeof UI !== 'undefined') UI.handSelectIdx = null;
+    const hand = G.players[0].hand || [];
+    while(hand.length < 14) hand.push({ suit: 'z', num: 5 });
+    G.players[0].hand = hand;
+    if(typeof render === 'function') render();
+  });
+  await page.waitForTimeout(80);
+  const discardBefore = await page.evaluate(() => G?.players?.[0]?.discards?.length || 0);
+  const firstTile = page.locator('#human-hand .tile[data-hand-i="1"]').first();
+  if(await firstTile.count()){
+    await firstTile.click();
+    await page.waitForTimeout(40);
+    const tap1 = await page.evaluate(() => ({
+      selected: document.querySelector('#human-hand .tile.selected')?.getAttribute('data-hand-i') || null,
+      discards: G?.players?.[0]?.discards?.length || 0,
+    }));
+    if(tap1.selected !== '1'){
+      console.error(`[${vp.name}] two-tap: first tap did not select tile 1 selected=${tap1.selected}`);
+      failed = true;
+    }else if(tap1.discards !== discardBefore){
+      console.error(`[${vp.name}] two-tap: first tap discarded`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] two-tap select: ok`);
+    }
+  }else{
+    console.error(`[${vp.name}] two-tap: hand tile missing`);
+    failed = true;
   }
 
   const dealer = await page.evaluate(() => {
