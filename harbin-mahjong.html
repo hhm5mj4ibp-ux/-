@@ -3499,8 +3499,8 @@ const I18N={
     ktGachaSub:'何が出るかな…？',
     ktRevealLine:'来た！',
     ktTensionLine:'この一枚を切る瞬間…誰かの上がりを運ばないか、胸がザワザワする',
-    chooseDiscard:'牌を1回タップして選び、もう一度タップして捨てます（先出後引き）',
-    tapAgainToDiscard:'もう一度タップして捨てる',
+    chooseDiscard:'牌をタップして捨てます（先出後引き）',
+    tapAgainToDiscard:'牌をタップして捨てる',
     clickToDiscard:'クリックして捨てる',
     drawTile:'牌を引く',
     tsumo:'ツモ！',
@@ -3658,8 +3658,8 @@ const I18N={
     ktGachaSub:'会摸到什么呢？',
     ktRevealLine:'是这张！',
     ktTensionLine:'打出去的瞬间…会不会帮别人点和？心里一紧',
-    chooseDiscard:'点一次选牌，再点一次打出（先出后摸）',
-    tapAgainToDiscard:'再点一次打出',
+    chooseDiscard:'点牌打出（先出后摸）',
+    tapAgainToDiscard:'点牌打出',
     clickToDiscard:'点击手牌打出',
     drawTile:'摸牌',
     tsumo:'自摸！',
@@ -4075,7 +4075,8 @@ function toggleMute(){
   UI.muted=!UI.muted;
   saveUiPrefs();
   applyChrome();
-  if(!UI.muted) GameSFX.playBgm(G?'table':'title');
+  if(UI.muted) GameSFX.stopBgm();
+  else if(!G) GameSFX.playBgm('title');
   renderStartScreen();
 }
 function toggleFxSkip(){
@@ -5291,7 +5292,7 @@ function showMatchSetResult(){
 }
 
 function startGame(){
-  GameSFX.playBgm('table');
+  GameSFX.stopBgm();
   maybeShowRulesPrimerThen(beginMatch);
 }
 
@@ -5941,6 +5942,7 @@ function enterKouTingByDiscard(p,tileIdx,fromEl){
   GameSFX.play('discard');
   fxVibrate(22);
   afterDiscard(pi,tile);
+  render();
   flushDiscardFlight();
   return true;
 }
@@ -6061,6 +6063,13 @@ const GameSFX=(function(){
       UI.muted=!!on;
       if(bgmEl) bgmEl.muted=UI.muted;
     },
+    stopBgm(){
+      if(bgmEl){
+        try{ bgmEl.pause(); bgmEl.removeAttribute('src'); bgmEl.load(); }catch(_e){}
+        bgmEl=null;
+      }
+      bgmName='';
+    },
     play(name){
       if(UI.muted) return;
       const clip=clips.get(name);
@@ -6076,6 +6085,11 @@ const GameSFX=(function(){
       playToneFallback(name);
     },
     playBgm(which){
+      if(which==='table'){
+        if(bgmEl) this.stopBgm();
+        return;
+      }
+      if(UI.muted) return;
       const src=BGM[which];
       if(!src) return;
       if(bgmName===which && bgmEl && !bgmEl.paused) return;
@@ -6660,6 +6674,7 @@ function humanDiscard(tileIdx, fromEl){
     GameSFX.play('kt_discard');
     fxVibrate(15);
     afterDiscard(0,tile);
+    render();
     flushDiscardFlight();
     return;
   }
@@ -6673,6 +6688,7 @@ function humanDiscard(tileIdx, fromEl){
   GameSFX.play('discard');
   fxVibrate(15);
   afterDiscard(0,tile);
+  render();
   flushDiscardFlight();
 }
 
@@ -7974,11 +7990,8 @@ function render(){
   const pendingTilePopup = showCallHint
     ? `<span class="callout-tile callout-compact" role="status"><strong>${playerLabelByIdx[G.pendingFrom]}</strong>${tr('callHintDiscard','の捨て牌')} <strong>${tileName(G.pendingDiscard)}</strong> ${tr('callHintAction','に対して行動できます')}</span>`
     : '';
-  const slipText = (canHumanDiscard && UI.handSelectIdx!=null)
-    ? tr('tapAgainToDiscard','もう一度タップして捨てる')
-    : (G.msg||'');
-  const slipHtml = !showCallHint && slipText.trim()
-    ? `<div class="message mj-slip">${escapeHtmlText(slipText).replace(/\n/g,' ')}</div>`
+  const slipHtml = !showCallHint && (G.msg||'').trim()
+    ? `<div class="message mj-slip">${escapeHtmlText(G.msg).replace(/\n/g,' ')}</div>`
     : '';
   const tablePrompt = (slipHtml || pendingTilePopup)
     ? `<div id="table-prompt">${slipHtml}${pendingTilePopup}</div>`
@@ -8102,22 +8115,14 @@ function render(){
   `;
   document.getElementById('app').innerHTML=html;
 
-  // 1タップ目は選択（ポップアップ）、同じ牌の2タップ目で捨て
+  // 1タップで捨て（河へ即描画）
   if(canHumanDiscard&&!G.kanBranchAOpts&&!G.kanTurnEnding){
     document.querySelectorAll('#human-hand .tile[data-hand-i]').forEach(el=>{
       const i=parseInt(el.getAttribute('data-hand-i'),10);
       if(Number.isNaN(i)) return;
       const legal=p0.kouTing?ktLeg.includes(i):kouTingPick?ktEntry.includes(i):true;
       if(!legal) return;
-      el.onclick=()=>{
-        if(UI.handSelectIdx===i){
-          humanDiscard(i,el);
-          return;
-        }
-        UI.handSelectIdx=i;
-        document.querySelectorAll('#human-hand .tile.selected').forEach(n=>n.classList.remove('selected'));
-        el.classList.add('selected');
-      };
+      el.onclick=()=>humanDiscard(i,el);
     });
   }
   armTurnTimer();

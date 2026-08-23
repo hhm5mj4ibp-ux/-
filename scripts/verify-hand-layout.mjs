@@ -716,6 +716,7 @@ for(const vp of viewports){
     G.kanTurnEnding = false;
     G.kouTingPick = false;
     G.players[0].kouTing = false;
+    G.players[0].discards = [];
     if(typeof UI !== 'undefined') UI.handSelectIdx = null;
     const hand = G.players[0].hand || [];
     while(hand.length < 14) hand.push({ suit: 'z', num: 5 });
@@ -724,20 +725,27 @@ for(const vp of viewports){
     const el = document.querySelector('#human-hand .tile[data-hand-i="1"]');
     if(el) el.click();
   });
-  await page.waitForTimeout(40);
-  const tap1 = await page.evaluate(() => ({
-    selected: document.querySelector('#human-hand .tile.selected')?.getAttribute('data-hand-i') || null,
-    discards: G?.players?.[0]?.discards?.length || 0,
-    hasTile: !!document.querySelector('#human-hand .tile[data-hand-i="1"]'),
-  }));
-  if(!tap1.hasTile){
-    console.error(`[${vp.name}] two-tap: hand tile missing`);
+  await page.waitForTimeout(80);
+  const tap1 = await page.evaluate(() => {
+    const river = document.querySelector('#human-discards .tile');
+    const art = river?.querySelector('.tile-art');
+    const ar = art?.getBoundingClientRect();
+    return {
+      discards: G?.players?.[0]?.discards?.length || 0,
+      riverTiles: document.querySelectorAll('#human-discards .tile').length,
+      artH: ar ? Math.round(ar.height * 10) / 10 : 0,
+      empty: !!document.querySelector('#human-discards .discard-river-mat.is-empty'),
+      hasTile: !!document.querySelector('#human-hand .tile[data-hand-i]'),
+    };
+  });
+  if(!tap1.hasTile && tap1.discards < 1){
+    console.error(`[${vp.name}] discard: hand tile missing`);
     failed = true;
-  }else if(tap1.selected !== '1'){
-    console.error(`[${vp.name}] two-tap: first tap did not select tile 1 selected=${tap1.selected}`);
+  }else if(tap1.discards < 1 || tap1.riverTiles < 1 || tap1.empty || tap1.artH < 16){
+    console.error(`[${vp.name}] discard did not appear in river ${JSON.stringify(tap1)}`);
     failed = true;
   }else{
-    console.log(`[${vp.name}] two-tap select: ok`);
+    console.log(`[${vp.name}] discard to river: ok n=${tap1.riverTiles} artH=${tap1.artH}`);
   }
 
   const dealer = await page.evaluate(() => {
