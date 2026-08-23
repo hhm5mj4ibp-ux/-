@@ -78,6 +78,25 @@ function saveUrl(url) {
   return play;
 }
 
+function urlReturns200(url) {
+  const r = spawnSync(
+    'curl',
+    ['-sS', '-o', '/dev/null', '-w', '%{http_code}', '--max-time', '12', url],
+    { encoding: 'utf8' }
+  );
+  return String(r.stdout || '').trim() === '200';
+}
+
+async function confirmTunnel(tun) {
+  if (!tun?.url) return false;
+  const play = saveUrl(tun.url);
+  await new Promise((r) => setTimeout(r, 1200));
+  if (urlReturns200(play)) return true;
+  log('tunnel URL not reachable, trying next:', play);
+  try { tun.child.kill('SIGTERM'); } catch (_e) {}
+  return false;
+}
+
 async function startApp() {
   spawnSync('node', [join(ROOT, 'scripts/vercel-static-build.mjs')], {
     cwd: ROOT,
@@ -156,12 +175,12 @@ async function tunnelLocalhostRun() {
 async function main() {
   await startApp();
   let tun = await tunnelCloudflared();
-  if (!tun) tun = await tunnelLocalhostRun();
+  if (!(await confirmTunnel(tun))) tun = await tunnelLocalhostRun();
+  if (!(await confirmTunnel(tun))) tun = null;
   if (!tun) {
     console.error('[preview] no public tunnel. local only: http://127.0.0.1:' + PORT + '/harbin-mahjong.html');
     process.exit(1);
   }
-  saveUrl(tun.url);
   const stop = () => {
     tun.child.kill('SIGTERM');
     process.exit(0);
