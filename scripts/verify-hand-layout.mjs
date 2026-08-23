@@ -268,37 +268,44 @@ function promptHandOverlap(page){
   });
 }
 
-function ghostShapeReport(page){
-  return page.evaluate(() => {
-    const measure = (rootSel, axis) => {
-      const root = document.querySelector(rootSel);
-      if(!root) return { missing: true };
-      const ghosts = [...root.querySelectorAll('.discard-cell.river-ghost')].map(el => el.getBoundingClientRect());
-      const tiles = [...root.querySelectorAll('.tile')].map(el => el.getBoundingClientRect());
-      const g = ghosts[0];
-      const t = tiles[0];
-      const rows = new Set(ghosts.map(r => Math.round(r.top / 2) * 2));
-      const cols = new Set(ghosts.map(r => Math.round(r.left / 2) * 2));
-      return {
-        missing: false,
-        axis,
-        ghostCount: ghosts.length,
-        tileCount: tiles.length,
-        gw: g ? Math.round(g.width * 10) / 10 : 0,
-        gh: g ? Math.round(g.height * 10) / 10 : 0,
-        tw: t ? Math.round(t.width * 10) / 10 : 0,
-        th: t ? Math.round(t.height * 10) / 10 : 0,
-        uniqueRows: rows.size,
-        uniqueCols: cols.size,
-      };
-    };
+function riverTileSizeReport(page, sel){
+  return page.evaluate((sel) => {
+    const tiles = [...document.querySelectorAll(sel)].map(el => el.getBoundingClientRect());
+    if(!tiles.length) return { missing: true, minW: 0, minH: 0, count: 0 };
+    const minW = tiles.reduce((m, r) => Math.min(m, r.width), 99);
+    const minH = tiles.reduce((m, r) => Math.min(m, r.height), 99);
+    return { missing: false, minW: Math.round(minW * 10) / 10, minH: Math.round(minH * 10) / 10, count: tiles.length };
+  }, sel);
+}
+
+function sideMeldReport(page, side){
+  return page.evaluate((side) => {
+    const root = document.querySelector(side === 'left' ? '#left-area' : '#right-area');
+    const hand = root?.querySelector('.side-col');
+    const meld = root?.querySelector('.melds-row') || root?.querySelector('.meld-group');
+    if(!root || !hand || !meld) return { missing: true };
+    const h = hand.getBoundingClientRect();
+    const m = meld.getBoundingClientRect();
+    const overlapX = Math.min(h.right, m.right) - Math.max(h.left, m.left);
+    const gapX = overlapX > 0 ? 0 : (m.left >= h.right ? m.left - h.right : h.left - m.right);
+    const handMidY = (h.top + h.bottom) / 2;
+    const meldMidY = (m.top + m.bottom) / 2;
+    const dy = Math.abs(handMidY - meldMidY);
+    const felt = document.querySelector('.table-felt')?.getBoundingClientRect();
+    const tableH = felt ? felt.height : window.innerHeight;
+    const towardCenter = side === 'left'
+      ? m.left + 2 >= h.left
+      : m.right <= h.right + 2;
     return {
-      south: measure('#human-discards', 'row'),
-      north: measure('#north-discards', 'row'),
-      west: measure('#left-discards', 'row'),
-      east: measure('#right-discards', 'row'),
+      missing: false,
+      gapX: Math.round(gapX * 10) / 10,
+      dy: Math.round(dy * 10) / 10,
+      farCorner: dy > tableH * 0.28,
+      towardCenter,
+      meldLeft: Math.round(m.left),
+      handLeft: Math.round(h.left),
     };
-  });
+  }, side);
 }
 
 function riverSelfOverlap(page, sel){
@@ -570,42 +577,60 @@ for(const vp of viewports){
     west: document.querySelectorAll('#left-discards .discard-cell.river-ghost').length,
     east: document.querySelectorAll('#right-discards .discard-cell.river-ghost').length,
   }));
-  if(ghosts.south < 4 || ghosts.north < 4 || ghosts.west < 1 || ghosts.east < 1){
-    console.error(`[${vp.name}] river ghosts short: ${JSON.stringify(ghosts)}`);
+  if(ghosts.south || ghosts.north || ghosts.west || ghosts.east){
+    console.error(`[${vp.name}] river ghosts still present: ${JSON.stringify(ghosts)}`);
     failed = true;
   }else{
-    console.log(`[${vp.name}] river mats: ok ${JSON.stringify(ghosts)}`);
+    console.log(`[${vp.name}] river ghosts: none`);
   }
-  const shape = await ghostShapeReport(page);
-  for(const [seat, info] of Object.entries(shape)){
-    if(info.missing){
-      console.error(`[${vp.name}] ${seat} river missing for ghost shape`);
+  for(const [seat, sel] of [
+    ['west', '#left-discards .tile'],
+    ['east', '#right-discards .tile'],
+    ['south', '#human-discards .tile'],
+    ['north', '#north-discards .tile'],
+  ]){
+    const size = await riverTileSizeReport(page, sel);
+    if(size.missing || size.count < 1){
+      console.error(`[${vp.name}] ${seat} river tiles missing`);
       failed = true;
-      continue;
-    }
-    if(info.tileCount > 0 && (Math.abs(info.gw - info.tw) > 2 || Math.abs(info.gh - info.th) > 2)){
-      console.error(`[${vp.name}] ${seat} ghost size ${info.gw}x${info.gh} vs tile ${info.tw}x${info.th}`);
+    }else if((seat === 'west' || seat === 'east') && size.minW < 19.5){
+      console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=20)`);
       failed = true;
-    }
-    if(info.axis === 'row' && info.uniqueRows !== 1){
-      console.error(`[${vp.name}] ${seat} ghosts not one row rows=${info.uniqueRows} cols=${info.uniqueCols}`);
+    }else if((seat === 'south' || seat === 'north') && size.minW < 21.5){
+      console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=22)`);
       failed = true;
+    }else if(size.minW >= size.minH){
+      console.error(`[${vp.name}] ${seat} river tile not upright ${size.minW}x${size.minH}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] ${seat} river size: ok ${size.minW}x${size.minH}`);
     }
   }
-  const southG = shape.south;
-  if(!southG.missing && southG.gw > 0 && southG.gh > 0){
-    const northG = shape.north;
-    if(!northG.missing && (Math.abs(northG.gw - southG.gw) > 2 || Math.abs(northG.gh - southG.gh) > 2)){
-      console.error(`[${vp.name}] north ghost ${northG.gw}x${northG.gh} not same as south ${southG.gw}x${southG.gh}`);
+
+  await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    const pon = (suit, num) => {
+      const t = { suit, num };
+      return { type: 'pon', tiles: [t, t, t], calledTile: t, from: 0 };
+    };
+    G.players[1].melds = [pon('p', 6)];
+    G.players[3].melds = [pon('z', 7)];
+    if(typeof render === 'function') render();
+  });
+  await page.waitForTimeout(80);
+  for(const side of ['left', 'right']){
+    const meld = await sideMeldReport(page, side);
+    if(meld.missing){
+      console.error(`[${vp.name}] ${side} meld missing beside hand`);
       failed = true;
-    }
-    for(const seat of ['west', 'east']){
-      const info = shape[seat];
-      if(info.missing) continue;
-      if(info.gw >= info.gh){
-        console.error(`[${vp.name}] ${seat} ghost ${info.gw}x${info.gh} is not upright (want taller than wide)`);
-        failed = true;
-      }
+    }else if(meld.gapX > 16){
+      console.error(`[${vp.name}] ${side} meld gapX=${meld.gapX} from hand`);
+      failed = true;
+    }else if(meld.farCorner){
+      console.error(`[${vp.name}] ${side} meld drifted from hand dy=${meld.dy}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] ${side} meld beside hand: ok gapX=${meld.gapX} dy=${meld.dy}`);
     }
   }
 

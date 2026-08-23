@@ -842,50 +842,11 @@ body{
 .side-player{display:flex;align-items:flex-end;gap:3px;width:100%;min-height:0;flex:1 1 auto;overflow:visible;}
 #left-area .side-player{flex-direction:row;justify-content:flex-start;align-items:flex-end;}
 #right-area .side-player{flex-direction:row;justify-content:flex-end;align-items:flex-end;}
-/* 左右席: 手牌列と鳴き列を縦に積み、その席から見て鳴きが手牌の左に来るようにする（自家と同じ並び）。
-   左席=上から[鳴き][手牌]、右席=上から[手牌][鳴き] → 両席ともプレイヤー視点で鳴きが手牌の左。 */
-#left-area .side-rack{flex-direction:column-reverse;align-items:flex-start;gap:3px;}
-#right-area .side-rack{flex-direction:column-reverse;align-items:flex-end;gap:3px;}
+/* 左右席: 手牌列の卓心側に鳴きを横密着（06: 鳴きは手牌の横） */
+#left-area .side-rack{flex-direction:row;align-items:center;justify-content:flex-start;gap:4px;}
+#right-area .side-rack{flex-direction:row;align-items:center;justify-content:flex-end;gap:4px;}
 .west-discards{align-items:flex-end;justify-content:center;}
-.side-discards-zone .discard-strip.strip-side{
-  display:flex;
-  flex-direction:row;
-  flex-wrap:nowrap;
-  gap:2px;
-  align-items:flex-end;
-  justify-content:flex-start;
-  width:auto;
-  max-width:100%;
-  height:auto;
-  max-height:none;
-}
 .east-discards{align-items:flex-start;justify-content:center;}
-.east-discards .discard-strip.strip-side{
-  flex-direction:row-reverse;
-  align-items:flex-end;
-  justify-content:flex-end;
-}
-.side-discards-zone .discard-row-sidecol{
-  display:flex;
-  flex-direction:column;
-  flex-wrap:nowrap;
-  gap:0;
-  align-items:center;
-}
-.side-discards-zone .discard-strip.strip-side .tile{flex:0 0 auto;}
-/* 2段時は牌をやや小さく（自家捨て牌の lg 縮尺に近づける） */
-.side-discards-zone .discard-strip.strip-side-compact{
-  --side-disc-w:min(26px,calc((100vw - 96px) / 18));
-  --side-disc-h:min(37px,calc((100vw - 96px) / 18 * 1.42),8.5dvh);
-}
-.side-discards-zone .discard-strip.strip-side-compact .tile.hand-face.opp-hand{
-  --opp-face-w:var(--side-disc-w);
-  --opp-face-h:var(--side-disc-h);
-  width:var(--opp-face-w);
-  height:var(--opp-face-h);
-}
-.side-discards-zone .discard-strip.strip-side-compact .discard-row-sidecol{gap:0;}
-.side-discards-zone .discard-strip.strip-side-compact .discard-river-mat{padding:2px 3px;}
 .side-stack{
   display:flex;
   flex:1;
@@ -1057,9 +1018,9 @@ body{
   padding:2px;
   box-shadow:none;
 }
-.discard-row-6:not(.discard-row-sidecol):not(.discard-row-side-river){
+.discard-row-6{
   display:grid;
-  grid-template-columns:repeat(6, var(--river-tile-w, 18px));
+  grid-template-columns:repeat(6, var(--river-tile-w, 22px));
   gap:2px;
   justify-content:center;
   align-items:end;
@@ -1067,13 +1028,7 @@ body{
   max-width:100%;
 }
 .discard-row-6.discard-row-3{
-  grid-template-columns:repeat(3, var(--river-tile-w, 18px));
-}
-.discard-row-sidecol{
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-  align-items:center;
+  grid-template-columns:repeat(3, var(--river-tile-w, 22px));
 }
 .discard-cell{display:flex;align-items:center;justify-content:center;}
 .discard-cell.river-ghost{
@@ -1554,7 +1509,6 @@ body{
 #top-area .tiles-row,
 #top-area .melds-row,
 .side-player,
-.side-discards-zone .discard-strip.strip-side,
 .discard-river-mat,
 #left-area .side-col,
 #right-area .side-col{
@@ -1568,7 +1522,6 @@ body{
 #top-area .tiles-row::-webkit-scrollbar,
 #top-area .melds-row::-webkit-scrollbar,
 .side-player::-webkit-scrollbar,
-.side-discards-zone .discard-strip.strip-side::-webkit-scrollbar,
 .discard-river-mat::-webkit-scrollbar,
 #left-area .side-col::-webkit-scrollbar,
 #right-area .side-col::-webkit-scrollbar{
@@ -2261,23 +2214,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   margin-bottom:0;
 }
 
-/* === 左右席の捨て牌・鳴き牌: 回転後の見た目サイズで詰める === */
-.felt-heart .west-discards .discard-strip.strip-side,
-.felt-heart .east-discards .discard-strip.strip-side{
-  gap:2px;
-}
-.felt-heart .west-discards .discard-row-sidecol,
-.felt-heart .east-discards .discard-row-sidecol{
-  width:var(--side-tile-h);
-}
-.felt-heart .west-discards .discard-row-sidecol .discard-cell,
-.felt-heart .east-discards .discard-row-sidecol .discard-cell{
-  margin-bottom:calc(var(--side-tile-w) - var(--side-tile-h) - 1px);
-}
-.felt-heart .west-discards .discard-row-sidecol .discard-cell:last-child,
-.felt-heart .east-discards .discard-row-sidecol .discard-cell:last-child{
-  margin-bottom:0;
-}
+/* === 左右席の鳴き牌: 回転後の見た目サイズで手牌列に詰める === */
 #middle-area #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
 #middle-area #right-area .side-rack .meld-group .tile.hand-face.opp-hand{
   margin:0 0 calc(var(--side-tile-w) - var(--side-tile-h) - 1px) 0;
@@ -2502,7 +2439,7 @@ body.playing #action-bar{
 }
 .mj-table .felt-play-column{
   display:grid;
-  grid-template-columns:minmax(40px,.14fr) minmax(0,1fr) minmax(40px,.14fr);
+  grid-template-columns:minmax(52px,.18fr) minmax(0,1fr) minmax(52px,.18fr);
   grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-areas:
     "n n n"
@@ -2524,18 +2461,18 @@ body.playing #action-bar{
   box-shadow:none;
   border-radius:0;
   padding:2px 0;
-  overflow:hidden;
+  overflow:visible;
   min-height:0;
   max-height:100%;
   justify-content:center;
   width:auto;
-  max-width:min(28vw,88px);
+  max-width:min(34vw,120px);
 }
 .mj-table #left-area{grid-area:w;}
 .mj-table #right-area{grid-area:e;}
 .mj-table #left-area .side-col,
 .mj-table #right-area .side-col{
-  overflow-x:hidden;
+  overflow-x:visible;
 }
 .mj-table #center-area{
   grid-area:c;
@@ -2562,7 +2499,7 @@ body.playing #action-bar{
   height:100%;
   max-width:100%;
   overflow:hidden;
-  --river-tile-w:max(16px, min(24px, calc((100% - 20px) / 6)));
+  --river-tile-w:max(22px, min(28px, calc((100% - 20px) / 6)));
   --river-tile-h:calc(var(--river-tile-w) * 1.42);
 }
 .mj-table .felt-compass.table-hub{
@@ -2600,7 +2537,7 @@ body.playing #action-bar{
   width:100%;
   max-width:100%;
   flex-shrink:1;
-  --river-tile-w:max(14px, min(22px, calc((100% - 8px) / 3)));
+  --river-tile-w:max(20px, min(26px, calc((100% - 8px) / 3)));
   --river-tile-h:calc(var(--river-tile-w) * 1.42);
 }
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:stretch;align-self:center;display:flex;justify-content:flex-end;}
@@ -2700,7 +2637,7 @@ body.playing #action-bar{
   max-width:100%;
   justify-content:center;
   box-sizing:border-box;
-  padding:16px 4px 10px;
+  padding:16px 8px 10px;
   align-items:flex-end;
 }
 .mj-table .human-rack #human-hand{
@@ -2710,8 +2647,8 @@ body.playing #action-bar{
 }
 .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
 .mj-table .human-rack #human-hand .tile.hand-face.lg{
-  width:min(34px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
-  height:min(46px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 10svh);
+  width:min(34px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
+  height:min(46px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 10svh);
   flex-shrink:0;
 }
 .mj-table .human-rack .meld-group .tile.lg{
@@ -2720,10 +2657,25 @@ body.playing #action-bar{
 }
 .mj-table .side-player{
   flex:0 0 auto;
-  overflow:hidden;
+  overflow:visible;
   align-items:center;
   justify-content:center;
 }
+.mj-table #left-area .side-player,
+.mj-table #right-area .side-player{
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+}
+.mj-table #left-area .side-rack,
+.mj-table #right-area .side-rack{
+  flex-direction:row;
+  align-items:center;
+  gap:4px;
+  max-width:100%;
+}
+.mj-table #left-area .side-rack{justify-content:flex-start;}
+.mj-table #right-area .side-rack{justify-content:flex-end;}
 .mj-table #left-area .seat-plate,
 .mj-table #right-area .seat-plate{
   max-width:100%;
@@ -2871,16 +2823,16 @@ body.playing #action-bar .btn-menu{
   .mj-table #top-area{padding:0;}
   .mj-table .hub-screen{width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);max-width:52px;max-height:52px;}
   .mj-table #left-area,
-  .mj-table #right-area{max-width:min(22vw,80px);}
+  .mj-table #right-area{max-width:min(28vw,100px);}
   .mj-table #center-area.felt-heart{
     gap:2px 4px;
-    --river-tile-w:max(14px, min(22px, calc((100% - 16px) / 6)));
+    --river-tile-w:max(20px, min(26px, calc((100% - 16px) / 6)));
     --river-tile-h:calc(var(--river-tile-w) * 1.42);
   }
   .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
   .mj-table .human-rack #human-hand .tile.hand-face.lg{
-    width:min(28px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
-    height:min(36px, calc((100cqi - 20px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 9svh);
+    width:min(28px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
+    height:min(36px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 9svh);
   }
   body.playing #action-bar.action-dock,
   body.playing #action-bar{
@@ -7456,30 +7408,6 @@ function renderFeltWallOrnaments(){
   return '';
 }
 
-/** 左右席: 1列6枚で次列（実卓の牌河。3列超えたらコンパクト） */
-const SIDE_DISCARD_ROW_CAP=6;
-
-function riverGhostCell(){
-  return '<div class="discard-cell river-ghost" aria-hidden="true"></div>';
-}
-function padRiverCells(htmlCells, cap){
-  const out=htmlCells.slice();
-  while(out.length<cap) out.push(riverGhostCell());
-  return out;
-}
-function renderSideDiscardRiver(tiles, cls, cellHtml){
-  let cols=chunkEvery(tiles||[],SIDE_DISCARD_ROW_CAP);
-  if(!cols.length) cols=[[]];
-  const compact=cols.length>3;
-  const stripCls=`discard-strip ${cls} strip-side${compact?' strip-side-compact':''}`;
-  const inner=cols.map((col,i)=>{
-    let cells=col.map(cellHtml);
-    if(cols.length===1||i===cols.length-1) cells=padRiverCells(cells,SIDE_DISCARD_ROW_CAP);
-    return `<div class="discard-row discard-row-sidecol">${cells.join('')}</div>`;
-  }).join('');
-  return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
-}
-
 function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
   const list=tiles||[];
   const tileCls=size;
@@ -7501,14 +7429,12 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
     return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
   };
-  let rows=chunkEvery(list,(cls==='left'||cls==='right')?3:6);
-  if(!rows.length) rows=[[]];
   const rowCap=(cls==='left'||cls==='right')?3:6;
-  const inner=rows.map((row,i)=>{
-    let cells=row.map(cellHtml);
-    if(rows.length===1||i===rows.length-1) cells=padRiverCells(cells,rowCap);
-    return `<div class="discard-row discard-row-6${rowCap===3?' discard-row-3':''}">${cells.join('')}</div>`;
-  }).join('');
+  if(!list.length){
+    return `<div class="discard-river-mat is-empty"><div class="${stripCls}"></div></div>`;
+  }
+  const rows=chunkEvery(list,rowCap);
+  const inner=rows.map(row=>`<div class="discard-row discard-row-6${rowCap===3?' discard-row-3':''}">${row.map(cellHtml).join('')}</div>`).join('');
   return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
 
