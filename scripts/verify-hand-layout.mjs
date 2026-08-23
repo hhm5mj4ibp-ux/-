@@ -497,6 +497,56 @@ for(const vp of viewports){
     console.log(`[${vp.name}] prompt vs hand: ok`);
   }
 
+  await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    G.dealCinemaActive = false;
+    for(const p of G.players) p.discards = [];
+    if(typeof render === 'function') render();
+  });
+  await page.waitForTimeout(80);
+  const emptyMats = await page.evaluate(() => {
+    const one = (sel) => {
+      const el = document.querySelector(sel);
+      if(!el) return { missing: true };
+      const r = el.getBoundingClientRect();
+      return {
+        missing: false,
+        w: Math.round(r.width * 10) / 10,
+        h: Math.round(r.height * 10) / 10,
+        ghosts: el.querySelectorAll('.discard-cell.river-ghost').length,
+        tiles: el.querySelectorAll('.tile').length,
+        empty: !!el.querySelector('.discard-river-mat.is-empty'),
+      };
+    };
+    return {
+      south: one('#human-discards'),
+      north: one('#north-discards'),
+      west: one('#left-discards'),
+      east: one('#right-discards'),
+    };
+  });
+  for(const [seat, wantW] of [['south', 120], ['north', 120], ['west', 56], ['east', 56]]){
+    const mat = emptyMats[seat];
+    if(!mat || mat.missing){
+      console.error(`[${vp.name}] empty ${seat} river missing`);
+      failed = true;
+    }else if(mat.ghosts){
+      console.error(`[${vp.name}] empty ${seat} river still has ghosts n=${mat.ghosts}`);
+      failed = true;
+    }else if(mat.tiles){
+      console.error(`[${vp.name}] empty ${seat} river unexpectedly has tiles n=${mat.tiles}`);
+      failed = true;
+    }else if(!mat.empty){
+      console.error(`[${vp.name}] empty ${seat} river missing is-empty mat`);
+      failed = true;
+    }else if(mat.w < wantW || mat.h < 24){
+      console.error(`[${vp.name}] empty ${seat} river collapsed ${mat.w}x${mat.h} (want >=${wantW}x24)`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] empty ${seat} river mat: ok ${mat.w}x${mat.h}`);
+    }
+  }
+
   await injectCenteredRivers(page);
   const rivers = await riverOverlapReport(page);
   if(!rivers.inHeart){
@@ -604,6 +654,26 @@ for(const vp of viewports){
       failed = true;
     }else{
       console.log(`[${vp.name}] ${seat} river size: ok ${size.minW}x${size.minH}`);
+    }
+    const art = await page.evaluate((sel) => {
+      const tiles = [...document.querySelectorAll(sel)];
+      if(!tiles.length) return { missing: true };
+      let minArtH = 99, minArtW = 99, minImgH = 99;
+      for(const t of tiles){
+        const artEl = t.querySelector('.tile-art');
+        const img = t.querySelector('.tile-art-img');
+        const ar = artEl?.getBoundingClientRect();
+        const ir = img?.getBoundingClientRect();
+        if(ar){ minArtH = Math.min(minArtH, ar.height); minArtW = Math.min(minArtW, ar.width); }
+        if(ir) minImgH = Math.min(minImgH, ir.height);
+      }
+      return { missing: false, minArtH: Math.round(minArtH * 10) / 10, minArtW: Math.round(minArtW * 10) / 10, minImgH: Math.round(minImgH * 10) / 10 };
+    }, sel);
+    if(art.missing || art.minArtH < 16 || art.minArtW < 14 || art.minImgH < 40){
+      console.error(`[${vp.name}] ${seat} river art missing/collapsed ${JSON.stringify(art)}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] ${seat} river art: ok ${art.minArtW}x${art.minArtH} imgH=${art.minImgH}`);
     }
   }
 

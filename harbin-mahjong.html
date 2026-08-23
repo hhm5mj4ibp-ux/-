@@ -1487,9 +1487,9 @@ body{
 .human-rack #human-hand .tile.hand-face.lg{width:min(34px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(48px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),10dvh);font-size:clamp(9px,2.2vw,16px);}
 /* 自家捨て・鳴き: 7198（手札 hand-face とは別） */
 #human-discards .tile.lg{
-  width:100%;
-  height:inherit;
-  min-height:inherit;
+  width:var(--river-tile-w, 22px);
+  height:var(--river-tile-h, 31px);
+  min-height:var(--river-tile-h, 31px);
   font-size:clamp(8px,2vw,12px);
 }
 .human-rack .meld-group .tile.lg{
@@ -1543,7 +1543,7 @@ body{
   margin:0 auto;
   padding:0;
   box-sizing:border-box;
-  overflow:hidden;
+  overflow:visible;
   flex-shrink:0;
   min-width:0;
 }
@@ -1551,7 +1551,7 @@ body{
   width:max-content;
   max-width:100%;
   padding:3px 4px;
-  overflow:hidden;
+  overflow:visible;
   box-sizing:border-box;
 }
 .discard-strip{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;}
@@ -2529,7 +2529,7 @@ body.playing #action-bar{
   max-width:100%;
   margin:0;
   padding:0;
-  overflow:hidden;
+  overflow:visible;
 }
 .mj-table .felt-heart .west-discards,
 .mj-table .felt-heart .east-discards{
@@ -2559,19 +2559,25 @@ body.playing #action-bar{
 .mj-table .felt-heart .west-discards .tile.lg,
 .mj-table .felt-heart .east-discards .tile.lg,
 .mj-table .felt-heart #human-discards .tile.lg{
-  width:100%;
-  height:inherit;
-  min-width:0;
-  min-height:inherit;
-  max-height:none;
+  width:var(--river-tile-w);
+  height:var(--river-tile-h);
+  min-width:var(--river-tile-w);
+  min-height:var(--river-tile-h);
+  max-height:var(--river-tile-h);
   flex:none;
   align-self:stretch;
   box-sizing:border-box;
+  display:block;
   font-size:clamp(7px,1.8vw,11px);
 }
 .mj-table .felt-heart .discard-cell .tile-art{
-  width:100%;
-  height:calc(100% - 3px);
+  position:absolute;
+  left:1px;
+  right:1px;
+  top:1px;
+  bottom:12%;
+  width:auto;
+  height:auto;
 }
 .mj-table .felt-heart .north-discards .discard-river-mat,
 .mj-table .felt-heart .west-discards .discard-river-mat,
@@ -2579,6 +2585,19 @@ body.playing #action-bar{
 .mj-table .felt-heart #human-discards .discard-river-mat{
   width:max-content;
   max-width:100%;
+}
+.mj-table .felt-heart .discard-river-mat.is-empty{
+  --river-cols:6;
+  box-sizing:border-box;
+  min-width:calc(var(--river-tile-w) * var(--river-cols) + 10px);
+  min-height:calc(var(--river-tile-h) + 8px);
+  background:rgba(4,22,8,.28);
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.06);
+  border-radius:4px;
+}
+.mj-table .felt-heart .west-discards .discard-river-mat.is-empty,
+.mj-table .felt-heart .east-discards .discard-river-mat.is-empty{
+  --river-cols:3;
 }
 .mj-table #bottom-area{
   grid-area:s;
@@ -3480,7 +3499,8 @@ const I18N={
     ktGachaSub:'何が出るかな…？',
     ktRevealLine:'来た！',
     ktTensionLine:'この一枚を切る瞬間…誰かの上がりを運ばないか、胸がザワザワする',
-    chooseDiscard:'牌を選んで捨てましょう（先出後引き）',
+    chooseDiscard:'牌を1回タップして選び、もう一度タップして捨てます（先出後引き）',
+    tapAgainToDiscard:'もう一度タップして捨てる',
     clickToDiscard:'クリックして捨てる',
     drawTile:'牌を引く',
     tsumo:'ツモ！',
@@ -3638,7 +3658,8 @@ const I18N={
     ktGachaSub:'会摸到什么呢？',
     ktRevealLine:'是这张！',
     ktTensionLine:'打出去的瞬间…会不会帮别人点和？心里一紧',
-    chooseDiscard:'请选择要打出的牌（先出后摸）',
+    chooseDiscard:'点一次选牌，再点一次打出（先出后摸）',
+    tapAgainToDiscard:'再点一次打出',
     clickToDiscard:'点击手牌打出',
     drawTile:'摸牌',
     tsumo:'自摸！',
@@ -7429,7 +7450,7 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
   };
   const rowCap=(cls==='left'||cls==='right')?3:6;
   if(!list.length){
-    return `<div class="discard-river-mat is-empty"><div class="${stripCls}"></div></div>`;
+    return `<div class="discard-river-mat is-empty" style="--river-cols:${rowCap}"><div class="${stripCls}"></div></div>`;
   }
   const rows=chunkEvery(list,rowCap);
   const inner=rows.map(row=>`<div class="discard-row discard-row-6${rowCap===3?' discard-row-3':''}">${row.map(cellHtml).join('')}</div>`).join('');
@@ -7953,8 +7974,11 @@ function render(){
   const pendingTilePopup = showCallHint
     ? `<span class="callout-tile callout-compact" role="status"><strong>${playerLabelByIdx[G.pendingFrom]}</strong>${tr('callHintDiscard','の捨て牌')} <strong>${tileName(G.pendingDiscard)}</strong> ${tr('callHintAction','に対して行動できます')}</span>`
     : '';
-  const slipHtml = !showCallHint && (G.msg||'').trim()
-    ? `<div class="message mj-slip">${escapeHtmlText(G.msg).replace(/\n/g,' ')}</div>`
+  const slipText = (canHumanDiscard && UI.handSelectIdx!=null)
+    ? tr('tapAgainToDiscard','もう一度タップして捨てる')
+    : (G.msg||'');
+  const slipHtml = !showCallHint && slipText.trim()
+    ? `<div class="message mj-slip">${escapeHtmlText(slipText).replace(/\n/g,' ')}</div>`
     : '';
   const tablePrompt = (slipHtml || pendingTilePopup)
     ? `<div id="table-prompt">${slipHtml}${pendingTilePopup}</div>`
