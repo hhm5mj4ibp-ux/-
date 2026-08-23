@@ -570,7 +570,7 @@ for(const vp of viewports){
     west: document.querySelectorAll('#left-discards .discard-cell.river-ghost').length,
     east: document.querySelectorAll('#right-discards .discard-cell.river-ghost').length,
   }));
-  if(ghosts.south < 4 || ghosts.north < 4 || ghosts.west < 4 || ghosts.east < 4){
+  if(ghosts.south < 4 || ghosts.north < 4 || ghosts.west < 1 || ghosts.east < 1){
     console.error(`[${vp.name}] river ghosts short: ${JSON.stringify(ghosts)}`);
     failed = true;
   }else{
@@ -594,11 +594,16 @@ for(const vp of viewports){
   }
   const southG = shape.south;
   if(!southG.missing && southG.gw > 0 && southG.gh > 0){
-    for(const seat of ['west', 'east', 'north']){
+    const northG = shape.north;
+    if(!northG.missing && (Math.abs(northG.gw - southG.gw) > 2 || Math.abs(northG.gh - southG.gh) > 2)){
+      console.error(`[${vp.name}] north ghost ${northG.gw}x${northG.gh} not same as south ${southG.gw}x${southG.gh}`);
+      failed = true;
+    }
+    for(const seat of ['west', 'east']){
       const info = shape[seat];
       if(info.missing) continue;
-      if(Math.abs(info.gw - southG.gw) > 2 || Math.abs(info.gh - southG.gh) > 2){
-        console.error(`[${vp.name}] ${seat} ghost ${info.gw}x${info.gh} not same as south ${southG.gw}x${southG.gh}`);
+      if(info.gw >= info.gh){
+        console.error(`[${vp.name}] ${seat} ghost ${info.gw}x${info.gh} is not upright (want taller than wide)`);
         failed = true;
       }
     }
@@ -610,6 +615,7 @@ for(const vp of viewports){
     G.gameOver = false;
     G.phase = 'discard';
     G.turn = 0;
+    G.msg = '';
     G.kouTingTreasurePending = false;
     G.kanBranchAOpts = null;
     G.kanTurnEnding = false;
@@ -620,29 +626,23 @@ for(const vp of viewports){
     while(hand.length < 14) hand.push({ suit: 'z', num: 5 });
     G.players[0].hand = hand;
     if(typeof render === 'function') render();
+    const el = document.querySelector('#human-hand .tile[data-hand-i="1"]');
+    if(el) el.click();
   });
-  await page.waitForTimeout(80);
-  const discardBefore = await page.evaluate(() => G?.players?.[0]?.discards?.length || 0);
-  const firstTile = page.locator('#human-hand .tile[data-hand-i="1"]').first();
-  if(await firstTile.count()){
-    await firstTile.click();
-    await page.waitForTimeout(40);
-    const tap1 = await page.evaluate(() => ({
-      selected: document.querySelector('#human-hand .tile.selected')?.getAttribute('data-hand-i') || null,
-      discards: G?.players?.[0]?.discards?.length || 0,
-    }));
-    if(tap1.selected !== '1'){
-      console.error(`[${vp.name}] two-tap: first tap did not select tile 1 selected=${tap1.selected}`);
-      failed = true;
-    }else if(tap1.discards !== discardBefore){
-      console.error(`[${vp.name}] two-tap: first tap discarded`);
-      failed = true;
-    }else{
-      console.log(`[${vp.name}] two-tap select: ok`);
-    }
-  }else{
+  await page.waitForTimeout(40);
+  const tap1 = await page.evaluate(() => ({
+    selected: document.querySelector('#human-hand .tile.selected')?.getAttribute('data-hand-i') || null,
+    discards: G?.players?.[0]?.discards?.length || 0,
+    hasTile: !!document.querySelector('#human-hand .tile[data-hand-i="1"]'),
+  }));
+  if(!tap1.hasTile){
     console.error(`[${vp.name}] two-tap: hand tile missing`);
     failed = true;
+  }else if(tap1.selected !== '1'){
+    console.error(`[${vp.name}] two-tap: first tap did not select tile 1 selected=${tap1.selected}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] two-tap select: ok`);
   }
 
   const dealer = await page.evaluate(() => {

@@ -1066,6 +1066,9 @@ body{
   width:max-content;
   max-width:100%;
 }
+.discard-row-6.discard-row-3{
+  grid-template-columns:repeat(3, var(--river-tile-w, 18px));
+}
 .discard-row-sidecol{
   display:flex;
   flex-direction:column;
@@ -2559,7 +2562,7 @@ body.playing #action-bar{
   height:100%;
   max-width:100%;
   overflow:hidden;
-  --river-tile-w:max(11px, min(22px, calc((100% - 108px) / 12)));
+  --river-tile-w:max(16px, min(24px, calc((100% - 20px) / 6)));
   --river-tile-h:calc(var(--river-tile-w) * 1.42);
 }
 .mj-table .felt-compass.table-hub{
@@ -2597,6 +2600,8 @@ body.playing #action-bar{
   width:100%;
   max-width:100%;
   flex-shrink:1;
+  --river-tile-w:max(14px, min(22px, calc((100% - 8px) / 3)));
+  --river-tile-h:calc(var(--river-tile-w) * 1.42);
 }
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:stretch;align-self:center;display:flex;justify-content:flex-end;}
 .mj-table .felt-heart .east-discards{grid-area:e;justify-self:stretch;align-self:center;display:flex;justify-content:flex-start;}
@@ -2869,7 +2874,7 @@ body.playing #action-bar .btn-menu{
   .mj-table #right-area{max-width:min(22vw,80px);}
   .mj-table #center-area.felt-heart{
     gap:2px 4px;
-    --river-tile-w:max(11px, min(20px, calc((100% - 96px) / 12)));
+    --river-tile-w:max(14px, min(22px, calc((100% - 16px) / 6)));
     --river-tile-h:calc(var(--river-tile-w) * 1.42);
   }
   .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
@@ -7496,12 +7501,13 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
     return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
   };
-  let rows=chunkEvery(list,6);
+  let rows=chunkEvery(list,(cls==='left'||cls==='right')?3:6);
   if(!rows.length) rows=[[]];
+  const rowCap=(cls==='left'||cls==='right')?3:6;
   const inner=rows.map((row,i)=>{
     let cells=row.map(cellHtml);
-    if(rows.length===1||i===rows.length-1) cells=padRiverCells(cells,6);
-    return `<div class="discard-row discard-row-6">${cells.join('')}</div>`;
+    if(rows.length===1||i===rows.length-1) cells=padRiverCells(cells,rowCap);
+    return `<div class="discard-row discard-row-6${rowCap===3?' discard-row-3':''}">${cells.join('')}</div>`;
   }).join('');
   return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
