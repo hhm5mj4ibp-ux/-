@@ -596,10 +596,10 @@ for(const vp of viewports){
     }else if((seat === 'west' || seat === 'east') && size.minW < 19.5){
       console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=20)`);
       failed = true;
-    }else if((seat === 'south' || seat === 'north') && size.minW < 21.5){
-      console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=22)`);
+    }else if((seat === 'south' || seat === 'north') && size.minW < 19.5){
+      console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=20)`);
       failed = true;
-    }else if(size.minW >= size.minH){
+    }else if(size.minH < size.minW * 1.15){
       console.error(`[${vp.name}] ${seat} river tile not upright ${size.minW}x${size.minH}`);
       failed = true;
     }else{

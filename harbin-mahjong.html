@@ -1487,8 +1487,9 @@ body{
 .human-rack #human-hand .tile.hand-face.lg{width:min(34px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(48px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),10dvh);font-size:clamp(9px,2.2vw,16px);}
 /* 自家捨て・鳴き: 7198（手札 hand-face とは別） */
 #human-discards .tile.lg{
-  width:var(--river-tile-w, min(24px, 5.2vw));
-  height:var(--river-tile-h, min(34px, calc(5.2vw * 1.42), 8.5dvh));
+  width:100%;
+  height:inherit;
+  min-height:inherit;
   font-size:clamp(8px,2vw,12px);
 }
 .human-rack .meld-group .tile.lg{
@@ -2550,30 +2551,27 @@ body.playing #action-bar{
   min-width:var(--river-tile-w);
   height:var(--river-tile-h);
   min-height:var(--river-tile-h);
-}
-.mj-table .felt-heart .discard-cell.river-ghost{
-  width:var(--river-tile-w);
-  height:var(--river-tile-h);
-  min-width:var(--river-tile-w);
-  min-height:var(--river-tile-h);
-  border:none;
-  background:rgba(255,255,255,.06);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
-  opacity:.38;
-}
-.mj-table .felt-heart #center-hud{
-  grid-area:hub;
-  min-width:0;
-  max-width:100%;
-  overflow:hidden;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
 }
 .mj-table .felt-heart .north-discards .tile.lg,
 .mj-table .felt-heart .west-discards .tile.lg,
 .mj-table .felt-heart .east-discards .tile.lg,
 .mj-table .felt-heart #human-discards .tile.lg{
-  width:var(--river-tile-w);
-  height:var(--river-tile-h);
+  width:100%;
+  height:inherit;
+  min-width:0;
+  min-height:inherit;
+  max-height:none;
+  flex:none;
+  align-self:stretch;
+  box-sizing:border-box;
   font-size:clamp(7px,1.8vw,11px);
+}
+.mj-table .felt-heart .discard-cell .tile-art{
+  width:100%;
+  height:calc(100% - 3px);
 }
 .mj-table .felt-heart .north-discards .discard-river-mat,
 .mj-table .felt-heart .west-discards .discard-river-mat,
