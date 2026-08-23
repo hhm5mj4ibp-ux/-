@@ -518,6 +518,38 @@ for(const vp of viewports){
       failed = true;
     }
   }
+  const southG = shape.south;
+  if(!southG.missing && southG.gw > 0 && southG.gh > 0){
+    for(const seat of ['west', 'east']){
+      const info = shape[seat];
+      if(info.missing) continue;
+      if(Math.abs(info.gw - southG.gh) > 2 || Math.abs(info.gh - southG.gw) > 2){
+        console.error(`[${vp.name}] ${seat} ghost ${info.gw}x${info.gh} not rotated south ${southG.gw}x${southG.gh}`);
+        failed = true;
+      }
+      if(info.gw + 0.5 < southG.gw){
+        console.error(`[${vp.name}] ${seat} ghost thinner than south ${info.gw} < ${southG.gw}`);
+        failed = true;
+      }
+    }
+  }
+
+  const dealer = await page.evaluate(() => {
+    const marks = [...document.querySelectorAll('.dealer-mark, .dealer-wind-pip')];
+    return {
+      count: marks.length,
+      texts: marks.map(el => (el.textContent || '').trim()),
+    };
+  });
+  if(dealer.count < 1){
+    console.error(`[${vp.name}] dealer mark missing`);
+    failed = true;
+  }else if(dealer.texts.some(t => /^(東|南|西|北|东)$/.test(t))){
+    console.error(`[${vp.name}] dealer mark looks like wind: ${JSON.stringify(dealer.texts)}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] dealer mark ok ${JSON.stringify(dealer.texts)}`);
+  }
 
   if(vp.name === 'iphone-portrait' || vp.name === 'iphone-portrait-safari' || vp.name === 'iphone-landscape'){
     const shotPath = join(root, 'scripts', 'screenshots', `rivers-${vp.name}.png`);

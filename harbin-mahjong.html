@@ -1078,6 +1078,7 @@ body{
   height:var(--river-tile-h, 26px);
   min-width:var(--river-tile-w, 18px);
   min-height:var(--river-tile-h, 26px);
+  flex-shrink:0;
   box-sizing:border-box;
   border:none;
   border-radius:3px;
@@ -1398,21 +1399,22 @@ body{
   padding:2px 6px 2px 3px;
   gap:4px;
 }
-.dealer-wind-pip{
+.dealer-mark{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   min-width:22px;
   height:20px;
   padding:0 5px;
-  margin-left:3px;
+  flex-shrink:0;
   border-radius:4px;
-  background:linear-gradient(180deg,#2f62c4,#1a3d8a);
-  border:1px solid rgba(180,210,255,.45);
-  color:#fff;
+  background:linear-gradient(180deg,#e8c56a,#b8862a);
+  border:1px solid #6a4410;
+  color:#2a1608;
   font-size:11px;
   font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 4px rgba(0,0,0,.35);
+  letter-spacing:.04em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.28);
 }
 #bottom-area #human-hand .tile.tsumo-separated{margin-left:clamp(6px,1.8vw,12px);}
 #bottom-area #human-hand .tile.just-drawn:not(.back)::after{content:none;}
@@ -2178,7 +2180,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .seat-plate-wind{min-width:16px;height:16px;font-size:9px;}
   .seat-plate-name,.seat-plate-score{font-size:9px;line-height:1.1;}
   #bottom-area .player-label{padding:0;}
-  .dealer-wind-pip{min-width:16px;height:16px;padding:0 3px;font-size:9px;}
+  .dealer-mark{min-width:16px;height:16px;padding:0 3px;font-size:9px;}
   .hub-screen{width:clamp(44px,12vw,56px);height:clamp(44px,12vw,56px);max-width:56px;max-height:56px;padding:4px 3px;border-width:2px;}
   .hub-line1{font-size:9px;}
   .hub-line2{font-size:8px;}
@@ -2587,11 +2589,18 @@ body.playing #action-bar{
   padding:0;
   overflow:hidden;
 }
+.mj-table .felt-heart .west-discards,
+.mj-table .felt-heart .east-discards{
+  overflow:visible;
+  min-width:max-content;
+  flex-shrink:0;
+}
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:end;align-self:center;}
 .mj-table .felt-heart .east-discards{grid-area:e;justify-self:start;align-self:center;}
 .mj-table .felt-heart #human-discards{grid-area:s;justify-self:center;align-self:start;}
 .mj-table .felt-heart .discard-cell{
   box-sizing:border-box;
+  flex-shrink:0;
 }
 .mj-table .felt-heart .north-discards .discard-cell,
 .mj-table .felt-heart #human-discards .discard-cell{
@@ -2623,6 +2632,7 @@ body.playing #action-bar{
   height:var(--river-tile-w);
   min-width:var(--river-tile-h);
   min-height:var(--river-tile-w);
+  flex-shrink:0;
 }
 .mj-table .felt-heart #center-hud{
   grid-area:hub;
@@ -3478,6 +3488,7 @@ const I18N={
     matchFinish:'セット結果',
     matchRound:'第{n} / {t}局',
     dealerRoll:'親決め',
+    dealerShort:'親',
     dealerRouletteSpin:'ルーレット回転中…',
     dealerIs:'{name}が親',
     seatSelf:'手前',
@@ -3635,6 +3646,7 @@ const I18N={
     matchFinish:'本盘结果',
     matchRound:'第{n} / {t}局',
     dealerRoll:'定庄',
+    dealerShort:'庄',
     dealerRouletteSpin:'轮盘转动中…',
     dealerIs:'{name}为庄家',
     seatSelf:'本家',
@@ -7570,8 +7582,8 @@ function renderSeatHand(p, faceSize, side=false, seatStyle=null){
 
 function dealerMark(i){
   if(!G||G.dealer!==i) return '';
-  const ch=UI.lang==='zh'?'庄':tr('windEast','東');
-  return ` <span class="dealer-wind-pip" title="${UI.lang==='zh'?'庄家':'親'}">${escapeHtmlText(ch)}</span>`;
+  const ch=tr('dealerShort', UI.lang==='zh'?'庄':'親');
+  return `<span class="dealer-mark" title="${escapeHtmlText(ch)}">${escapeHtmlText(ch)}</span>`;
 }
 
 function tileName(t){
@@ -8040,12 +8052,16 @@ function render(){
     const p=G.players[viewSeat];
     const isTurn=G.turn===viewSeat;
     const wind=windLabelForView(viewSeat,dealerRealHub);
-    const name=escapeHtmlText(viewSeat===0?sideName(0):p.name);
+    const rawName=viewSeat===0?sideName(0):(p.name||'');
+    const name=escapeHtmlText(rawName);
+    const showName=!!rawName && rawName!==wind;
     const meldHint=viewSeat!==0&&p.melds.length>0?` [${p.melds.length}${tr('calledCount','鳴')}]`:'';
+    const dealer=dealerMark(viewSeat);
     return `<div class="player-label player-label-rim seat-plate${isTurn?' is-turn':''}">
       <span class="seat-plate-wind">${escapeHtmlText(wind)}</span>
+      ${dealer}
       <span class="seat-plate-body">
-        <span class="seat-plate-name rim-name">${dealerMark(viewSeat)}${name}${meldHint} ${ktBadge(p)}${extra}</span>
+        ${showName?`<span class="seat-plate-name rim-name">${name}${meldHint} ${ktBadge(p)}${extra}</span>`:`<span class="seat-plate-name rim-name">${meldHint} ${ktBadge(p)}${extra}</span>`}
         <span class="seat-plate-score">${escapeHtmlText(hubScoreTxt(viewSeat))}</span>
       </span>
     </div>`;
