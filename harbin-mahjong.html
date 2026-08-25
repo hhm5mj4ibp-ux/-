@@ -1097,8 +1097,8 @@ body{
   filter:drop-shadow(0 0 10px rgba(255,110,30,.85)) drop-shadow(0 0 18px rgba(255,60,20,.45));
 }
 @keyframes ron-fired-pulse{
-  0%,100%{transform:scale(1);}
-  50%{transform:scale(1.06);}
+  0%,100%{scale:1;}
+  50%{scale:1.06;}
 }
 #meld-fx.mfx-ron{--mfx-main:#ff5a28;--mfx-hot:#ffe8c8;}
 #meld-fx.mfx-ron .mfx-stamp{
@@ -2361,7 +2361,7 @@ body[data-table-theme="night"] .human-rack{
   100%{transform:translate3d(var(--tx),var(--ty),0) rotate(0deg) scale(1);opacity:.15;}
 }
 .discard-cell.just-landed .tile{animation:discardLand .32s ease-out;}
-@keyframes discardLand{0%{transform:translateY(-10px) scale(1.08);}100%{transform:none;}}
+@keyframes discardLand{0%{translate:0 -10px;scale:1.08;}100%{translate:0 0;scale:1;}}
 
 @media (prefers-reduced-motion: reduce){
   .tile.just-drawn,.kouting-badge,.hub-wind.is-turn,#tile-flight .fly-clone{animation:none !important;}
@@ -2485,7 +2485,7 @@ body.playing #action-bar{
 }
 .mj-table #center-area.felt-heart{
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-columns:minmax(76px,1fr) auto minmax(76px,1fr);
   grid-template-rows:max-content max-content max-content;
   grid-template-areas:
     "n n n"
@@ -2538,8 +2538,8 @@ body.playing #action-bar{
   width:100%;
   max-width:100%;
   flex-shrink:1;
-  --river-tile-w:max(20px, min(26px, calc((100% - 8px) / 3)));
-  --river-tile-h:calc(var(--river-tile-w) * 1.42);
+  --ew-long:min(var(--river-tile-h), max(22px, calc((100% - 8px) / 3)));
+  --ew-short:calc(var(--ew-long) / 1.42);
 }
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:stretch;align-self:center;display:flex;justify-content:flex-end;}
 .mj-table .felt-heart .east-discards{grid-area:e;justify-self:stretch;align-self:center;display:flex;justify-content:flex-start;}
@@ -2554,6 +2554,23 @@ body.playing #action-bar{
   display:flex;
   align-items:stretch;
   justify-content:center;
+  position:relative;
+  overflow:visible;
+}
+.mj-table .felt-heart .discard-strip.left,
+.mj-table .felt-heart .discard-strip.right{
+  overflow:visible;
+}
+.mj-table .felt-heart .west-discards .discard-row-6.discard-row-3,
+.mj-table .felt-heart .east-discards .discard-row-6.discard-row-3{
+  grid-template-columns:repeat(3, var(--ew-long));
+}
+.mj-table .felt-heart .west-discards .discard-cell,
+.mj-table .felt-heart .east-discards .discard-cell{
+  width:var(--ew-long);
+  min-width:var(--ew-long);
+  height:var(--ew-short);
+  min-height:var(--ew-short);
 }
 .mj-table .felt-heart .north-discards .tile.lg,
 .mj-table .felt-heart .west-discards .tile.lg,
@@ -2569,6 +2586,39 @@ body.playing #action-bar{
   box-sizing:border-box;
   display:block;
   font-size:clamp(7px,1.8vw,11px);
+  transform-origin:50% 50%;
+}
+.mj-table .felt-heart .west-discards .tile.lg,
+.mj-table .felt-heart .east-discards .tile.lg{
+  width:var(--ew-short);
+  height:var(--ew-long);
+  min-width:var(--ew-short);
+  min-height:var(--ew-long);
+  max-height:var(--ew-long);
+}
+.mj-table .felt-heart .west-discards .tile:not(.hand-face),
+.mj-table .felt-heart .east-discards .tile:not(.hand-face){
+  transform-origin:50% 50%;
+}
+.mj-table .felt-heart .discard-cell.river-face-south .tile.lg{
+  transform:none;
+}
+.mj-table .felt-heart .discard-cell.river-face-north .tile.lg{
+  transform:rotate(180deg);
+}
+.mj-table .felt-heart .discard-cell.river-face-west .tile.lg,
+.mj-table .felt-heart .discard-cell.river-face-east .tile.lg{
+  position:absolute;
+  left:50%;
+  top:50%;
+  margin:0;
+  align-self:auto;
+}
+.mj-table .felt-heart .discard-cell.river-face-west .tile.lg{
+  transform:translate(-50%,-50%) rotate(90deg);
+}
+.mj-table .felt-heart .discard-cell.river-face-east .tile.lg{
+  transform:translate(-50%,-50%) rotate(-90deg);
 }
 .mj-table .felt-heart .discard-cell .tile-art{
   position:absolute;
@@ -2598,6 +2648,10 @@ body.playing #action-bar{
 .mj-table .felt-heart .west-discards .discard-river-mat.is-empty,
 .mj-table .felt-heart .east-discards .discard-river-mat.is-empty{
   --river-cols:3;
+  width:100%;
+  min-width:56px;
+  max-width:100%;
+  min-height:max(24px, calc(var(--ew-short) + 12px));
 }
 .mj-table #bottom-area{
   grid-area:s;
@@ -7460,7 +7514,8 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
     const isPin=pinPending&&flat===lastIdx&&tileEq(d.tile,G.pendingDiscard);
     const isRonFired=!!(ronWin&&stripSeat===ronWin.from&&d.claimed&&tileEq(d.tile,ronWin.tile));
     flat++;
-    const cw=(d.claimed?' discard-cell is-claimed':' discard-cell')+(isPin?' discard-pending-target':'')+(isRonFired?' ron-fired':'');
+    const face=cls==='opp-top'?' river-face-north':cls==='left'?' river-face-west':cls==='right'?' river-face-east':' river-face-south';
+    const cw=(d.claimed?' discard-cell is-claimed':' discard-cell')+face+(isPin?' discard-pending-target':'')+(isRonFired?' ron-fired':'');
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
     return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
   };
@@ -8239,7 +8294,7 @@ loadUiPrefs();
 preloadTileTextures();
 GameSFX.preload();
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js?v=2').catch(()=>{});
+  navigator.serviceWorker.register('./sw.js?v=4').catch(()=>{});
 }
 renderStartScreen();
 refreshShopConfig().then(()=>{ consumeShopReturn(); renderStartScreen(); }).catch(()=>{});

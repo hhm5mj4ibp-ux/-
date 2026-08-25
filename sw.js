@@ -1,4 +1,4 @@
-const CACHE = 'harbin-mahjong-v2';
+const CACHE = 'harbin-mahjong-v4';
 const PRECACHE = [
   './harbin-mahjong.html',
   './index.html',

@@ -278,6 +278,20 @@ function riverTileSizeReport(page, sel){
   }, sel);
 }
 
+function riverFacingReport(page, sel){
+  return page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if(!el) return { missing: true, rotate: null, transform: '' };
+    const tr = getComputedStyle(el).transform;
+    if(!tr || tr === 'none') return { missing: false, rotate: 0, transform: tr };
+    const m = tr.match(/matrix\(([^)]+)\)/);
+    if(!m) return { missing: false, rotate: null, transform: tr };
+    const parts = m[1].split(',').map(Number);
+    const deg = Math.round(Math.atan2(parts[1], parts[0]) * 180 / Math.PI);
+    return { missing: false, rotate: deg, transform: tr };
+  }, sel);
+}
+
 function sideMeldReport(page, side){
   return page.evaluate((side) => {
     const root = document.querySelector(side === 'left' ? '#left-area' : '#right-area');
@@ -643,17 +657,33 @@ for(const vp of viewports){
     if(size.missing || size.count < 1){
       console.error(`[${vp.name}] ${seat} river tiles missing`);
       failed = true;
-    }else if((seat === 'west' || seat === 'east') && size.minW < 19.5){
-      console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=20)`);
+    }else if((seat === 'west' || seat === 'east') && size.minW < 21.5){
+      console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=22)`);
+      failed = true;
+    }else if((seat === 'west' || seat === 'east') && size.minW < size.minH * 1.15){
+      console.error(`[${vp.name}] ${seat} river not facing seat ${size.minW}x${size.minH}`);
       failed = true;
     }else if((seat === 'south' || seat === 'north') && size.minW < 19.5){
       console.error(`[${vp.name}] ${seat} river minW=${size.minW} (want >=20)`);
       failed = true;
-    }else if(size.minH < size.minW * 1.15){
+    }else if((seat === 'south' || seat === 'north') && size.minH < size.minW * 1.15){
       console.error(`[${vp.name}] ${seat} river tile not upright ${size.minW}x${size.minH}`);
       failed = true;
     }else{
       console.log(`[${vp.name}] ${seat} river size: ok ${size.minW}x${size.minH}`);
+    }
+    const facingWant = { west: 90, east: -90, north: 180, south: 0 }[seat];
+    const facing = await riverFacingReport(page, sel);
+    const rot = facing.rotate;
+    const rotOk = !facing.missing && rot != null && (
+      Math.abs(((rot - facingWant + 540) % 360) - 180) <= 8
+      || (facingWant === 180 && Math.abs(Math.abs(rot) - 180) <= 8)
+    );
+    if(facing.missing || rot == null || !rotOk){
+      console.error(`[${vp.name}] ${seat} river facing rotate=${rot} want=${facingWant} ${facing.transform}`);
+      failed = true;
+    }else{
+      console.log(`[${vp.name}] ${seat} river facing: ok rotate=${rot}`);
     }
     const art = await page.evaluate((sel) => {
       const tiles = [...document.querySelectorAll(sel)];
@@ -669,7 +699,7 @@ for(const vp of viewports){
       }
       return { missing: false, minArtH: Math.round(minArtH * 10) / 10, minArtW: Math.round(minArtW * 10) / 10, minImgH: Math.round(minImgH * 10) / 10 };
     }, sel);
-    if(art.missing || art.minArtH < 16 || art.minArtW < 14 || art.minImgH < 40){
+    if(art.missing || Math.min(art.minArtH, art.minArtW) < 14 || art.minImgH < 40){
       console.error(`[${vp.name}] ${seat} river art missing/collapsed ${JSON.stringify(art)}`);
       failed = true;
     }else{
