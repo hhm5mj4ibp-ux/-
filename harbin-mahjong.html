@@ -2560,19 +2560,31 @@ body.playing #action-bar{
 .mj-table .felt-heart .discard-strip.right{
   overflow:visible;
 }
-.mj-table .felt-heart .west-discards .discard-row-6.discard-row-3,
-.mj-table .felt-heart .east-discards .discard-row-6.discard-row-3{
-  grid-template-columns:repeat(3, minmax(0, 1fr));
+.mj-table .felt-heart .west-discards .discard-river-mat,
+.mj-table .felt-heart .east-discards .discard-river-mat{
   width:100%;
   max-width:100%;
+}
+.mj-table .felt-heart .west-discards .discard-strip,
+.mj-table .felt-heart .east-discards .discard-strip{
+  width:100%;
+  max-width:100%;
+  align-items:stretch;
+}
+.mj-table .felt-heart .west-discards .discard-row-6.discard-row-3,
+.mj-table .felt-heart .east-discards .discard-row-6.discard-row-3{
+  grid-template-columns:repeat(3, min(32px, calc((100cqw - 6px) / 3)));
+  width:max-content;
+  max-width:100%;
   box-sizing:border-box;
+  justify-content:center;
 }
 .mj-table .felt-heart .west-discards .discard-cell,
 .mj-table .felt-heart .east-discards .discard-cell{
-  width:auto;
-  min-width:0;
-  height:calc((100cqw - 6px) / 3 / 1.42);
-  min-height:calc((100cqw - 6px) / 3 / 1.42);
+  width:min(32px, calc((100cqw - 6px) / 3));
+  min-width:min(32px, calc((100cqw - 6px) / 3));
+  height:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+  min-height:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
 }
 .mj-table .felt-heart .north-discards .tile.lg,
 .mj-table .felt-heart .west-discards .tile.lg,
@@ -2592,11 +2604,11 @@ body.playing #action-bar{
 }
 .mj-table .felt-heart .west-discards .tile.lg,
 .mj-table .felt-heart .east-discards .tile.lg{
-  width:calc((100cqw - 6px) / 3 / 1.42);
-  height:calc((100cqw - 6px) / 3);
-  min-width:calc((100cqw - 6px) / 3 / 1.42);
-  min-height:calc((100cqw - 6px) / 3);
-  max-height:calc((100cqw - 6px) / 3);
+  width:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+  height:min(32px, calc((100cqw - 6px) / 3));
+  min-width:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+  min-height:min(32px, calc((100cqw - 6px) / 3));
+  max-height:min(32px, calc((100cqw - 6px) / 3));
 }
 .mj-table .felt-heart .west-discards .tile:not(.hand-face),
 .mj-table .felt-heart .east-discards .tile:not(.hand-face){
@@ -2636,8 +2648,6 @@ body.playing #action-bar{
   bottom:8%;
 }
 .mj-table .felt-heart .north-discards .discard-river-mat,
-.mj-table .felt-heart .west-discards .discard-river-mat,
-.mj-table .felt-heart .east-discards .discard-river-mat,
 .mj-table .felt-heart #human-discards .discard-river-mat{
   width:max-content;
   max-width:100%;
