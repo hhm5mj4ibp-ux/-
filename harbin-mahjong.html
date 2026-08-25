@@ -2538,8 +2538,7 @@ body.playing #action-bar{
   width:100%;
   max-width:100%;
   flex-shrink:1;
-  --ew-long:min(var(--river-tile-h), max(22px, calc((100% - 8px) / 3)));
-  --ew-short:calc(var(--ew-long) / 1.42);
+  container-type:inline-size;
 }
 .mj-table .felt-heart .west-discards{grid-area:w;justify-self:stretch;align-self:center;display:flex;justify-content:flex-end;}
 .mj-table .felt-heart .east-discards{grid-area:e;justify-self:stretch;align-self:center;display:flex;justify-content:flex-start;}
@@ -2563,14 +2562,17 @@ body.playing #action-bar{
 }
 .mj-table .felt-heart .west-discards .discard-row-6.discard-row-3,
 .mj-table .felt-heart .east-discards .discard-row-6.discard-row-3{
-  grid-template-columns:repeat(3, var(--ew-long));
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
 }
 .mj-table .felt-heart .west-discards .discard-cell,
 .mj-table .felt-heart .east-discards .discard-cell{
-  width:var(--ew-long);
-  min-width:var(--ew-long);
-  height:var(--ew-short);
-  min-height:var(--ew-short);
+  width:auto;
+  min-width:0;
+  height:calc((100cqw - 6px) / 3 / 1.42);
+  min-height:calc((100cqw - 6px) / 3 / 1.42);
 }
 .mj-table .felt-heart .north-discards .tile.lg,
 .mj-table .felt-heart .west-discards .tile.lg,
@@ -2590,11 +2592,11 @@ body.playing #action-bar{
 }
 .mj-table .felt-heart .west-discards .tile.lg,
 .mj-table .felt-heart .east-discards .tile.lg{
-  width:var(--ew-short);
-  height:var(--ew-long);
-  min-width:var(--ew-short);
-  min-height:var(--ew-long);
-  max-height:var(--ew-long);
+  width:calc((100cqw - 6px) / 3 / 1.42);
+  height:calc((100cqw - 6px) / 3);
+  min-width:calc((100cqw - 6px) / 3 / 1.42);
+  min-height:calc((100cqw - 6px) / 3);
+  max-height:calc((100cqw - 6px) / 3);
 }
 .mj-table .felt-heart .west-discards .tile:not(.hand-face),
 .mj-table .felt-heart .east-discards .tile:not(.hand-face){
@@ -2629,6 +2631,10 @@ body.playing #action-bar{
   width:auto;
   height:auto;
 }
+.mj-table .felt-heart .west-discards .discard-cell .tile-art,
+.mj-table .felt-heart .east-discards .discard-cell .tile-art{
+  bottom:8%;
+}
 .mj-table .felt-heart .north-discards .discard-river-mat,
 .mj-table .felt-heart .west-discards .discard-river-mat,
 .mj-table .felt-heart .east-discards .discard-river-mat,
@@ -2651,7 +2657,7 @@ body.playing #action-bar{
   width:100%;
   min-width:56px;
   max-width:100%;
-  min-height:max(24px, calc(var(--ew-short) + 12px));
+  min-height:max(24px, calc((100cqw - 6px) / 3 / 1.42 + 12px));
 }
 .mj-table #bottom-area{
   grid-area:s;
