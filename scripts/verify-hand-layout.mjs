@@ -755,6 +755,10 @@ for(const vp of viewports){
     const el = document.querySelector('#human-hand .tile[data-hand-i="1"]');
     if(el) el.click();
   });
+  await page.waitForFunction(() => {
+    return (window.G?.players?.[0]?.discards?.length || 0) >= 1
+      && document.querySelector('#human-discards .tile');
+  }, null, { timeout: 2000 }).catch(() => {});
   await page.waitForTimeout(80);
   const tap1 = await page.evaluate(() => {
     const river = document.querySelector('#human-discards .tile');
