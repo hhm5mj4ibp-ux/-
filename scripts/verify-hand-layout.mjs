@@ -184,6 +184,7 @@ async function assertRiverGlyphFacing(page, vpName){
   await page.evaluate(() => {
     if(typeof G === 'undefined' || !G?.players) return;
     document.body.classList.add('fx-skip');
+    if(typeof clearTurnTimer === 'function') clearTurnTimer();
     G.dealCinemaActive = false;
     G.gameOver = false;
     const yiwan = { tile: { suit: 'm', num: 1 }, claimed: false };
@@ -602,6 +603,7 @@ for(const vp of viewports){
   await page.goto(htmlUrl);
   await skipToPlayableHand(page);
   await page.waitForSelector('#human-hand .tile.hand-face', { timeout: 8000 });
+  await page.evaluate(() => { if(typeof clearTurnTimer === 'function') clearTurnTimer(); });
   await forceThirteenTileHands(page);
 
   const reports = await Promise.all([
@@ -971,10 +973,14 @@ for(const vp of viewports){
     }
   }
 
-  await page.evaluate(() => {
-    if(typeof G === 'undefined' || !G?.players) return;
+  const tap1 = await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players){
+      return { discards: 0, riverTiles: 0, artH: 0, empty: true, hasTile: false };
+    }
+    if(typeof clearTurnTimer === 'function') clearTurnTimer();
     G.dealCinemaActive = false;
     G.gameOver = false;
+    G.roundOver = false;
     G.phase = 'discard';
     G.turn = 0;
     G.msg = '';
@@ -991,13 +997,7 @@ for(const vp of viewports){
     if(typeof render === 'function') render();
     const el = document.querySelector('#human-hand .tile[data-hand-i="1"]');
     if(el) el.click();
-  });
-  await page.waitForFunction(() => {
-    return (window.G?.players?.[0]?.discards?.length || 0) >= 1
-      && document.querySelector('#human-discards .tile');
-  }, null, { timeout: 2000 }).catch(() => {});
-  await page.waitForTimeout(80);
-  const tap1 = await page.evaluate(() => {
+    if((G.players[0].discards || []).length >= 1 && typeof render === 'function') render();
     const river = document.querySelector('#human-discards .tile');
     const art = river?.querySelector('.tile-art');
     const ar = art?.getBoundingClientRect();
