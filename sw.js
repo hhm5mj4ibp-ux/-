@@ -1,4 +1,4 @@
-const CACHE = 'harbin-mahjong-v1';
+const CACHE = 'harbin-mahjong-v5';
 const PRECACHE = [
   './harbin-mahjong.html',
   './index.html',
@@ -29,15 +29,12 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return;
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const fetched = fetch(req).then((res) => {
-        if (res && res.ok && res.type === 'basic') {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
-        }
-        return res;
-      }).catch(() => cached);
-      return cached || fetched;
-    })
+    fetch(req).then((res) => {
+      if (res && res.ok && (res.type === 'basic' || res.type === 'cors')) {
+        const copy = res.clone();
+        caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
+      }
+      return res;
+    }).catch(() => caches.match(req))
   );
 });

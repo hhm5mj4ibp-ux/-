@@ -14,16 +14,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html{height:100%;height:100dvh;overflow:hidden;}
+html{height:100%;height:100svh;overflow:hidden;}
 body{
   background:
     radial-gradient(circle at 48% 42%, rgba(107,205,137,.24) 0%, rgba(33,120,69,.08) 34%, transparent 58%),
     radial-gradient(circle at 50% 48%, #2f9a5c 0%, #1f6c42 35%, #133d28 75%, #0a2418 100%);
   font-family:'Noto Sans JP','Hiragino Kaku Gothic Pro',sans-serif;
-  height:100dvh;max-height:100dvh;overflow:hidden;user-select:none;touch-action:manipulation;
+  height:100svh;max-height:100svh;overflow:hidden;user-select:none;touch-action:manipulation;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-#app{height:100%;min-height:0;max-height:100dvh;overflow:hidden;padding:clamp(2px,1.2vw,8px);box-sizing:border-box;}
+#app{height:100%;min-height:0;max-height:100svh;overflow:hidden;padding:clamp(2px,1.2vw,8px);box-sizing:border-box;}
 .table-shell{
   position:relative;
   height:100%;
@@ -71,7 +71,7 @@ body{
   position:relative;
   height:100%;
   min-height:0;
-  overflow-x:visible;
+  overflow-x:hidden;
   overflow-y:hidden;
   border-radius:12px;
   display:flex;
@@ -221,9 +221,9 @@ body{
 #bottom-area #human-hand .tile:not(.back):not(.hand-face):hover{transform:scaleY(-1) translateY(4px);}
 #bottom-area #human-hand .tile.hand-face:not(.back):hover{transform:translateY(-4px);}
 }
-.tile.selected{transform:translateY(-8px);outline:2px solid #ff0;}
-#bottom-area #human-hand .tile:not(.back):not(.hand-face).selected{transform:scaleY(-1) translateY(8px);}
-#bottom-area #human-hand .tile.hand-face:not(.back).selected{transform:translateY(-8px);outline:2px solid #ff0;}
+.tile.selected{transform:translateY(-14px);outline:2px solid #ffd44b;z-index:3;}
+#bottom-area #human-hand .tile:not(.back):not(.hand-face).selected{transform:scaleY(-1) translateY(14px);z-index:3;}
+#bottom-area #human-hand .tile.hand-face:not(.back).selected{transform:translateY(-14px);outline:2px solid #ffd44b;z-index:3;}
 #bottom-area #human-hand .tile.hand-face.tsumo-separated{
   margin-left:clamp(10px,2.8vw,16px);
 }
@@ -417,8 +417,8 @@ body{
 #right-area .side-col .tile.hand-face.opp-hand,
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand,
-#left-area .side-discards-zone .tile.hand-face.opp-hand,
-#right-area .side-discards-zone .tile.hand-face.opp-hand{
+.west-discards .tile.hand-face.opp-hand,
+.east-discards .tile.hand-face.opp-hand{
   --opp-face-w:var(--side-tile-w);
   --opp-face-h:var(--side-tile-h);
   width:var(--opp-face-w);
@@ -464,9 +464,9 @@ body{
   pointer-events:none;
   z-index:1;
 }
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+.west-discards .tile.hand-face.opp-hand:not(.back),
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back),
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+.east-discards .tile.hand-face.opp-hand:not(.back),
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back){
   border:1px solid #b8d4ea;
   border-bottom:1px solid #b8d4ea;
@@ -474,8 +474,8 @@ body{
 /* 左右の捨て・鳴き・手牌列: 自家と同じ CSS 下駄（デザイン2 PNG の青縁を隠して統一） */
 #left-area .side-col .tile.hand-face.opp-hand:not(.back),
 #right-area .side-col .tile.hand-face.opp-hand:not(.back),
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back),
+.west-discards .tile.hand-face.opp-hand:not(.back),
+.east-discards .tile.hand-face.opp-hand:not(.back),
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back),
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back){
   position:relative;
@@ -486,8 +486,8 @@ body{
 }
 #left-area .side-col .tile.hand-face.opp-hand:not(.back)::before,
 #right-area .side-col .tile.hand-face.opp-hand:not(.back)::before,
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back)::before,
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back)::before,
+.west-discards .tile.hand-face.opp-hand:not(.back)::before,
+.east-discards .tile.hand-face.opp-hand:not(.back)::before,
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back)::before,
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back)::before{
   display:block;
@@ -506,8 +506,8 @@ body{
 }
 #left-area .side-col .tile.hand-face.opp-hand:not(.back) .tile-art,
 #right-area .side-col .tile.hand-face.opp-hand:not(.back) .tile-art,
-#left-area .side-discards-zone .tile.hand-face.opp-hand:not(.back) .tile-art,
-#right-area .side-discards-zone .tile.hand-face.opp-hand:not(.back) .tile-art,
+.west-discards .tile.hand-face.opp-hand:not(.back) .tile-art,
+.east-discards .tile.hand-face.opp-hand:not(.back) .tile-art,
 #left-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back) .tile-art,
 #right-area .side-rack .meld-group .tile.hand-face.opp-hand:not(.back) .tile-art{
   position:absolute;
@@ -547,8 +547,8 @@ body{
 /* 左右席: 旧 side 立体（hand-face / lg opp-hand 以外） */
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand),
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand),
-#left-area .side-discards-zone .tile:not(.hand-face),
-#right-area .side-discards-zone .tile:not(.hand-face),
+.west-discards .tile:not(.hand-face),
+.east-discards .tile:not(.hand-face),
 #left-area .side-rack .meld-group .tile:not(.hand-face),
 #right-area .side-rack .meld-group .tile:not(.hand-face){
   transform-origin:50% 100%;
@@ -559,8 +559,8 @@ body{
 }
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back),
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back),
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back),
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back),
+.west-discards .tile:not(.hand-face):not(.back),
+.east-discards .tile:not(.hand-face):not(.back),
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back),
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back){
   background:#fbfdff;
@@ -570,8 +570,8 @@ body{
 }
 /* 捨て牌・鳴り牌の奥行き: 親の overflow:hidden にクリップされる 0 3px box-shadow の代わりに
    border-bottom + inset shadow で卓上手前エッジの立体感を出す */
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back),
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back),
+.west-discards .tile:not(.hand-face):not(.back),
+.east-discards .tile:not(.hand-face):not(.back),
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back),
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back){
   border-bottom:3px solid rgba(50,100,158,.65);
@@ -581,8 +581,8 @@ body{
 }
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::before,
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::before,
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back)::before,
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back)::before,
+.west-discards .tile:not(.hand-face):not(.back)::before,
+.east-discards .tile:not(.hand-face):not(.back)::before,
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::before,
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::before{
   left:1px;right:1px;top:auto;bottom:0;
@@ -598,8 +598,8 @@ body{
 }
 #left-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::after,
 #right-area .side-col .tile:not(.hand-face):not(.opp-hand):not(.back)::after,
-#left-area .side-discards-zone .tile:not(.hand-face):not(.back)::after,
-#right-area .side-discards-zone .tile:not(.hand-face):not(.back)::after,
+.west-discards .tile:not(.hand-face):not(.back)::after,
+.east-discards .tile:not(.hand-face):not(.back)::after,
 #left-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::after,
 #right-area .side-rack .meld-group .tile:not(.hand-face):not(.back)::after{
   left:1px;right:1px;top:2px;bottom:auto;height:26%;
@@ -620,24 +620,16 @@ body{
 /* 配牌中も対面（北）は1列で並べる（飛んできた牌がそのまま横一列に着地する演出） */
 #top-area .north-hand-row.deal-staging{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:flex-end;gap:1px;max-width:100%;justify-content:center;overflow-x:auto;}
 #top-area .north-melds{display:flex;flex-wrap:nowrap;gap:2px;justify-content:flex-start;align-items:flex-end;flex-shrink:0;}
-#top-area .top-discards.north-discards{display:flex;flex-direction:column;align-items:stretch;gap:3px;width:100%;max-width:98vw;margin:4px auto 0;padding:0 4px;box-sizing:border-box;}
 #top-area .north-melds .meld-group .tile,
 #top-area .north-hand-row .tile{
   width:min(32px,calc((100vw - 96px) / 14));
   height:min(45px,calc((100vw - 96px) / 14 * 1.42),10dvh);
   font-size:clamp(9px,2.2vw,16px);
 }
-#top-area .top-discards .tile.lg{
-  width:min(28px,calc((100vw - 88px) / 19));
-  height:min(40px,calc((100vw - 88px) / 19 * 1.42),9dvh);
-  font-size:clamp(8px,2vw,14px);
-}
-#top-area .top-discards .discard-river-mat{width:100%;}
-.top-seat .tiles-row.top-discards.north-discards{align-self:stretch;justify-content:flex-start;}
 #left-area .side-col .tile.back:not(.hand-face),
 #right-area .side-col .tile.back:not(.hand-face),
-#left-area .side-discards-zone .tile.back:not(.hand-face),
-#right-area .side-discards-zone .tile.back:not(.hand-face),
+.west-discards .tile.back:not(.hand-face),
+.east-discards .tile.back:not(.hand-face),
 #left-area .side-rack .meld-group .tile.back:not(.hand-face),
 #right-area .side-rack .meld-group .tile.back:not(.hand-face){
   background:linear-gradient(0deg,var(--tile-geta-shadow) 0%,var(--tile-geta-deep) 24%,var(--tile-geta-mid) 52%,var(--tile-geta-top) 82%,#6a94c8 100%);
@@ -648,8 +640,8 @@ body{
 }
 #left-area .side-col .tile.back:not(.hand-face)::before,
 #right-area .side-col .tile.back:not(.hand-face)::before,
-#left-area .side-discards-zone .tile.back:not(.hand-face)::before,
-#right-area .side-discards-zone .tile.back:not(.hand-face)::before,
+.west-discards .tile.back:not(.hand-face)::before,
+.east-discards .tile.back:not(.hand-face)::before,
 #left-area .side-rack .meld-group .tile.back:not(.hand-face)::before,
 #right-area .side-rack .meld-group .tile.back:not(.hand-face)::before{
   display:block;
@@ -665,8 +657,8 @@ body{
 }
 #left-area .side-col .tile.back:not(.hand-face)::after,
 #right-area .side-col .tile.back:not(.hand-face)::after,
-#left-area .side-discards-zone .tile.back:not(.hand-face)::after,
-#right-area .side-discards-zone .tile.back:not(.hand-face)::after,
+.west-discards .tile.back:not(.hand-face)::after,
+.east-discards .tile.back:not(.hand-face)::after,
 #left-area .side-rack .meld-group .tile.back:not(.hand-face)::after,
 #right-area .side-rack .meld-group .tile.back:not(.hand-face)::after{
   inset:auto;left:0;right:0;top:0;height:24%;
@@ -745,7 +737,7 @@ body{
 
 /* === LAYOUT === */
 #top-area{display:flex;justify-content:center;align-items:flex-start;gap:4px;padding:2px;min-height:0;flex:0 1 auto;overflow:visible;}
-#middle-area{display:flex;flex:1 1 auto;gap:2px;overflow-x:visible;overflow-y:hidden;min-height:0;align-items:stretch;}
+#middle-area{display:flex;flex:1 1 auto;gap:2px;overflow-x:hidden;overflow-y:hidden;min-height:0;align-items:stretch;}
 #left-area,#right-area{display:flex;flex-direction:column;justify-content:center;align-items:stretch;width:auto;min-width:0;max-width:min(48vw,168px);flex:0 0 auto;background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.1));border-radius:6px;padding:3px 4px;gap:2px;overflow:visible;border:1px solid rgba(255,235,190,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 5px 16px rgba(0,0,0,.12);}
 .side-main{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 1 auto;min-width:0;max-width:100%;min-height:0;max-height:100%;}
 #left-area .side-main{align-items:flex-start;}
@@ -789,7 +781,7 @@ body{
   justify-content:center;
   gap:8px;
   flex-wrap:wrap;
-  padding:8px 10px max(10px, env(safe-area-inset-bottom));
+  padding:8px 10px;
   flex-shrink:0;
   margin:4px 4px 0;
   background:linear-gradient(180deg,rgba(42,28,12,.92),rgba(16,10,6,.94));
@@ -818,17 +810,19 @@ body{
 }
 #action-bar .btn-menu{
   min-width:0;
-  min-height:32px;
-  padding:6px 10px;
+  min-height:22px;
+  padding:2px 8px;
   font-size:11px;
   font-weight:600;
   flex:0 0 auto;
   letter-spacing:.02em;
   background:transparent;
   color:#d4c4a0;
-  border:1px solid rgba(255,220,140,.28);
+  border:none;
   box-shadow:none;
-  opacity:.88;
+  opacity:.8;
+  text-decoration:underline;
+  text-underline-offset:3px;
 }
 
 /* player info */
@@ -844,54 +838,15 @@ body{
 .top-seat{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;width:100%;max-width:100%;min-height:0;}
 .top-rack{display:flex;align-items:flex-end;justify-content:center;gap:6px;max-width:100%;flex-shrink:0;}
 .top-rack .melds-row{flex-shrink:0;margin:0;}
-.top-discards{justify-content:flex-start;margin-top:0;width:100%;max-width:98vw;}
+.top-discards{justify-content:center;margin-top:0;width:max-content;max-width:100%;}
 .side-player{display:flex;align-items:flex-end;gap:3px;width:100%;min-height:0;flex:1 1 auto;overflow:visible;}
 #left-area .side-player{flex-direction:row;justify-content:flex-start;align-items:flex-end;}
 #right-area .side-player{flex-direction:row;justify-content:flex-end;align-items:flex-end;}
-/* 左右席: 手牌列と鳴き列を縦に積み、その席から見て鳴きが手牌の左に来るようにする（自家と同じ並び）。
-   左席=上から[鳴き][手牌]、右席=上から[手牌][鳴き] → 両席ともプレイヤー視点で鳴きが手牌の左。 */
-#left-area .side-rack{flex-direction:column-reverse;align-items:flex-start;gap:3px;}
-#right-area .side-rack{flex-direction:column-reverse;align-items:flex-end;gap:3px;}
-#left-area .side-discards-zone{align-items:flex-start;}
-.side-discards-zone .discard-strip.strip-side{
-  display:flex;
-  flex-direction:row;
-  flex-wrap:nowrap;
-  gap:2px;
-  align-items:flex-end;
-  justify-content:flex-start;
-  width:auto;
-  max-width:100%;
-  height:auto;
-  max-height:none;
-}
-#right-area .side-discards-zone{align-items:flex-end;}
-#right-area .side-discards-zone .discard-strip.strip-side{
-  flex-direction:row-reverse;
-  align-items:flex-end;
-  justify-content:flex-end;
-}
-.side-discards-zone .discard-row-sidecol{
-  display:flex;
-  flex-direction:column;
-  flex-wrap:nowrap;
-  gap:0;
-  align-items:center;
-}
-.side-discards-zone .discard-strip.strip-side .tile{flex:0 0 auto;}
-/* 2段時は牌をやや小さく（自家捨て牌の lg 縮尺に近づける） */
-.side-discards-zone .discard-strip.strip-side-compact{
-  --side-disc-w:min(26px,calc((100vw - 96px) / 18));
-  --side-disc-h:min(37px,calc((100vw - 96px) / 18 * 1.42),8.5dvh);
-}
-.side-discards-zone .discard-strip.strip-side-compact .tile.hand-face.opp-hand{
-  --opp-face-w:var(--side-disc-w);
-  --opp-face-h:var(--side-disc-h);
-  width:var(--opp-face-w);
-  height:var(--opp-face-h);
-}
-.side-discards-zone .discard-strip.strip-side-compact .discard-row-sidecol{gap:0;}
-.side-discards-zone .discard-strip.strip-side-compact .discard-river-mat{padding:2px 3px;}
+/* 左右席: 手牌列の卓心側に鳴きを横密着（06: 鳴きは手牌の横） */
+#left-area .side-rack{flex-direction:row;align-items:center;justify-content:flex-start;gap:4px;}
+#right-area .side-rack{flex-direction:row;align-items:center;justify-content:flex-end;gap:4px;}
+.west-discards{align-items:flex-end;justify-content:center;}
+.east-discards{align-items:flex-start;justify-content:center;}
 .side-stack{
   display:flex;
   flex:1;
@@ -912,16 +867,19 @@ body{
   max-width:100%;
 }
 .side-discards-zone{
-  flex:1 1 auto;
+  flex:0 0 auto;
   min-width:0;
   min-height:0;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
-  align-items:flex-start;
+  justify-content:center;
+  align-items:center;
   overflow:hidden;
+  --side-tile-w:var(--hand-face-w);
+  --side-tile-h:var(--hand-face-h);
 }
-#right-area .side-discards-zone{align-items:flex-end;}
+.west-discards{align-items:flex-end;}
+.east-discards{align-items:flex-start;}
 .side-main{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;min-width:0;max-width:100%;}
 /* 鳴き列: 面子を縦に積む（手牌列と同じ向き＝1本の縦列に見せる） */
 #left-area .side-rack .melds-row,
@@ -1054,26 +1012,39 @@ body{
 
 /* 捨て牌リバー */
 .discard-river-mat{
-  border:1px solid rgba(255,230,170,.18);
-  border-radius:6px;
-  background:rgba(0,18,10,.2);
-  padding:3px 4px;
-  box-shadow:inset 0 0 12px rgba(0,0,0,.14),inset 0 0 0 1px rgba(0,0,0,.1);
+  border:none;
+  border-radius:4px;
+  background:transparent;
+  padding:2px;
+  box-shadow:none;
 }
-.discard-row-6:not(.discard-row-sidecol):not(.discard-row-side-river){
+.discard-row-6{
   display:grid;
-  grid-template-columns:repeat(6,minmax(0,auto));
+  grid-template-columns:repeat(6, var(--river-tile-w, 22px));
   gap:2px;
   justify-content:center;
   align-items:end;
+  width:max-content;
+  max-width:100%;
 }
-.discard-row-sidecol{
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-  align-items:center;
+.discard-row-6.discard-row-3{
+  grid-template-columns:repeat(3, var(--river-tile-w, 22px));
 }
 .discard-cell{display:flex;align-items:center;justify-content:center;}
+.discard-cell.river-ghost{
+  width:var(--river-tile-w, 18px);
+  height:var(--river-tile-h, 26px);
+  min-width:var(--river-tile-w, 18px);
+  min-height:var(--river-tile-h, 26px);
+  flex-shrink:0;
+  box-sizing:border-box;
+  border:none;
+  border-radius:3px;
+  background:rgba(255,255,255,.05);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
+  pointer-events:none;
+  opacity:.4;
+}
 .discard-cell.discard-pending-target{
   border-radius:5px;
   outline:2px solid rgba(255,220,100,.92);
@@ -1126,8 +1097,8 @@ body{
   filter:drop-shadow(0 0 10px rgba(255,110,30,.85)) drop-shadow(0 0 18px rgba(255,60,20,.45));
 }
 @keyframes ron-fired-pulse{
-  0%,100%{transform:scale(1);}
-  50%{transform:scale(1.06);}
+  0%,100%{scale:1;}
+  50%{scale:1.06;}
 }
 #meld-fx.mfx-ron{--mfx-main:#ff5a28;--mfx-hot:#ffe8c8;}
 #meld-fx.mfx-ron .mfx-stamp{
@@ -1386,21 +1357,22 @@ body{
   padding:2px 6px 2px 3px;
   gap:4px;
 }
-.dealer-wind-pip{
+.dealer-mark{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   min-width:22px;
   height:20px;
   padding:0 5px;
-  margin-left:3px;
+  flex-shrink:0;
   border-radius:4px;
-  background:linear-gradient(180deg,#2f62c4,#1a3d8a);
-  border:1px solid rgba(180,210,255,.45);
-  color:#fff;
+  background:linear-gradient(180deg,#e8c56a,#b8862a);
+  border:1px solid #6a4410;
+  color:#2a1608;
   font-size:11px;
   font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 4px rgba(0,0,0,.35);
+  letter-spacing:.04em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.28);
 }
 #bottom-area #human-hand .tile.tsumo-separated{margin-left:clamp(6px,1.8vw,12px);}
 #bottom-area #human-hand .tile.just-drawn:not(.back)::after{content:none;}
@@ -1515,9 +1487,10 @@ body{
 .human-rack #human-hand .tile.hand-face.lg{width:min(34px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(48px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),10dvh);font-size:clamp(9px,2.2vw,16px);}
 /* 自家捨て・鳴き: 7198（手札 hand-face とは別） */
 #human-discards .tile.lg{
-  width:min(28px,calc((100vw - 88px) / 19));
-  height:min(40px,calc((100vw - 88px) / 19 * 1.42),9dvh);
-  font-size:clamp(8px,2.2vw,14px);
+  width:var(--river-tile-w, 22px);
+  height:var(--river-tile-h, 31px);
+  min-height:var(--river-tile-h, 31px);
+  font-size:clamp(8px,2vw,12px);
 }
 .human-rack .meld-group .tile.lg{
   width:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));
@@ -1537,7 +1510,6 @@ body{
 #top-area .tiles-row,
 #top-area .melds-row,
 .side-player,
-.side-discards-zone .discard-strip.strip-side,
 .discard-river-mat,
 #left-area .side-col,
 #right-area .side-col{
@@ -1551,7 +1523,6 @@ body{
 #top-area .tiles-row::-webkit-scrollbar,
 #top-area .melds-row::-webkit-scrollbar,
 .side-player::-webkit-scrollbar,
-.side-discards-zone .discard-strip.strip-side::-webkit-scrollbar,
 .discard-river-mat::-webkit-scrollbar,
 #left-area .side-col::-webkit-scrollbar,
 #right-area .side-col::-webkit-scrollbar{
@@ -1564,39 +1535,46 @@ body{
 .turn-arrow{color:#ff0;font-size:16px;}
 
 /* human hand */
-#human-hand{display:flex;gap:0;align-items:flex-end;justify-content:flex-start;flex-wrap:nowrap;padding:1px 2px 0;flex:0 0 auto;flex-shrink:0;min-width:0;}
+#human-hand{display:flex;gap:1px;align-items:flex-end;justify-content:flex-start;flex-wrap:nowrap;padding:1px 2px 0;flex:0 0 auto;flex-shrink:0;min-width:0;}
 #human-discards{
-  display:flex;flex-direction:column;align-items:stretch;
-  width:100%;
-  max-width:98vw;
-  margin:0 auto 2px;
-  padding:0 4px;
+  display:flex;flex-direction:column;align-items:center;
+  width:max-content;
+  max-width:100%;
+  margin:0 auto;
+  padding:0;
   box-sizing:border-box;
   overflow:visible;
   flex-shrink:0;
+  min-width:0;
 }
 #human-discards .discard-river-mat{
-  width:100%;
-  padding:4px 6px;
+  width:max-content;
+  max-width:100%;
+  padding:3px 4px;
   overflow:visible;
   box-sizing:border-box;
 }
 .discard-strip{display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;}
-/* 自家・対面: 横いっぱいに並べ、はみ出したら折り返し（6枚固定行なし） */
+/* 自家・対面: 卓心に6枚で改行（実卓の牌河） */
 .discard-strip.human,
-.discard-strip.opp-top{
+.discard-strip.opp-top,
+.discard-strip.left,
+.discard-strip.right{
   display:flex;
-  flex-wrap:wrap;
+  flex-direction:column;
+  flex-wrap:nowrap;
   gap:2px;
-  width:100%;
+  width:max-content;
   max-width:100%;
   justify-content:flex-start;
-  align-items:flex-end;
-  align-content:flex-start;
-  overflow:visible;
+  align-items:center;
+  align-content:center;
+  overflow:hidden;
 }
 .discard-strip.human .discard-cell,
-.discard-strip.opp-top .discard-cell{flex:0 0 auto;}
+.discard-strip.opp-top .discard-cell,
+.discard-strip.left .discard-cell,
+.discard-strip.right .discard-cell{flex:0 0 auto;}
 .discard-strip.opp-top{margin-top:2px;}
 .dealer-badge{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:8px;background:rgba(255,215,0,.22);border:1px solid rgba(255,220,120,.55);color:#fff2b8;font-size:9px;font-weight:bold;}
 .match-round{color:#d8f5d8;font-size:10px;text-align:center;}
@@ -2067,8 +2045,8 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   #right-area .side-col .tile.hand-face.opp-hand,
   #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
   #right-area .side-rack .meld-group .tile.hand-face.opp-hand,
-  #left-area .side-discards-zone .tile.hand-face.opp-hand,
-  #right-area .side-discards-zone .tile.hand-face.opp-hand{
+  .west-discards .tile.hand-face.opp-hand,
+  .east-discards .tile.hand-face.opp-hand{
     --opp-face-w:var(--side-tile-w);
     --opp-face-h:var(--side-tile-h);
     width:var(--opp-face-w);
@@ -2081,11 +2059,6 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     height:min(36px,calc((100vw - 72px) / 16 * 1.42),9dvh);
     font-size:10px;
   }
-  #top-area .top-discards .tile.lg{
-    width:min(22px,calc((100vw - 72px) / 19));
-    height:min(32px,calc((100vw - 72px) / 19 * 1.42),8.5dvh);
-    font-size:9px;
-  }
   #left-area .side-rack .meld-group .tile.side,
   #right-area .side-rack .meld-group .tile.side{
     --meld-w:clamp(20px,4.5vw,38px);
@@ -2097,9 +2070,9 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .human-rack{padding:4px 6px 4px;gap:2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(26px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(36px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),9dvh);font-size:10px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(26px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(36px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),9dvh);font-size:10px;}
-  #human-discards .tile.lg{width:min(22px,calc((100vw - 72px) / 19));height:min(32px,calc((100vw - 72px) / 19 * 1.42),8.5dvh);font-size:9px;}
+  #human-discards .tile.lg{width:var(--river-tile-w, min(20px, 5vw));height:var(--river-tile-h, min(28px, 7.2dvh));font-size:8px;}
   .human-rack .meld-group .tile.lg{width:min(22px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(32px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8.5dvh);font-size:9px;}
-  #human-discards{max-width:98vw;}
+  #human-discards{max-width:100%;}
   .table-hub{width:100%;max-width:100%;gap:4px 6px;grid-template-columns:minmax(36px,1fr) auto minmax(36px,1fr);}
   .hub-wind{min-width:38px;padding:2px 5px;}
   .hub-wind-face{font-size:10px;}
@@ -2131,14 +2104,15 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .human-rack{--hand-rack-pad:48px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(23px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(32px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8.5dvh);font-size:9px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(23px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(32px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8.5dvh);font-size:9px;}
-  #human-discards .tile.lg{width:min(20px,calc((100vw - 64px) / 19));height:min(28px,calc((100vw - 64px) / 19 * 1.42),8dvh);font-size:8px;}
+  #human-discards .tile.lg{width:var(--river-tile-w, min(18px, 5vw));height:var(--river-tile-h, min(26px, 7dvh));font-size:8px;}
   .human-rack .meld-group .tile.lg{width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8dvh);font-size:8px;}
-  #human-discards{max-width:98vw;}
+  #human-discards{max-width:100%;}
   .tile.xs{width:12px;height:18px;font-size:6px;}
 }
 
 /* short screens (landscape phone) */
 @media (max-height:520px){
+  #app{padding:2px;}
   .table-shell{padding:3px;}
   .table-shell::before{inset:4px;}
   .table-corner{width:12px;height:12px;}
@@ -2149,7 +2123,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
     padding:2px;gap:1px;
   }
   #top-area{min-height:0;}
-  #left-area,#right-area{overflow:visible;max-width:min(54vw,108px);}
+  #left-area,#right-area{overflow:hidden;max-width:min(54vw,108px);}
   #bottom-area{padding:2px 4px 0;flex:0 0 auto;overflow:visible;gap:1px;}
   .player-label-row{max-width:100%;margin:0 auto;}
   .seat-plate{
@@ -2164,42 +2138,51 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   .seat-plate-wind{min-width:16px;height:16px;font-size:9px;}
   .seat-plate-name,.seat-plate-score{font-size:9px;line-height:1.1;}
   #bottom-area .player-label{padding:0;}
-  .dealer-wind-pip{min-width:16px;height:16px;padding:0 3px;font-size:9px;}
-  .hub-screen{width:clamp(56px,16vw,76px);height:clamp(56px,16vw,76px);max-width:76px;max-height:76px;padding:5px 4px;border-width:2px;}
+  .dealer-mark{min-width:16px;height:16px;padding:0 3px;font-size:9px;}
+  .hub-screen{width:clamp(44px,12vw,56px);height:clamp(44px,12vw,56px);max-width:56px;max-height:56px;padding:4px 3px;border-width:2px;}
   .hub-line1{font-size:9px;}
   .hub-line2{font-size:8px;}
   .hub-wind{min-width:34px;padding:1px 4px;}
+  body.playing #action-bar.action-dock,
+  body.playing #action-bar,
   #action-bar.action-dock,
   #action-bar{
-    position:absolute;
-    right:max(6px, env(safe-area-inset-right));
-    bottom:max(4px, env(safe-area-inset-bottom));
+    position:relative;
+    right:auto;
+    bottom:auto;
     left:auto;
-    width:auto;
-    max-width:min(72vw, 440px);
+    width:100%;
+    max-width:100%;
     flex-wrap:nowrap;
     z-index:8;
-    padding:5px 8px;
+    padding:4px 8px max(6px, env(safe-area-inset-bottom));
     margin:0;
-    border-radius:14px;
+    border-radius:0;
     gap:6px;
   }
   .action-dock-main{flex-wrap:nowrap;gap:6px;}
   #action-bar .btn{
-    min-height:36px;
-    min-width:52px;
-    padding:6px 10px;
+    min-height:32px;
+    min-width:48px;
+    padding:5px 10px;
     font-size:13px;
   }
-  #action-bar .btn-menu{min-height:28px;padding:4px 8px;font-size:10px;}
-  .human-rack-scroll{padding-right:min(28vw, 140px);overflow:visible;}
+  #action-bar .btn-menu{
+    min-height:22px;
+    min-width:0;
+    padding:2px 6px;
+    font-size:10px;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+  }
   .tile.lg{width:min(20px,calc((100vw - 72px) / 16));height:min(28px,calc((100vw - 72px) / 16 * 1.42),7.8dvh);font-size:9px;}
   .human-rack{--hand-rack-pad:56px;padding:2px 5px 2px;}
   .human-rack #human-hand .tile.lg:not(.hand-face){width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
   .human-rack #human-hand .tile.hand-face.lg{width:min(20px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(28px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),7.8dvh);font-size:9px;}
-  #human-discards .tile.lg{width:min(21px,calc((100vw - 72px) / 19));height:min(30px,calc((100vw - 72px) / 19 * 1.42),8dvh);font-size:9px;}
+  #human-discards .tile.lg{width:var(--river-tile-w, min(18px, 3.2vw));height:var(--river-tile-h, min(26px, 7.2dvh));font-size:8px;}
   .human-rack .meld-group .tile.lg{width:min(21px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots)));height:min(30px,calc((100vw - var(--hand-rack-pad)) / var(--human-rack-slots) * 1.42),8dvh);font-size:9px;}
-  #human-discards{max-width:98vw;}
+  #human-discards{max-width:100%;}
   #left-area,#right-area{
     --side-tile-w:var(--hand-face-w);
     --side-tile-h:var(--hand-face-h);
@@ -2208,8 +2191,8 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   #right-area .side-col .tile.hand-face.opp-hand,
   #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
   #right-area .side-rack .meld-group .tile.hand-face.opp-hand,
-  #left-area .side-discards-zone .tile.hand-face.opp-hand,
-  #right-area .side-discards-zone .tile.hand-face.opp-hand{
+  .west-discards .tile.hand-face.opp-hand,
+  .east-discards .tile.hand-face.opp-hand{
     --opp-face-w:var(--side-tile-w);
     --opp-face-h:var(--side-tile-h);
     width:var(--opp-face-w);
@@ -2222,23 +2205,6 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   #bottom-area #human-hand .tile.hand-face.just-drawn:not(.back){transform:translateY(-3px) scale(1.02);}
 }
 
-@media (orientation: landscape) and (max-height: 640px){
-  #action-bar.action-dock,
-  #action-bar{
-    position:absolute;
-    right:max(6px, env(safe-area-inset-right));
-    bottom:max(4px, env(safe-area-inset-bottom));
-    left:auto;
-    width:auto;
-    max-width:min(72vw, 440px);
-    flex-wrap:nowrap;
-    z-index:8;
-    margin:0;
-    border-radius:14px;
-  }
-  .human-rack-scroll{padding-right:min(28vw, 140px);}
-}
-
 /* 東西の伏せ手牌列は90度回転後の見た目の高さで縦送りする */
 #left-area .side-col .tile.hand-face.opp-hand,
 #right-area .side-col .tile.hand-face.opp-hand{
@@ -2249,19 +2215,7 @@ body.mfx-active .table-shell[data-mfx-seat="3"] #right-area .meld-group:last-chi
   margin-bottom:0;
 }
 
-/* === 左右席の捨て牌・鳴き牌: 回転後の見た目サイズで詰める === */
-#middle-area #left-area .side-discards-zone .discard-strip.strip-side,
-#middle-area #right-area .side-discards-zone .discard-strip.strip-side{
-  gap:2px;
-}
-#middle-area #left-area .side-discards-zone .discard-row-sidecol .discard-cell,
-#middle-area #right-area .side-discards-zone .discard-row-sidecol .discard-cell{
-  margin-bottom:calc(var(--side-tile-w) - var(--side-tile-h) - 1px);
-}
-#middle-area #left-area .side-discards-zone .discard-row-sidecol .discard-cell:last-child,
-#middle-area #right-area .side-discards-zone .discard-row-sidecol .discard-cell:last-child{
-  margin-bottom:0;
-}
+/* === 左右席の鳴き牌: 回転後の見た目サイズで手牌列に詰める === */
 #middle-area #left-area .side-rack .meld-group .tile.hand-face.opp-hand,
 #middle-area #right-area .side-rack .meld-group .tile.hand-face.opp-hand{
   margin:0 0 calc(var(--side-tile-w) - var(--side-tile-h) - 1px) 0;
@@ -2407,13 +2361,606 @@ body[data-table-theme="night"] .human-rack{
   100%{transform:translate3d(var(--tx),var(--ty),0) rotate(0deg) scale(1);opacity:.15;}
 }
 .discard-cell.just-landed .tile{animation:discardLand .32s ease-out;}
-@keyframes discardLand{0%{transform:translateY(-10px) scale(1.08);}100%{transform:none;}}
+@keyframes discardLand{0%{translate:0 -10px;scale:1.08;}100%{translate:0 0;scale:1;}}
 
 @media (prefers-reduced-motion: reduce){
   .tile.just-drawn,.kouting-badge,.hub-wind.is-turn,#tile-flight .fly-clone{animation:none !important;}
   #ron-cinema.show .ron-cine-rays{animation:none;}
+  .discard-cell.just-landed .tile{animation:none !important;}
 }
-body.fx-skip .tile.just-drawn,body.fx-skip .kouting-badge,body.fx-skip #tile-flight .fly-clone{animation:none !important;}
+body.fx-skip .tile.just-drawn,body.fx-skip .kouting-badge,body.fx-skip #tile-flight .fly-clone,
+body.fx-skip .discard-cell.just-landed .tile{animation:none !important;}
+
+/* ===== Real square table (ADR-075). Title splash stays. Tile sprites / seat order unchanged. ===== */
+body.playing{
+  background:
+    radial-gradient(ellipse at 50% 32%, #3a2818 0%, #1a120c 46%, #0c0806 100%);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+body.playing #app{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  max-height:100svh;
+  min-height:0;
+  overflow:hidden;
+}
+body.playing .mj-table.table-shell{
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+}
+body.playing #action-bar.action-dock,
+body.playing #action-bar{
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  margin:0;
+  border-radius:0;
+  position:relative;
+  z-index:8;
+  padding:6px 10px max(8px, env(safe-area-inset-bottom));
+  box-sizing:border-box;
+}
+.mj-table.table-shell{
+  border-radius:6px;
+  padding:12px;
+  overflow:hidden;
+  background:
+    repeating-linear-gradient(90deg,rgba(40,18,6,.18) 0 2px,transparent 2px 9px),
+    repeating-linear-gradient(0deg,rgba(255,210,140,.07) 0 1px,transparent 1px 8px),
+    linear-gradient(145deg,#9a6a38 0%,#6e4420 28%,#4a2c12 62%,#7a4e26 100%);
+  box-shadow:
+    inset 0 0 0 3px #3a2410,
+    inset 0 0 0 6px #c4a06a,
+    inset 0 0 0 8px #3a2410,
+    0 18px 36px rgba(0,0,0,.55);
+}
+.mj-table.table-shell::before{
+  inset:8px;
+  border-radius:3px;
+  border:1px solid rgba(90,50,20,.55);
+  box-shadow:inset 0 0 0 1px rgba(20,10,4,.45);
+}
+.mj-table .table-corner{
+  width:14px;height:14px;
+  background:linear-gradient(135deg,#8a8a8a,#4a4a4a 55%,#2a2a2a);
+  clip-path:polygon(0 0,100% 0,100% 34%,34% 34%,34% 100%,0 100%);
+}
+.mj-table .table-felt{
+  border-radius:3px;
+  border:1px solid rgba(20,60,30,.65);
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(90,170,110,.22) 0%, transparent 52%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,#1f7a45 0%,#156338 48%,#0e4a2c 100%);
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,.28),
+    inset 0 24px 40px rgba(255,255,255,.04);
+  --hand-rack-pad:120px;
+}
+.mj-table .felt-play-column{
+  display:grid;
+  grid-template-columns:minmax(52px,.18fr) minmax(0,1fr) minmax(52px,.18fr);
+  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:
+    "n n n"
+    "w c e"
+    "s s s";
+  gap:4px 6px;
+  flex:1;
+  min-height:0;
+  min-width:0;
+  align-items:stretch;
+  overflow:hidden;
+}
+.mj-table #top-area{grid-area:n;justify-content:center;overflow:hidden;}
+.mj-table #middle-area{display:contents;}
+.mj-table #left-area,
+.mj-table #right-area{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  border-radius:0;
+  padding:2px 0;
+  overflow:visible;
+  min-height:0;
+  max-height:100%;
+  justify-content:center;
+  width:auto;
+  max-width:min(34vw,120px);
+}
+.mj-table #left-area{grid-area:w;}
+.mj-table #right-area{grid-area:e;}
+.mj-table #left-area .side-col,
+.mj-table #right-area .side-col{
+  overflow-x:visible;
+}
+.mj-table #center-area{
+  grid-area:c;
+  justify-content:center;
+  padding:0;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.mj-table #center-area.felt-heart{
+  display:grid;
+  grid-template-columns:minmax(76px,1fr) auto minmax(76px,1fr);
+  grid-template-rows:max-content max-content max-content;
+  grid-template-areas:
+    "n n n"
+    "w hub e"
+    "s s s";
+  align-items:center;
+  justify-items:center;
+  justify-content:center;
+  align-content:center;
+  gap:2px 4px;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  overflow:hidden;
+  --river-tile-w:max(22px, min(28px, calc((100% - 20px) / 6)));
+  --river-tile-h:calc(var(--river-tile-w) * 1.42);
+}
+.mj-table .felt-compass.table-hub{
+  display:block;
+  width:auto;
+  margin:0;
+  padding:0;
+  gap:0;
+}
+.mj-table .felt-heart #center-hud{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:0;
+}
+.mj-table .felt-heart .north-discards{
+  grid-area:n;
+  display:flex;
+  flex-direction:column;
+  flex-wrap:nowrap;
+  align-items:center;
+  justify-content:flex-end;
+  width:100%;
+  max-width:100%;
+  margin:0;
+  padding:0;
+  overflow:visible;
+}
+.mj-table .felt-heart .west-discards,
+.mj-table .felt-heart .east-discards{
+  overflow:visible;
+  min-width:0;
+  width:100%;
+  max-width:100%;
+  flex-shrink:1;
+  container-type:inline-size;
+}
+.mj-table .felt-heart .west-discards{grid-area:w;justify-self:stretch;align-self:center;display:flex;justify-content:flex-end;}
+.mj-table .felt-heart .east-discards{grid-area:e;justify-self:stretch;align-self:center;display:flex;justify-content:flex-start;}
+.mj-table .felt-heart #human-discards{grid-area:s;justify-self:center;align-self:start;}
+.mj-table .felt-heart .discard-cell{
+  box-sizing:border-box;
+  flex-shrink:0;
+  width:var(--river-tile-w);
+  min-width:var(--river-tile-w);
+  height:var(--river-tile-h);
+  min-height:var(--river-tile-h);
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  position:relative;
+  overflow:visible;
+}
+.mj-table .felt-heart .discard-strip.left,
+.mj-table .felt-heart .discard-strip.right{
+  overflow:visible;
+}
+.mj-table .felt-heart .west-discards .discard-river-mat,
+.mj-table .felt-heart .east-discards .discard-river-mat{
+  width:100%;
+  max-width:100%;
+}
+.mj-table .felt-heart .west-discards .discard-strip,
+.mj-table .felt-heart .east-discards .discard-strip{
+  width:100%;
+  max-width:100%;
+  align-items:stretch;
+}
+.mj-table .felt-heart .west-discards .discard-row-6.discard-row-3,
+.mj-table .felt-heart .east-discards .discard-row-6.discard-row-3{
+  grid-template-columns:repeat(3, min(32px, calc((100cqw - 6px) / 3)));
+  width:max-content;
+  max-width:100%;
+  box-sizing:border-box;
+  justify-content:center;
+}
+.mj-table .felt-heart .west-discards .discard-cell,
+.mj-table .felt-heart .east-discards .discard-cell{
+  width:min(32px, calc((100cqw - 6px) / 3));
+  min-width:min(32px, calc((100cqw - 6px) / 3));
+  height:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+  min-height:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+}
+.mj-table .felt-heart .north-discards .tile.lg,
+.mj-table .felt-heart .west-discards .tile.lg,
+.mj-table .felt-heart .east-discards .tile.lg,
+.mj-table .felt-heart #human-discards .tile.lg{
+  width:var(--river-tile-w);
+  height:var(--river-tile-h);
+  min-width:var(--river-tile-w);
+  min-height:var(--river-tile-h);
+  max-height:var(--river-tile-h);
+  flex:none;
+  align-self:stretch;
+  box-sizing:border-box;
+  display:block;
+  font-size:clamp(7px,1.8vw,11px);
+  transform:none;
+  position:relative;
+  left:auto;
+  top:auto;
+  overflow:hidden;
+}
+.mj-table .felt-heart .discard-cell .river-spin{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform-origin:50% 50%;
+  width:100%;
+  height:100%;
+}
+.mj-table .felt-heart .discard-cell.river-face-north .river-spin{
+  transform:rotate(180deg);
+}
+.mj-table .felt-heart .discard-cell.river-face-west .river-spin,
+.mj-table .felt-heart .discard-cell.river-face-east .river-spin{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+  height:min(32px, calc((100cqw - 6px) / 3));
+  margin:0;
+}
+.mj-table .felt-heart .discard-cell.river-face-west .river-spin{
+  transform:translate(-50%,-50%) rotate(-90deg);
+}
+.mj-table .felt-heart .discard-cell.river-face-east .river-spin{
+  transform:translate(-50%,-50%) rotate(90deg);
+}
+.mj-table .felt-heart .west-discards .tile.lg,
+.mj-table .felt-heart .east-discards .tile.lg{
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  max-height:none;
+}
+.mj-table .felt-heart .discard-cell .tile.lg.hand-face{
+  filter:none;
+  overflow:hidden;
+}
+.mj-table .felt-heart .discard-cell .tile:not(.hand-face) .tile-art{
+  position:absolute;
+  left:1px;
+  right:1px;
+  top:1px;
+  bottom:12%;
+  width:auto;
+  height:auto;
+}
+.mj-table .felt-heart .discard-cell .tile.hand-face .tile-art,
+.mj-table .felt-heart #human-discards .discard-cell .tile.hand-face .tile-art{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+.mj-table .felt-heart .north-discards .discard-river-mat,
+.mj-table .felt-heart #human-discards .discard-river-mat{
+  width:max-content;
+  max-width:100%;
+}
+.mj-table .felt-heart .discard-river-mat.is-empty{
+  --river-cols:6;
+  box-sizing:border-box;
+  min-width:calc(var(--river-tile-w) * var(--river-cols) + 10px);
+  min-height:calc(var(--river-tile-h) + 8px);
+  background:rgba(4,22,8,.28);
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.06);
+  border-radius:4px;
+}
+.mj-table .felt-heart .west-discards .discard-river-mat.is-empty,
+.mj-table .felt-heart .east-discards .discard-river-mat.is-empty{
+  --river-cols:3;
+  width:100%;
+  min-width:56px;
+  max-width:100%;
+  min-height:max(24px, calc(min(32px, (100cqw - 6px) / 3) / 1.42 + 12px));
+}
+.mj-table #bottom-area{
+  grid-area:s;
+  padding:8px 2px 8px;
+  min-width:0;
+  max-width:100%;
+  overflow:visible;
+  z-index:3;
+}
+#table-prompt{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  min-height:0;
+  padding:0 6px 2px;
+  box-sizing:border-box;
+  pointer-events:none;
+  z-index:4;
+}
+#table-prompt:empty{display:none;}
+#table-prompt .message,
+#table-prompt .callout-tile{
+  pointer-events:auto;
+  margin:0;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:11px;
+  line-height:1.25;
+  padding:3px 10px;
+}
+.mj-table #table-prompt .message{
+  max-width:min(96%, 440px);
+}
+.mj-table .human-rack-scroll{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+  container-type:inline-size;
+  container-name:humanrack;
+  padding:0 2px;
+  box-sizing:border-box;
+}
+.mj-table .human-rack{
+  --hand-rack-pad:16px;
+  width:100%;
+  max-width:100%;
+  justify-content:center;
+  box-sizing:border-box;
+  padding:16px 8px 10px;
+  align-items:flex-end;
+}
+.mj-table .human-rack #human-hand{
+  gap:1px;
+  justify-content:center;
+  max-width:100%;
+}
+.mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
+.mj-table .human-rack #human-hand .tile.hand-face.lg{
+  width:min(34px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
+  height:min(46px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 10svh);
+  flex-shrink:0;
+}
+.mj-table .human-rack .meld-group .tile.lg{
+  width:min(28px,calc((100cqi - 16px) / var(--human-rack-slots)));
+  height:min(40px,calc((100cqi - 16px) / var(--human-rack-slots) * 1.42),9svh);
+}
+.mj-table .side-player{
+  flex:0 0 auto;
+  overflow:visible;
+  align-items:center;
+  justify-content:center;
+}
+.mj-table #left-area .side-player,
+.mj-table #right-area .side-player{
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+}
+.mj-table #left-area .side-rack,
+.mj-table #right-area .side-rack{
+  flex-direction:row;
+  align-items:center;
+  gap:4px;
+  max-width:100%;
+}
+.mj-table #left-area .side-rack{justify-content:flex-start;}
+.mj-table #right-area .side-rack{justify-content:flex-end;}
+.mj-table #left-area .seat-plate,
+.mj-table #right-area .seat-plate{
+  max-width:100%;
+  padding:1px 3px 1px 1px;
+  gap:2px;
+}
+.mj-table #left-area .seat-plate-name,
+.mj-table #right-area .seat-plate-name,
+.mj-table #left-area .seat-plate-score,
+.mj-table #right-area .seat-plate-score{
+  font-size:11px;
+}
+@media (max-width:520px){
+  .mj-table.table-shell{padding:4px;}
+  .mj-table .human-rack{--hand-rack-pad:16px;}
+}
+.mj-table #center-hud{
+  background:transparent;border:none;padding:2px;gap:4px;justify-content:center;
+  overflow:hidden;min-width:0;max-width:100%;
+}
+.mj-table .hub-screen{
+  width:clamp(48px,14vw,64px);
+  height:clamp(48px,14vw,64px);
+  max-width:64px;max-height:64px;
+  background:
+    radial-gradient(circle at 40% 32%, #e2c898 0%, #b08950 38%, #6a4420 78%);
+  border:3px solid #3a2410;
+  box-shadow:
+    inset 0 2px 0 rgba(255,240,210,.45),
+    inset 0 -8px 12px rgba(0,0,0,.28),
+    0 4px 10px rgba(0,0,0,.35);
+}
+.mj-table .hub-line1,
+.mj-table .hub-line2{
+  color:#2a1608;
+  text-shadow:0 1px 0 rgba(255,240,210,.4);
+  font-family:'Noto Serif JP',serif;
+}
+.mj-table .hub-wind{
+  background:linear-gradient(180deg,#efe3c8,#c9ae7c);
+  border:1px solid #5a3a18;
+  border-radius:4px;
+}
+.mj-table .hub-wind.is-turn{
+  border-color:#fff2c4;
+  box-shadow:0 0 10px rgba(255,220,120,.7);
+}
+.mj-table .seat-plate{
+  background:linear-gradient(180deg,#e8d7b4,#c4a06a);
+  border:1px solid #5c3a18;
+  border-radius:4px;
+  box-shadow:0 2px 4px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.4);
+}
+.mj-table .seat-plate-wind{
+  background:linear-gradient(180deg,#9a2a2a,#6a1414);
+  border:1px solid #3a0c0c;
+  color:#f7ead0;
+  border-radius:3px;
+}
+.mj-table .seat-plate-name{color:#2a1608;}
+.mj-table .seat-plate-score{color:#4a2c10;}
+.mj-table .seat-plate.is-turn{
+  border-color:#fff0b8;
+  box-shadow:0 0 0 2px rgba(255,230,150,.85),0 0 12px rgba(255,200,80,.4);
+}
+.mj-table .message{
+  background:#f3ead0;
+  color:#2a1608;
+  border:1px solid #c4b48a;
+  border-radius:2px;
+  font-family:'Noto Serif JP',serif;
+  box-shadow:1px 2px 0 rgba(60,40,10,.18);
+  max-width:min(92%,440px);
+}
+.mj-table .table-hub{
+  width:auto;
+  max-width:100%;
+  margin:2px auto;
+  gap:4px 6px;
+}
+.mj-table .treasure-reveal{
+  background:
+    radial-gradient(circle at 50% 35%, #a07038 0%, #5a3414 70%);
+  border:2px solid #2a1608;
+  border-radius:50%;
+  width:56px;height:56px;
+  padding:4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  letter-spacing:0;
+  font-size:8px;
+  color:#f3ead0;
+  box-shadow:inset 0 2px 0 rgba(255,230,180,.25),0 4px 8px rgba(0,0,0,.35);
+}
+.mj-table .discard-river-mat{
+  background:transparent;
+  border:none;
+  border-radius:2px;
+  box-shadow:none;
+  padding:1px;
+}
+.mj-table .human-rack{
+  background:
+    repeating-linear-gradient(90deg,rgba(40,18,6,.2) 0 2px,transparent 2px 8px),
+    linear-gradient(180deg,#8a5a2c 0%,#5a3414 55%,#3a200c 100%);
+  border:1px solid #2a1608;
+  border-radius:3px;
+  box-shadow:inset 0 4px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,220,160,.2);
+}
+.mj-table #action-bar.action-dock,
+.mj-table #action-bar,
+body.playing #action-bar.action-dock,
+body.playing #action-bar{
+  background:linear-gradient(180deg,#6a4420,#3a2410);
+  border:1px solid #2a1608;
+  box-shadow:inset 0 1px 0 rgba(255,220,160,.18);
+}
+body.playing #action-bar.action-dock,
+body.playing #action-bar{
+  border-radius:0;
+  border-left:none;
+  border-right:none;
+  border-bottom:none;
+}
+.mj-table #action-bar .btn-menu,
+body.playing #action-bar .btn-menu{
+  color:#eadcc0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+  min-height:22px;
+  min-width:0;
+  padding:2px 8px;
+  font-size:11px;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  opacity:.82;
+}
+@media (max-height:520px){
+  .mj-table.table-shell{padding:1px;}
+  .mj-table.table-shell::before{inset:3px;}
+  .mj-table .table-felt{--hand-rack-pad:16px;}
+  .mj-table .human-rack{--hand-rack-pad:16px;}
+  .mj-table .treasure-reveal{width:40px;height:40px;font-size:7px;padding:2px;}
+  .mj-table .felt-play-column{gap:2px 4px;}
+  .mj-table #top-area{padding:0;}
+  .mj-table .hub-screen{width:clamp(40px,10vw,52px);height:clamp(40px,10vw,52px);max-width:52px;max-height:52px;}
+  .mj-table #left-area,
+  .mj-table #right-area{max-width:min(28vw,100px);}
+  .mj-table #center-area.felt-heart{
+    gap:2px 4px;
+    --river-tile-w:max(20px, min(26px, calc((100% - 16px) / 6)));
+    --river-tile-h:calc(var(--river-tile-w) * 1.42);
+  }
+  .mj-table .human-rack #human-hand .tile.lg:not(.hand-face),
+  .mj-table .human-rack #human-hand .tile.hand-face.lg{
+    width:min(28px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots)));
+    height:min(36px, calc((100cqi - 28px - (var(--human-rack-slots) - 1) * 1px) / var(--human-rack-slots) * 1.42), 9svh);
+  }
+  body.playing #action-bar.action-dock,
+  body.playing #action-bar{
+    position:relative;
+    right:auto;
+    bottom:auto;
+    left:auto;
+    width:100%;
+    max-width:100%;
+    flex-wrap:nowrap;
+    padding:4px 8px max(6px, env(safe-area-inset-bottom));
+    margin:0;
+    border-radius:0;
+  }
+}
+body.playing[data-table-theme="night"]{
+  background:radial-gradient(ellipse at 50% 32%, #16324a 0%, #050c12 70%);
+}
+body.playing[data-table-theme="night"] .mj-table .table-felt{
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(80,140,190,.2) 0%, transparent 52%),
+    linear-gradient(180deg,#0c3a48 0%,#072028 100%);
+}
+body.playing[data-table-theme="gold"] .mj-table.table-shell{
+  box-shadow:inset 0 0 0 3px #3a2410,inset 0 0 0 6px #e0b056,inset 0 0 0 8px #3a2410,0 18px 36px rgba(0,0,0,.55);
+}
 </style>
 </head>
 <body>
@@ -2621,6 +3168,7 @@ const UI={
   shopMsg:'',
   muted:false,
   fxSkip:false,
+  handSelectIdx:null,
 };
 
 const ONLINE={
@@ -2988,6 +3536,7 @@ const I18N={
     matchFinish:'セット結果',
     matchRound:'第{n} / {t}局',
     dealerRoll:'親決め',
+    dealerShort:'親',
     dealerRouletteSpin:'ルーレット回転中…',
     dealerIs:'{name}が親',
     seatSelf:'手前',
@@ -3035,7 +3584,8 @@ const I18N={
     ktGachaSub:'何が出るかな…？',
     ktRevealLine:'来た！',
     ktTensionLine:'この一枚を切る瞬間…誰かの上がりを運ばないか、胸がザワザワする',
-    chooseDiscard:'牌を選んで捨てましょう（先出後引き）',
+    chooseDiscard:'牌をタップして捨てます（先出後引き）',
+    tapAgainToDiscard:'牌をタップして捨てる',
     clickToDiscard:'クリックして捨てる',
     drawTile:'牌を引く',
     tsumo:'ツモ！',
@@ -3145,6 +3695,7 @@ const I18N={
     matchFinish:'本盘结果',
     matchRound:'第{n} / {t}局',
     dealerRoll:'定庄',
+    dealerShort:'庄',
     dealerRouletteSpin:'轮盘转动中…',
     dealerIs:'{name}为庄家',
     seatSelf:'本家',
@@ -3192,7 +3743,8 @@ const I18N={
     ktGachaSub:'会摸到什么呢？',
     ktRevealLine:'是这张！',
     ktTensionLine:'打出去的瞬间…会不会帮别人点和？心里一紧',
-    chooseDiscard:'请选择要打出的牌（先出后摸）',
+    chooseDiscard:'点牌打出（先出后摸）',
+    tapAgainToDiscard:'点牌打出',
     clickToDiscard:'点击手牌打出',
     drawTile:'摸牌',
     tsumo:'自摸！',
@@ -3608,7 +4160,8 @@ function toggleMute(){
   UI.muted=!UI.muted;
   saveUiPrefs();
   applyChrome();
-  if(!UI.muted) GameSFX.playBgm(G?'table':'title');
+  if(UI.muted) GameSFX.stopBgm();
+  else if(!G) GameSFX.playBgm('title');
   renderStartScreen();
 }
 function toggleFxSkip(){
@@ -3743,9 +4296,12 @@ function armDiscardFlight(fromPi, tile, fromEl){
   }
   _pendingFlight={fromPi,tile,origin};
 }
+function discardRiverRoot(pi){
+  return ['#human-discards','#left-discards','#north-discards','#right-discards'][pi]||'';
+}
 function lastDiscardCellRect(fromPi){
-  const map={0:'#human-discards .discard-cell',1:'#left-area .discard-cell',2:'#top-area .discard-cell, .north-discards .discard-cell',3:'#right-area .discard-cell'};
-  const nodes=document.querySelectorAll(map[fromPi]||'');
+  const root=discardRiverRoot(fromPi);
+  const nodes=document.querySelectorAll(root?`${root} .discard-cell:not(.river-ghost)`:'.north-discards .discard-cell:not(.river-ghost)');
   const el=nodes[nodes.length-1];
   if(!el) return null;
   const r=el.getBoundingClientRect();
@@ -4821,7 +5377,7 @@ function showMatchSetResult(){
 }
 
 function startGame(){
-  GameSFX.playBgm('table');
+  GameSFX.stopBgm();
   maybeShowRulesPrimerThen(beginMatch);
 }
 
@@ -5471,6 +6027,7 @@ function enterKouTingByDiscard(p,tileIdx,fromEl){
   GameSFX.play('discard');
   fxVibrate(22);
   afterDiscard(pi,tile);
+  render();
   flushDiscardFlight();
   return true;
 }
@@ -5591,6 +6148,13 @@ const GameSFX=(function(){
       UI.muted=!!on;
       if(bgmEl) bgmEl.muted=UI.muted;
     },
+    stopBgm(){
+      if(bgmEl){
+        try{ bgmEl.pause(); bgmEl.removeAttribute('src'); bgmEl.load(); }catch(_e){}
+        bgmEl=null;
+      }
+      bgmName='';
+    },
     play(name){
       if(UI.muted) return;
       const clip=clips.get(name);
@@ -5606,6 +6170,11 @@ const GameSFX=(function(){
       playToneFallback(name);
     },
     playBgm(which){
+      if(which==='table'){
+        if(bgmEl) this.stopBgm();
+        return;
+      }
+      if(UI.muted) return;
       const src=BGM[which];
       if(!src) return;
       if(bgmName===which && bgmEl && !bgmEl.paused) return;
@@ -5708,15 +6277,8 @@ function seatAnchorRect(pi, role){
     const groups=area.querySelectorAll('.meld-group');
     el=groups.length?groups[groups.length-1]:area.querySelector('.melds-row')||area.querySelector('#human-rack-wrap')||area;
   }else if(role==='discard'){
-    if(pi===1){
-      el=area.querySelector('.side-discards-zone .tile:last-child');
-    }else if(pi===3){
-      el=area.querySelector('.side-discards-zone .tile:last-child');
-    }else if(pi===0){
-      el=area.querySelector('#human-discards .tile:last-child');
-    }else{
-      el=area.querySelector('.top-discards .tile:last-child')||area.querySelector('.discard-strip .tile:last-child');
-    }
+    const root=discardRiverRoot(pi);
+    el=root?document.querySelector(`${root} .tile:last-child`):null;
   }else if(role==='hand'){
     el=area.querySelector('#human-hand')||area.querySelector('.tiles-row:last-child')||area.querySelector('.side-col')||area;
   }
@@ -6161,6 +6723,7 @@ function humanKouTingPickCancel(){
 }
 
 function humanDiscard(tileIdx, fromEl){
+  if(typeof UI!=='undefined') UI.handSelectIdx=null;
   if(G?.online){
     if(G.kouTingPick&&onlineLegal('kouting')) onlineAction('kouting',{index:tileIdx});
     else onlineAction('discard',{index:tileIdx});
@@ -6196,6 +6759,7 @@ function humanDiscard(tileIdx, fromEl){
     GameSFX.play('kt_discard');
     fxVibrate(15);
     afterDiscard(0,tile);
+    render();
     flushDiscardFlight();
     return;
   }
@@ -6209,6 +6773,7 @@ function humanDiscard(tileIdx, fromEl){
   GameSFX.play('discard');
   fxVibrate(15);
   afterDiscard(0,tile);
+  render();
   flushDiscardFlight();
 }
 
@@ -6725,7 +7290,8 @@ function ronRevealBannerHtml(winnerSeat, fromSeat, tile){
 }
 
 function seatAnchorRonDiscard(fromPi, tile){
-  const area=document.querySelector(MELD_FX_SEAT_ROOT[fromPi]);
+  const root=discardRiverRoot(fromPi);
+  const area=root?document.querySelector(root):document.querySelector(MELD_FX_SEAT_ROOT[fromPi]);
   if(!area||!tile) return null;
   const cells=area.querySelectorAll('.discard-cell.ron-fired');
   if(cells.length){
@@ -6962,58 +7528,35 @@ function renderFeltWallOrnaments(){
   return '';
 }
 
-/** 左右席: 1行あたりこの枚数を超えたら2段＋コンパクト表示 */
-const SIDE_DISCARD_ROW_CAP=5;
-
-function renderSideDiscardRiver(tiles, cls, cellHtml){
-  const compact=tiles.length>SIDE_DISCARD_ROW_CAP;
-  const perCol=compact?Math.ceil(tiles.length/2):tiles.length;
-  const cols=chunkEvery(tiles,perCol).slice(0,2);
-  const stripCls=`discard-strip ${cls} strip-side${compact?' strip-side-compact':''}`;
-  const inner=cols.map(col=>{
-    const cells=col.map(cellHtml).join('');
-    return `<div class="discard-row discard-row-sidecol">${cells}</div>`;
-  }).join('');
-  return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
-}
-
 function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
-  if(!tiles||!tiles.length) return '';
-  const tileCls=cls==='left'?'lg hand-face opp-hand opp-disc opp-rot-left'
-    :cls==='right'?'lg hand-face opp-hand opp-disc opp-rot-right'
-    :size;
-  const stripCls=cls==='left'||cls==='right'?`discard-strip ${cls} strip-side`:`discard-strip ${cls}`;
+  const list=tiles||[];
+  const tileCls=size;
+  const stripCls=`discard-strip ${cls}`;
   const seatByCls={'opp-top':2,left:1,right:3,human:0};
   const stripSeat=Object.prototype.hasOwnProperty.call(seatByCls,cls)?seatByCls[cls]:-1;
-  const lastIdx=tiles.length-1;
+  const lastIdx=list.length-1;
   const pinPending=G&&G.phase==='after_discard'&&G.pendingDiscard&&pendingFromSeat!=null&&stripSeat===pendingFromSeat;
   const ronWin=G&&G.lastWin&&!G.lastWin.isTsumo&&!G.lastWin.isTreasure&&G.lastWin.from!=null?G.lastWin:null;
   const ronLabel=ronRevealLabel();
-  const fluidRiver=cls==='human'||cls==='opp-top';
   let flat=0;
   const cellHtml=entry=>{
     const d=normalizeDiscardEntry(entry);
-    const cls2=tileCls+(d.claimed?' discard-claimed':'');
+    const faceCls=String(tileCls).includes('hand-face')?tileCls:`${tileCls} hand-face`; // ADR-091: 河は平面絵を回す
+    const cls2=faceCls+(d.claimed?' discard-claimed':'');
     const isPin=pinPending&&flat===lastIdx&&tileEq(d.tile,G.pendingDiscard);
     const isRonFired=!!(ronWin&&stripSeat===ronWin.from&&d.claimed&&tileEq(d.tile,ronWin.tile));
     flat++;
-    const cw=(d.claimed?' discard-cell is-claimed':' discard-cell')+(isPin?' discard-pending-target':'')+(isRonFired?' ron-fired':'');
+    const face=cls==='opp-top'?' river-face-north':cls==='left'?' river-face-west':cls==='right'?' river-face-east':' river-face-south';
+    const cw=(d.claimed?' discard-cell is-claimed':' discard-cell')+face+(isPin?' discard-pending-target':'')+(isRonFired?' ron-fired':'');
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
-    return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
+    return `<div class="${cw}"${ronAttr}><div class="river-spin">${tileHTML(d.tile,cls2)}</div></div>`;
   };
-  if(fluidRiver){
-    const inner=tiles.map(cellHtml).join('');
-    return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
+  const rowCap=(cls==='left'||cls==='right')?3:6;
+  if(!list.length){
+    return `<div class="discard-river-mat is-empty" style="--river-cols:${rowCap}"><div class="${stripCls}"></div></div>`;
   }
-  if(cls==='left'||cls==='right'){
-    return renderSideDiscardRiver(tiles, cls, cellHtml);
-  }
-  const rows=chunkEvery(tiles,6);
-  const rowExtra=cls==='left'||cls==='right'?' discard-row-sidecol':'';
-  const inner=rows.map(row=>{
-    const cells=row.map(cellHtml).join('');
-    return `<div class="discard-row discard-row-6${rowExtra}">${cells}</div>`;
-  }).join('');
+  const rows=chunkEvery(list,rowCap);
+  const inner=rows.map(row=>`<div class="discard-row discard-row-6${rowCap===3?' discard-row-3':''}">${row.map(cellHtml).join('')}</div>`).join('');
   return `<div class="discard-river-mat"><div class="${stripCls}">${inner}</div></div>`;
 }
 
@@ -7021,9 +7564,9 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
 const SIDE_HAND_TILE_CLS='lg hand-face opp-hand';
 const EAST_HAND_TILE_CLS=SIDE_HAND_TILE_CLS+' opp-rot-left';
 const WEST_HAND_TILE_CLS=SIDE_HAND_TILE_CLS+' opp-rot-right';
-/** 自家捨て牌・対面卓上牌（7198.png）。自家手牌(hand-face)とは別デザイン */
+/** 対面卓上牌・自家鳴き（7198.png）。河だけ ADR-091 で hand-face に差し替える */
 const HUMAN_RIVER_TILE_CLS='lg';
-/** 自家鳴き（チー・ポン・槓）— 捨て牌と同じ 7198 */
+/** 自家鳴き（チー・ポン・槓）— 7198 */
 const HUMAN_MELD_TILE_CLS=HUMAN_RIVER_TILE_CLS;
 function renderDealHandRows(tiles, renderTile, colsPerRow=3){
   if(!tiles.length) return '';
@@ -7078,8 +7621,8 @@ function renderSeatHand(p, faceSize, side=false, seatStyle=null){
 
 function dealerMark(i){
   if(!G||G.dealer!==i) return '';
-  const ch=UI.lang==='zh'?'庄':tr('windEast','東');
-  return ` <span class="dealer-wind-pip" title="${UI.lang==='zh'?'庄家':'親'}">${escapeHtmlText(ch)}</span>`;
+  const ch=tr('dealerShort', UI.lang==='zh'?'庄':'親');
+  return `<span class="dealer-mark" title="${escapeHtmlText(ch)}">${escapeHtmlText(ch)}</span>`;
 }
 
 function tileName(t){
@@ -7356,6 +7899,7 @@ function renderTiles(tiles,cls,faceDown,onclickFn){
 
 function render(){
   if(!G) return;
+  document.body.classList.add('playing');
   if(G.kouTingTreasurePending&&!canOfferKouTingTreasureNow(0)){
     G.kouTingTreasurePending=false;
     G.kouTingTreasureSeen=false;
@@ -7376,12 +7920,12 @@ function render(){
   // === LEFT PLAYER (p1, 西) ===
   const leftHand=`<div class="side-col${dealActive?' deal-staging':''}">${renderSeatHand(p1,'',true,'west')}</div>`;
   const leftMelds=p1.melds.length?renderSideMeldGroups(p1.melds,'left'):'';
-  const leftDiscards=renderDiscardStrip(p1.discards,'left','xs',pendingForStrip);
+  const leftDiscards=renderDiscardStrip(p1.discards,'left',HUMAN_RIVER_TILE_CLS,pendingForStrip);
 
   // === RIGHT PLAYER (p3, 東) ===
   const rightHand=`<div class="side-col${dealActive?' deal-staging':''}">${renderSeatHand(p3,'',true,'east')}</div>`;
   const rightMelds=p3.melds.length?renderSideMeldGroups(p3.melds,'right'):'';
-  const rightDiscards=renderDiscardStrip(p3.discards,'right','xs',pendingForStrip);
+  const rightDiscards=renderDiscardStrip(p3.discards,'right',HUMAN_RIVER_TILE_CLS,pendingForStrip);
 
   // === HUMAN (p0) ===
   const waits=p0.waits&&p0.waits.length?p0.waits:getKatanWaits(p0.hand);
@@ -7392,6 +7936,10 @@ function render(){
     :[];
   const kouTingPick=!!G.kouTingPick;
   const canHumanDiscard=G.phase==='discard'&&G.turn===0&&(!p0.kouTing||kouTingMayDiscard)&&!G.kouTingTreasurePending&&!G.dealCinemaActive;
+  if(!canHumanDiscard||UI.handSelectIdx==null||UI.handSelectIdx<0||UI.handSelectIdx>=p0.hand.length){
+    if(!canHumanDiscard) UI.handSelectIdx=null;
+    else if(UI.handSelectIdx!=null&&(UI.handSelectIdx<0||UI.handSelectIdx>=p0.hand.length)) UI.handSelectIdx=null;
+  }
   const ktLeg=kouTingMayDiscard?kouTingLegalDiscardIndices(p0):[];
   const kt=G.ktReveal;
   const suspenseMask=!!(kt&&kt.phase==='suspense'&&kt.pi===0&&p0.kouTing&&Number.isInteger(kt.drawIdx));
@@ -7401,7 +7949,7 @@ function render(){
   const drawnRef0=p0.drawnTile||(G.lastDrawn&&p0.hand.some(t=>t===G.lastDrawn)?G.lastDrawn:null);
   const drawnIdx0=drawnRef0?handIndexOfTileRef(p0,drawnRef0):-1;
   const humanMeldTileCount=(p0.melds||[]).reduce((n,m)=>n+(m.tiles?m.tiles.length:0),0);
-  const humanRackSlots=Math.max(14,humanMeldTileCount+p0.hand.length+(drawnIdx0>=0?1:0)+2);
+  const humanRackSlots=Math.max(13,humanMeldTileCount+p0.hand.length);
   const humanRackStyle=`--human-rack-slots:${humanRackSlots}`;
   const tableFeltStyle=`--human-rack-slots:${humanRackSlots}`;
   const humanTiles=dealActive&&!G.dealFaceReveal
@@ -7422,6 +7970,7 @@ function render(){
     if(kouTingMayDiscard) cls+=ktLeg.includes(i)?' kt-discardable':' kt-discard-locked';
     else if(kouTingPick&&ktEntry.includes(i)) cls+=' kt-discardable';
     else if(kouTingPick) cls+=' kt-discard-locked';
+    if(canHumanDiscard&&UI.handSelectIdx===i) cls+=' selected';
     return tileHTML(t,cls,false,null,`data-hand-i="${i}"`);
   }).join('');
   const humanMelds=renderMeldGroups(p0.melds,HUMAN_MELD_TILE_CLS);
@@ -7485,8 +8034,6 @@ function render(){
       buttons+=`<span style="color:#ffd44b;font-size:11px">${tr('kouTingPick','聴に入る牌をタップして捨ててください')}</span>`;
       buttons+=`<button class="btn btn-skip" onclick="humanKouTingPickCancel()">${tr('kouTingPickCancel','通常の捨てに戻る')}</button>`;
     }
-    if(!p0.kouTing&&!kouTingPick&&!G.humanOptions.includes('tsumo')&&!G.humanOptions.includes('treasure_win'))
-      buttons+=`<span style="color:#ffe;font-size:11px">${tr('clickToDiscard','クリックして捨てる')}</span>`;
   }
   if(G.phase==='after_discard'){
     if(G.humanOptions.includes('win'))
@@ -7523,15 +8070,19 @@ function render(){
     ? (UI.lang==='zh'?' <span class="treasure-used">（已用）</span>':' <span class="treasure-used">（使用済）</span>')
     : '';
   const treasureInfo=
-    `<div class="treasure-reveal">${tr('treasure','宝牌')}: ${treasureTileHtml}${treasureUsedTag}</div>`;
+    `<div class="treasure-reveal mj-dish" title="${tr('treasure','宝牌')}">${tr('treasure','宝牌')}${treasureTileHtml}${treasureUsedTag}</div>`;
 
   const playerLabelByIdx=[sideName(0),sideName(1),sideName(2),sideName(3)];
   const showCallHint = G.phase==='after_discard' && G.humanOptions.length>0 && G.pendingDiscard && G.pendingFrom>=0;
-  const pendingTilePopup = showCallHint ? `
-    <div class="callout-tile callout-compact" role="status">
-      <span><strong>${playerLabelByIdx[G.pendingFrom]}</strong> ${tr('callHintDiscard','の捨て牌')}: <strong>${tileName(G.pendingDiscard)}</strong> · ${tr('callHintAction','に対して行動できます')}</span>
-    </div>
-  ` : '';
+  const pendingTilePopup = showCallHint
+    ? `<span class="callout-tile callout-compact" role="status"><strong>${playerLabelByIdx[G.pendingFrom]}</strong>${tr('callHintDiscard','の捨て牌')} <strong>${tileName(G.pendingDiscard)}</strong> ${tr('callHintAction','に対して行動できます')}</span>`
+    : '';
+  const slipHtml = !showCallHint && (G.msg||'').trim()
+    ? `<div class="message mj-slip">${escapeHtmlText(G.msg).replace(/\n/g,' ')}</div>`
+    : '';
+  const tablePrompt = (slipHtml || pendingTilePopup)
+    ? `<div id="table-prompt">${slipHtml}${pendingTilePopup}</div>`
+    : '';
   const dealerRealHub=G.dealerReal??MATCH?.dealer??G.dealer??0;
   const hubPrimary=matchObj
     ? tr('matchRound','第{n} / {t}局').replace('{n}',String(matchObj.round)).replace('{t}',String(matchObj.totalRounds))
@@ -7545,28 +8096,22 @@ function render(){
     const p=G.players[viewSeat];
     const isTurn=G.turn===viewSeat;
     const wind=windLabelForView(viewSeat,dealerRealHub);
-    const name=escapeHtmlText(viewSeat===0?sideName(0):p.name);
+    const rawName=viewSeat===0?sideName(0):(p.name||'');
+    const name=escapeHtmlText(rawName);
+    const showName=!!rawName && rawName!==wind;
     const meldHint=viewSeat!==0&&p.melds.length>0?` [${p.melds.length}${tr('calledCount','鳴')}]`:'';
+    const dealer=dealerMark(viewSeat);
     return `<div class="player-label player-label-rim seat-plate${isTurn?' is-turn':''}">
       <span class="seat-plate-wind">${escapeHtmlText(wind)}</span>
+      ${dealer}
       <span class="seat-plate-body">
-        <span class="seat-plate-name rim-name">${dealerMark(viewSeat)}${name}${meldHint} ${ktBadge(p)}${extra}</span>
+        ${showName?`<span class="seat-plate-name rim-name">${name}${meldHint} ${ktBadge(p)}${extra}</span>`:`<span class="seat-plate-name rim-name">${meldHint} ${ktBadge(p)}${extra}</span>`}
         <span class="seat-plate-score">${escapeHtmlText(hubScoreTxt(viewSeat))}</span>
       </span>
     </div>`;
   };
-  const hubW=(seat,pos)=>`<div class="hub-wind hub-wind-${pos} ${G.turn===seat?'is-turn':''}" title="${escapeHtmlText(sideName(seat))}">
-    ${G.turn===seat?'<span class="hub-turn-arrow" aria-hidden="true"></span>':''}
-    <span class="hub-wind-face">${escapeHtmlText(windLabelForView(seat,dealerRealHub))}</span>
-    <span class="hub-wind-score">${escapeHtmlText(hubScoreTxt(seat))}</span>
-  </div>`;
-  const tableHub=`<div class="table-hub" role="group" aria-label="卓心">
-    <span class="hub-crosshair" aria-hidden="true"></span>
-    <div class="hub-arm hub-arm-n">${hubW(2,'n')}</div>
-    <div class="hub-arm hub-arm-w">${hubW(1,'w')}</div>
+  const tableHub=`<div class="table-hub mj-compass felt-compass" role="group" aria-label="卓心">
     <div class="hub-core-wrap"><div class="hub-screen"><div class="hub-line1">${escapeHtmlText(hubPrimary)}</div><div class="hub-line2">${hubSubLine}</div></div></div>
-    <div class="hub-arm hub-arm-e">${hubW(3,'e')}</div>
-    <div class="hub-arm hub-arm-s">${hubW(0,'s')}</div>
   </div>`;
   const feltWallOrnaments=renderFeltWallOrnaments();
 
@@ -7577,7 +8122,7 @@ function render(){
   const humanWaitExtra=p0.kouTing?` <span style="color:#ffd44b;font-size:10px">${tr('waiting','待ち')}: ${(p0.waits||waits).map(tileName).join(' ')}</span>`:'';
 
   const html=`
-  <div class="table-shell">
+  <div class="table-shell mj-table">
   <span class="table-corner tl" aria-hidden="true"></span>
   <span class="table-corner tr" aria-hidden="true"></span>
   <span class="table-corner bl" aria-hidden="true"></span>
@@ -7592,7 +8137,6 @@ function render(){
         <div class="tiles-row north-hand-row${dealActive&&!G.dealFaceReveal?' deal-staging':''}">${topHand}</div>
         ${topMelds?`<div class="melds-row north-melds">${topMelds}</div>`:''}
       </div>
-      <div class="tiles-row top-discards north-discards">${topDiscards}</div>
     </div>
   </div>
   <div id="middle-area">
@@ -7605,21 +8149,20 @@ function render(){
             ${leftMelds?`<div class="melds-row">${leftMelds}</div>`:''}
           </div>
         </div>
-        <div class="side-discards-zone">${leftDiscards}</div>
       </div>
     </div>
-    <div id="center-area">
+    <div id="center-area" class="felt-heart">
+      <div class="tiles-row top-discards north-discards" id="north-discards">${topDiscards}</div>
+      <div class="side-discards-zone west-discards" id="left-discards">${leftDiscards}</div>
       <div id="center-hud">
         ${tableHub}
-        <div class="message">${escapeHtmlText(G.msg||"").replace(/\n/g,"<br>")}</div>
-        ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
-        ${pendingTilePopup}
         ${treasureInfo}
       </div>
+      <div class="side-discards-zone east-discards" id="right-discards">${rightDiscards}</div>
+      <div id="human-discards">${humanDiscards}</div>
     </div>
     <div id="right-area">
       <div class="side-player">
-        <div class="side-discards-zone">${rightDiscards}</div>
         <div class="side-main">
           ${seatPlateHtml(3)}
           <div class="side-rack">
@@ -7636,13 +8179,17 @@ function render(){
     </div>
     ${ktNearHint}
     ${ktDiscardHint}
-    <div id="human-discards">${humanDiscards}</div>
+    ${tablePrompt}
+    ${G.gameOver&&G.lastWin&&G.lastWin.from!=null&&!G.lastWin.isTsumo?ronRevealBannerHtml(G.lastWin.winner,G.lastWin.from,G.lastWin.tile):''}
     <div class="human-rack-scroll">
     <div class="${humanRackCls}" id="human-rack-wrap" style="${humanRackStyle}">
       <div class="melds-row">${humanMelds}</div>
       <div id="human-hand"${dealActive&&!G.dealFaceReveal?' class="deal-staging"':''}>${humanTiles}</div>
     </div>
     </div>
+    </div>
+  </div>
+  </div>
   </div>
   ${G.online&&ONLINE.sseDisconnected?`<div class="online-sse-banner" role="alert" style="margin:8px 12px;padding:10px 12px;background:rgba(180,40,40,.85);border-radius:8px;color:#fff;font-size:12px;line-height:1.5">
     ${tr('onlineReconnectHint','サーバーとの接続が切れました。ページを再読み込みせずに再接続できます。').replace('{code}',ONLINE.room?.id||'—')}
@@ -7652,24 +8199,17 @@ function render(){
     </div>
   </div>`:''}
   <div id="action-bar" class="action-dock"><div class="action-dock-main">${buttons}</div><button type="button" class="btn btn-menu" onclick="leaveToMenu()">${t('backToMenu')}</button></div>
-  </div>
-  </div>
-  </div>
   `;
   document.getElementById('app').innerHTML=html;
 
-  // attach tile click for discard (only when human can choose discard, i.e., not 扣聴)
+  // 1タップで捨て（河へ即描画）
   if(canHumanDiscard&&!G.kanBranchAOpts&&!G.kanTurnEnding){
     document.querySelectorAll('#human-hand .tile[data-hand-i]').forEach(el=>{
       const i=parseInt(el.getAttribute('data-hand-i'),10);
       if(Number.isNaN(i)) return;
-      if(p0.kouTing){
-        if(ktLeg.includes(i)) el.onclick=()=>humanDiscard(i,el);
-      }else if(kouTingPick){
-        if(ktEntry.includes(i)) el.onclick=()=>humanDiscard(i,el);
-      }else{
-        el.onclick=()=>humanDiscard(i,el);
-      }
+      const legal=p0.kouTing?ktLeg.includes(i):kouTingPick?ktEntry.includes(i):true;
+      if(!legal) return;
+      el.onclick=()=>humanDiscard(i,el);
     });
   }
   armTurnTimer();
@@ -7689,6 +8229,7 @@ function renderStartScreen(){
   }
   clearTurnTimer();
   G=null;
+  document.body.classList.remove('playing');
   const themeBtn=(key,val)=>`<button type="button" class="btn btn-lite theme-chip ${UI.tableTheme===val?'active':''}" onclick="setTableTheme('${val}')">${t(key)}${(val!=='classic'&&UI.shopEnabled&&!UI.premium)?' *':''}</button>`;
   const hardLocked=UI.shopEnabled&&!UI.premium;
   const diffBtn = (key,val)=>`<button class="btn btn-lite ${UI.difficulty===val?'active':''}" onclick="setDifficulty('${val}')">${t(key)}${(val==='hard'&&hardLocked)?' *':''}</button>`;
@@ -7785,7 +8326,7 @@ loadUiPrefs();
 preloadTileTextures();
 GameSFX.preload();
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  navigator.serviceWorker.register('./sw.js?v=5').catch(()=>{});
 }
 renderStartScreen();
 refreshShopConfig().then(()=>{ consumeShopReturn(); renderStartScreen(); }).catch(()=>{});
