@@ -2366,8 +2366,10 @@ body[data-table-theme="night"] .human-rack{
 @media (prefers-reduced-motion: reduce){
   .tile.just-drawn,.kouting-badge,.hub-wind.is-turn,#tile-flight .fly-clone{animation:none !important;}
   #ron-cinema.show .ron-cine-rays{animation:none;}
+  .discard-cell.just-landed .tile{animation:none !important;}
 }
-body.fx-skip .tile.just-drawn,body.fx-skip .kouting-badge,body.fx-skip #tile-flight .fly-clone{animation:none !important;}
+body.fx-skip .tile.just-drawn,body.fx-skip .kouting-badge,body.fx-skip #tile-flight .fly-clone,
+body.fx-skip .discard-cell.just-landed .tile{animation:none !important;}
 
 /* ===== Real square table (ADR-075). Title splash stays. Tile sprites / seat order unchanged. ===== */
 body.playing{
@@ -2600,41 +2602,51 @@ body.playing #action-bar{
   box-sizing:border-box;
   display:block;
   font-size:clamp(7px,1.8vw,11px);
-  transform-origin:50% 50%;
-}
-.mj-table .felt-heart .west-discards .tile.lg,
-.mj-table .felt-heart .east-discards .tile.lg{
-  width:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
-  height:min(32px, calc((100cqw - 6px) / 3));
-  min-width:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
-  min-height:min(32px, calc((100cqw - 6px) / 3));
-  max-height:min(32px, calc((100cqw - 6px) / 3));
-}
-.mj-table .felt-heart .west-discards .tile:not(.hand-face),
-.mj-table .felt-heart .east-discards .tile:not(.hand-face){
-  transform-origin:50% 50%;
-}
-.mj-table .felt-heart .discard-cell.river-face-south .tile.lg{
   transform:none;
+  position:relative;
+  left:auto;
+  top:auto;
+  overflow:hidden;
 }
-.mj-table .felt-heart .discard-cell.river-face-north .tile.lg{
+.mj-table .felt-heart .discard-cell .river-spin{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform-origin:50% 50%;
+  width:100%;
+  height:100%;
+}
+.mj-table .felt-heart .discard-cell.river-face-north .river-spin{
   transform:rotate(180deg);
 }
-.mj-table .felt-heart .discard-cell.river-face-west .tile.lg,
-.mj-table .felt-heart .discard-cell.river-face-east .tile.lg{
+.mj-table .felt-heart .discard-cell.river-face-west .river-spin,
+.mj-table .felt-heart .discard-cell.river-face-east .river-spin{
   position:absolute;
   left:50%;
   top:50%;
+  width:calc(min(32px, calc((100cqw - 6px) / 3)) / 1.42);
+  height:min(32px, calc((100cqw - 6px) / 3));
   margin:0;
-  align-self:auto;
 }
-.mj-table .felt-heart .discard-cell.river-face-west .tile.lg{
-  transform:translate(-50%,-50%) rotate(90deg);
-}
-.mj-table .felt-heart .discard-cell.river-face-east .tile.lg{
+.mj-table .felt-heart .discard-cell.river-face-west .river-spin{
   transform:translate(-50%,-50%) rotate(-90deg);
 }
-.mj-table .felt-heart .discard-cell .tile-art{
+.mj-table .felt-heart .discard-cell.river-face-east .river-spin{
+  transform:translate(-50%,-50%) rotate(90deg);
+}
+.mj-table .felt-heart .west-discards .tile.lg,
+.mj-table .felt-heart .east-discards .tile.lg{
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  max-height:none;
+}
+.mj-table .felt-heart .discard-cell .tile.lg.hand-face{
+  filter:none;
+  overflow:hidden;
+}
+.mj-table .felt-heart .discard-cell .tile:not(.hand-face) .tile-art{
   position:absolute;
   left:1px;
   right:1px;
@@ -2643,9 +2655,12 @@ body.playing #action-bar{
   width:auto;
   height:auto;
 }
-.mj-table .felt-heart .west-discards .discard-cell .tile-art,
-.mj-table .felt-heart .east-discards .discard-cell .tile-art{
-  bottom:8%;
+.mj-table .felt-heart .discard-cell .tile.hand-face .tile-art,
+.mj-table .felt-heart #human-discards .discard-cell .tile.hand-face .tile-art{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
 }
 .mj-table .felt-heart .north-discards .discard-river-mat,
 .mj-table .felt-heart #human-discards .discard-river-mat{
@@ -7526,14 +7541,15 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
   let flat=0;
   const cellHtml=entry=>{
     const d=normalizeDiscardEntry(entry);
-    const cls2=tileCls+(d.claimed?' discard-claimed':'');
+    const faceCls=String(tileCls).includes('hand-face')?tileCls:`${tileCls} hand-face`; // ADR-091: 河は平面絵を回す
+    const cls2=faceCls+(d.claimed?' discard-claimed':'');
     const isPin=pinPending&&flat===lastIdx&&tileEq(d.tile,G.pendingDiscard);
     const isRonFired=!!(ronWin&&stripSeat===ronWin.from&&d.claimed&&tileEq(d.tile,ronWin.tile));
     flat++;
     const face=cls==='opp-top'?' river-face-north':cls==='left'?' river-face-west':cls==='right'?' river-face-east':' river-face-south';
     const cw=(d.claimed?' discard-cell is-claimed':' discard-cell')+face+(isPin?' discard-pending-target':'')+(isRonFired?' ron-fired':'');
     const ronAttr=isRonFired?` data-ron-label="${escapeHtmlText(ronLabel)}" data-tile-key="${tileKey(d.tile)}"`:` data-tile-key="${tileKey(d.tile)}"`;
-    return `<div class="${cw}"${ronAttr}>${tileHTML(d.tile,cls2)}</div>`;
+    return `<div class="${cw}"${ronAttr}><div class="river-spin">${tileHTML(d.tile,cls2)}</div></div>`;
   };
   const rowCap=(cls==='left'||cls==='right')?3:6;
   if(!list.length){
@@ -7548,9 +7564,9 @@ function renderDiscardStrip(tiles, cls, size='xs', pendingFromSeat=null){
 const SIDE_HAND_TILE_CLS='lg hand-face opp-hand';
 const EAST_HAND_TILE_CLS=SIDE_HAND_TILE_CLS+' opp-rot-left';
 const WEST_HAND_TILE_CLS=SIDE_HAND_TILE_CLS+' opp-rot-right';
-/** 自家捨て牌・対面卓上牌（7198.png）。自家手牌(hand-face)とは別デザイン */
+/** 対面卓上牌・自家鳴き（7198.png）。河だけ ADR-091 で hand-face に差し替える */
 const HUMAN_RIVER_TILE_CLS='lg';
-/** 自家鳴き（チー・ポン・槓）— 捨て牌と同じ 7198 */
+/** 自家鳴き（チー・ポン・槓）— 7198 */
 const HUMAN_MELD_TILE_CLS=HUMAN_RIVER_TILE_CLS;
 function renderDealHandRows(tiles, renderTile, colsPerRow=3){
   if(!tiles.length) return '';
@@ -8310,7 +8326,7 @@ loadUiPrefs();
 preloadTileTextures();
 GameSFX.preload();
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js?v=4').catch(()=>{});
+  navigator.serviceWorker.register('./sw.js?v=5').catch(()=>{});
 }
 renderStartScreen();
 refreshShopConfig().then(()=>{ consumeShopReturn(); renderStartScreen(); }).catch(()=>{});

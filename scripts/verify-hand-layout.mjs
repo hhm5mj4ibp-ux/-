@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
-import { mkdirSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
+import { inflateSync } from 'zlib';
 import { pathToFileURL } from 'url';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -8,6 +9,233 @@ import { skipToPlayableHand } from './verify-helpers.mjs';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const htmlUrl = pathToFileURL(join(root, 'harbin-mahjong.html')).href;
 mkdirSync(join(root, 'scripts', 'screenshots'), { recursive: true });
+
+function paethPredictor(a, b, c){
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if(pa <= pb && pa <= pc) return a;
+  if(pb <= pc) return b;
+  return c;
+}
+
+function decodePngRgba(buf){
+  if(buf[0] !== 0x89 || buf.toString('ascii', 1, 4) !== 'PNG') throw new Error('not png');
+  let off = 8;
+  let w = 0, h = 0, depth = 8, ctype = 6;
+  const idats = [];
+  while(off + 8 <= buf.length){
+    const len = buf.readUInt32BE(off); off += 4;
+    const type = buf.toString('ascii', off, off + 4); off += 4;
+    const data = buf.subarray(off, off + len); off += len;
+    off += 4;
+    if(type === 'IHDR'){
+      w = data.readUInt32BE(0);
+      h = data.readUInt32BE(4);
+      depth = data[8];
+      ctype = data[9];
+    }else if(type === 'IDAT'){
+      idats.push(data);
+    }else if(type === 'IEND'){
+      break;
+    }
+  }
+  if(depth !== 8) throw new Error(`png depth ${depth}`);
+  const bpp = ctype === 6 ? 4 : ctype === 2 ? 3 : ctype === 0 ? 1 : ctype === 4 ? 2 : 0;
+  if(!bpp) throw new Error(`png color type ${ctype}`);
+  const inflated = inflateSync(Buffer.concat(idats));
+  const stride = w * bpp;
+  const rgba = Buffer.alloc(w * h * 4);
+  let src = 0;
+  let prev = Buffer.alloc(stride);
+  for(let y = 0; y < h; y++){
+    const filter = inflated[src++];
+    const row = Buffer.from(inflated.subarray(src, src + stride));
+    src += stride;
+    for(let i = 0; i < stride; i++){
+      const left = i >= bpp ? row[i - bpp] : 0;
+      const up = prev[i];
+      const upLeft = i >= bpp ? prev[i - bpp] : 0;
+      let v = row[i];
+      if(filter === 1) v = (v + left) & 255;
+      else if(filter === 2) v = (v + up) & 255;
+      else if(filter === 3) v = (v + ((left + up) >> 1)) & 255;
+      else if(filter === 4) v = (v + paethPredictor(left, up, upLeft)) & 255;
+      row[i] = v;
+    }
+    for(let x = 0; x < w; x++){
+      const di = (y * w + x) * 4;
+      if(bpp === 4){
+        row.copy(rgba, di, x * 4, x * 4 + 4);
+      }else if(bpp === 3){
+        rgba[di] = row[x * 3];
+        rgba[di + 1] = row[x * 3 + 1];
+        rgba[di + 2] = row[x * 3 + 2];
+        rgba[di + 3] = 255;
+      }else if(bpp === 2){
+        rgba[di] = rgba[di + 1] = rgba[di + 2] = row[x * 2];
+        rgba[di + 3] = row[x * 2 + 1];
+      }else{
+        rgba[di] = rgba[di + 1] = rgba[di + 2] = row[x];
+        rgba[di + 3] = 255;
+      }
+    }
+    prev = row;
+  }
+  return { w, h, rgba };
+}
+
+function scaleRgba(img, w, h){
+  if(img.w === w && img.h === h) return img;
+  const out = Buffer.alloc(w * h * 4);
+  for(let y = 0; y < h; y++){
+    const sy = Math.min(img.h - 1, Math.floor(y * img.h / h));
+    for(let x = 0; x < w; x++){
+      const sx = Math.min(img.w - 1, Math.floor(x * img.w / w));
+      img.rgba.copy(out, (y * w + x) * 4, (sy * img.w + sx) * 4, (sy * img.w + sx) * 4 + 4);
+    }
+  }
+  return { w, h, rgba: out };
+}
+
+function insetCrop(img, frac = 0.14){
+  const x0 = Math.max(1, Math.floor(img.w * frac));
+  const y0 = Math.max(1, Math.floor(img.h * frac));
+  const w = img.w - x0 * 2;
+  const h = img.h - y0 * 2;
+  if(w < 4 || h < 4) return img;
+  const out = Buffer.alloc(w * h * 4);
+  for(let y = 0; y < h; y++){
+    img.rgba.copy(out, y * w * 4, ((y0 + y) * img.w + x0) * 4, ((y0 + y) * img.w + x0) * 4 + w * 4);
+  }
+  return { w, h, rgba: out };
+}
+
+function rot180(img){
+  const { w, h, rgba } = img;
+  const out = Buffer.alloc(rgba.length);
+  for(let y = 0; y < h; y++){
+    for(let x = 0; x < w; x++){
+      rgba.copy(out, ((h - 1 - y) * w + (w - 1 - x)) * 4, (y * w + x) * 4, (y * w + x) * 4 + 4);
+    }
+  }
+  return { w, h, rgba: out };
+}
+
+function rot90cw(img){
+  const { w, h, rgba } = img;
+  const out = Buffer.alloc(rgba.length);
+  for(let y = 0; y < h; y++){
+    for(let x = 0; x < w; x++){
+      rgba.copy(out, (x * h + (h - 1 - y)) * 4, (y * w + x) * 4, (y * w + x) * 4 + 4);
+    }
+  }
+  return { w: h, h: w, rgba: out };
+}
+
+function rot90ccw(img){
+  const { w, h, rgba } = img;
+  const out = Buffer.alloc(rgba.length);
+  for(let y = 0; y < h; y++){
+    for(let x = 0; x < w; x++){
+      rgba.copy(out, ((w - 1 - x) * h + y) * 4, (y * w + x) * 4, (y * w + x) * 4 + 4);
+    }
+  }
+  return { w: h, h: w, rgba: out };
+}
+
+function mseRgba(a, b){
+  const w = Math.min(a.w, b.w);
+  const h = Math.min(a.h, b.h);
+  const A = scaleRgba(a, w, h);
+  const B = scaleRgba(b, w, h);
+  let s = 0, n = 0;
+  for(let i = 0; i < A.rgba.length; i += 4){
+    if(A.rgba[i + 3] < 16 && B.rgba[i + 3] < 16) continue;
+    const dr = A.rgba[i] - B.rgba[i];
+    const dg = A.rgba[i + 1] - B.rgba[i + 1];
+    const db = A.rgba[i + 2] - B.rgba[i + 2];
+    s += dr * dr + dg * dg + db * db;
+    n++;
+  }
+  return n ? s / n : 99999;
+}
+
+async function clipPng(page, sel){
+  const box = await page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if(!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  }, sel);
+  if(!box || box.width < 6 || box.height < 6) return null;
+  const clip = {
+    x: Math.max(0, Math.floor(box.x)),
+    y: Math.max(0, Math.floor(box.y)),
+    width: Math.max(1, Math.ceil(box.width)),
+    height: Math.max(1, Math.ceil(box.height)),
+  };
+  const buf = await page.screenshot({ clip, animations: 'disabled' });
+  return decodePngRgba(buf);
+}
+
+async function assertRiverGlyphFacing(page, vpName){
+  await page.evaluate(() => {
+    if(typeof G === 'undefined' || !G?.players) return;
+    document.body.classList.add('fx-skip');
+    G.dealCinemaActive = false;
+    G.gameOver = false;
+    const yiwan = { tile: { suit: 'm', num: 1 }, claimed: false };
+    for(let i = 0; i < 4; i++) G.players[i].discards = [yiwan, yiwan];
+    if(typeof render === 'function') render();
+  });
+  await page.evaluate(async () => {
+    const imgs = [...document.querySelectorAll('.discard-cell img')];
+    await Promise.all(imgs.map((img) => (img.decode ? img.decode().catch(() => {}) : Promise.resolve())));
+  });
+  await page.waitForTimeout(120);
+  const shots = {};
+  for(const [seat, sel] of [
+    ['south', '#human-discards .discard-cell'],
+    ['north', '#north-discards .discard-cell'],
+    ['west', '#left-discards .discard-cell'],
+    ['east', '#right-discards .discard-cell'],
+  ]){
+    const img = await clipPng(page, sel);
+    if(!img) return { ok: false, reason: `${seat} clip missing` };
+    shots[seat] = insetCrop(img);
+    writeFileSync(join(root, 'scripts', 'screenshots', `yiwan-${vpName}-${seat}.png`), await page.screenshot({
+      clip: await page.evaluate((sel) => {
+        const r = document.querySelector(sel).getBoundingClientRect();
+        return { x: Math.max(0, Math.floor(r.x)), y: Math.max(0, Math.floor(r.y)), width: Math.ceil(r.width), height: Math.ceil(r.height) };
+      }, sel),
+      animations: 'disabled',
+    }));
+  }
+  const south = shots.south;
+  const northVsSouth = mseRgba(shots.north, south);
+  const northVs180 = mseRgba(shots.north, rot180(south));
+  const westVsCcw = mseRgba(shots.west, rot90ccw(south));
+  const westVsCw = mseRgba(shots.west, rot90cw(south));
+  const eastVsCw = mseRgba(shots.east, rot90cw(south));
+  const eastVsCcw = mseRgba(shots.east, rot90ccw(south));
+  const scores = {
+    northVsSouth: Math.round(northVsSouth),
+    northVs180: Math.round(northVs180),
+    westVsCcw: Math.round(westVsCcw),
+    westVsCw: Math.round(westVsCw),
+    eastVsCw: Math.round(eastVsCw),
+    eastVsCcw: Math.round(eastVsCcw),
+  };
+  const northOk = northVs180 < northVsSouth * 0.72 && northVsSouth > northVs180 + 250;
+  const westOk = westVsCcw < westVsCw * 0.82;
+  const eastOk = eastVsCw < eastVsCcw * 0.82;
+  if(!northOk || !westOk || !eastOk){
+    return { ok: false, reason: `glyph facing mse ${JSON.stringify(scores)} northOk=${northOk} westOk=${westOk} eastOk=${eastOk}` };
+  }
+  return { ok: true, scores };
+}
 
 function clipReport(page, selector, label){
   return page.evaluate(({ selector, label }) => {
@@ -369,7 +597,8 @@ const browser = await chromium.launch();
 let failed = false;
 
 for(const vp of viewports){
-  const page = await browser.newPage({ viewport: vp });
+  const page = await browser.newPage({ viewport: vp, reducedMotion: 'reduce' });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(htmlUrl);
   await skipToPlayableHand(page);
   await page.waitForSelector('#human-hand .tile.hand-face', { timeout: 8000 });
@@ -672,8 +901,8 @@ for(const vp of viewports){
     }else{
       console.log(`[${vp.name}] ${seat} river size: ok ${size.minW}x${size.minH}`);
     }
-    const facingWant = { west: 90, east: -90, north: 180, south: 0 }[seat];
-    const facing = await riverFacingReport(page, sel);
+    const facingWant = { west: -90, east: 90, north: 180, south: 0 }[seat];
+    const facing = await riverFacingReport(page, sel.replace(/\.tile$/, '.river-spin'));
     const rot = facing.rotate;
     const rotOk = !facing.missing && rot != null && (
       Math.abs(((rot - facingWant + 540) % 360) - 180) <= 8
@@ -705,6 +934,14 @@ for(const vp of viewports){
     }else{
       console.log(`[${vp.name}] ${seat} river art: ok ${art.minArtW}x${art.minArtH} imgH=${art.minImgH}`);
     }
+  }
+
+  const glyphs = await assertRiverGlyphFacing(page, vp.name);
+  if(!glyphs.ok){
+    console.error(`[${vp.name}] river glyph facing: ${glyphs.reason}`);
+    failed = true;
+  }else{
+    console.log(`[${vp.name}] river glyph facing: ok ${JSON.stringify(glyphs.scores)}`);
   }
 
   await page.evaluate(() => {
