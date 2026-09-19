@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NURO光 訪問営業｜アウト返し集（現場カンペ）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --teal: #0b6e7a;
+      --teal-deep: #085560;
+      --mint: #e6f4f5;
+      --mint-strong: #cfe9eb;
+      --ink: #2c3338;
+      --muted: #5a656c;
+      --line: #d5e3e5;
+      --paper: #ffffff;
+      --accent: #c45c26;
+      --ok: #1f7a4c;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #dfe8ea;
+      color: var(--ink);
+      font-family: "Noto Sans JP", sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .sheet {
+      width: 297mm;
+      height: 210mm;
+      margin: 8mm auto;
+      background: var(--paper);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(20, 40, 45, 0.18);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .sheet:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    /* —— Cover —— */
+    .cover {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      height: 100%;
+    }
+
+    .cover-copy {
+      padding: 18mm 16mm 14mm 18mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(165deg, #f7fbfb 0%, #ffffff 48%, #eef7f8 100%);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--teal);
+      border: 1px solid var(--mint-strong);
+      background: var(--mint);
+      padding: 6px 12px;
+      width: fit-content;
+    }
+
+    .badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--teal);
+      border-radius: 50%;
+    }
+
+    .cover h1 {
+      font-family: "Shippori Mincho", "Noto Sans JP", serif;
+      font-size: 34px;
+      line-height: 1.35;
+      margin: 18px 0 10px;
+      font-weight: 700;
+      color: var(--teal-deep);
+      letter-spacing: 0.04em;
+    }
+
+    .cover .lead {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 34em;
+      margin: 0;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 14px;
+      margin-top: 22px;
+      font-size: 11.5px;
+    }
+
+    .meta-grid dt {
+      color: var(--teal);
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .meta-grid dd {
+      margin: 2px 0 0;
+      color: var(--ink);
+    }
+
+    .cover-visual {
+      position: relative;
+      background: var(--teal-deep);
+      overflow: hidden;
+    }
+
+    .cover-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.95;
+    }
+
+    .cover-visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(8, 85, 96, 0.35), transparent 42%);
+      pointer-events: none;
+    }
+
+    .footer-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 9mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12mm;
+      font-size: 10px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .page-num {
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: 0.08em;
+    }
+
+    /* —— Inner pages —— */
+    .inner {
+      padding: 10mm 11mm 8mm;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 4.5mm;
+      border-bottom: 2px solid var(--teal);
+      margin-bottom: 4.5mm;
+      flex-shrink: 0;
+    }
+
+    .page-head h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--teal-deep);
+      letter-spacing: 0.06em;
+    }
+
+    .page-head .sub {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7mm;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .card-visual {
+      height: 34mm;
+      background: var(--mint);
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .card-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-body {
+      padding: 3.5mm 4.5mm 4mm;
+      display: flex;
+      flex-direction: column;
+      gap: 2.2mm;
+      min-height: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tag-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .customer-line {
+      margin: 0;
+      font-size: 12.5px;
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .aim {
+      margin: 0;
+      font-size: 10.5px;
+      line-height: 1.45;
+      color: var(--teal-deep);
+      background: var(--mint);
+      padding: 2mm 2.5mm;
+      border-left: 3px solid var(--teal);
+      flex-shrink: 0;
+    }
+
+    .aim strong {
+      font-weight: 900;
+    }
+
+    .script {
+      margin: 0;
+      font-size: 9.8px;
+      line-height: 1.55;
+      color: var(--ink);
+      white-space: pre-wrap;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .points {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 1.2mm;
+      flex-shrink: 0;
+    }
+
+    .points li {
+      font-size: 9.6px;
+      line-height: 1.4;
+      color: var(--muted);
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .points li::before {
+      content: "▶";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--teal);
+      font-size: 9px;
+    }
+
+    .label {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      color: var(--teal);
+      margin: 0;
+    }
+
+    /* —— Guide page —— */
+    .guide-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 7mm;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      padding: 5mm;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 3.5mm;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 14px;
+      color: var(--teal-deep);
+      letter-spacing: 0.04em;
+    }
+
+    .panel p, .panel li {
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    .panel ol, .panel ul {
+      margin: 0;
+      padding-left: 1.2em;
+    }
+
+    .flow-img {
+      width: 100%;
+      height: 52mm;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      display: block;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3mm;
+      margin-top: 1mm;
+    }
+
+    .step {
+      background: var(--mint);
+      border: 1px solid var(--mint-strong);
+      padding: 3mm;
+      min-height: 28mm;
+    }
+
+    .step .n {
+      font-size: 10px;
+      font-weight: 900;
+      color: var(--teal);
+      letter-spacing: 0.08em;
+      margin-bottom: 2mm;
+    }
+
+    .step p {
+      font-size: 11px;
+      line-height: 1.5;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .warn-list li {
+      margin-bottom: 2mm;
+    }
+
+    .note-banner {
+      margin-top: auto;
+      background: #fff8f2;
+      border: 1px solid #efd5c4;
+      color: #6b3a22;
+      padding: 3.5mm 4mm;
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    /* —— Notes page —— */
+    .notes-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7mm;
+      flex: 1;
+    }
+
+    .check-box {
+      border: 1px solid var(--line);
+      padding: 5mm;
+      background: linear-gradient(180deg, #f7fbfb, #fff);
+    }
+
+    .check-box h3 {
+      margin: 0 0 3mm;
+      font-size: 14px;
+      color: var(--teal-deep);
+    }
+
+    .check-box ul {
+      margin: 0;
+      padding-left: 1.1em;
+    }
+
+    .check-box li {
+      font-size: 11.5px;
+      line-height: 1.7;
+      margin-bottom: 2mm;
+    }
+
+    .index-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+
+    .index-table th,
+    .index-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 2.8mm 2mm;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .index-table th {
+      color: var(--teal);
+      font-weight: 900;
+      width: 12%;
+      white-space: nowrap;
+    }
+
+    .screen-hint {
+      max-width: 297mm;
+      margin: 0 auto 6mm;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .screen-hint { display: none !important; }
+      .sheet {
+        margin: 0;
+        box-shadow: none;
+        width: 297mm;
+        height: 210mm;
+      }
+    }
+
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <p class="screen-hint">A4横・印刷用資料です。ブラウザの印刷（Ctrl/Cmd+P）で「用紙：A4／向き：横」を選び PDF 保存してください。</p>
+
+  <!-- ========== 1. 表紙 ========== -->
+  <section class="sheet cover" aria-label="表紙">
+    <div class="cover-copy">
+      <div>
+        <div class="badge">FIELD CHEAT SHEET ／ 社内研修・現場用</div>
+        <h1>NURO光 訪問営業<br />アウト返し集</h1>
+        <p class="lead">
+          お客様からよくいただく「お断り・ご不安」への返し方を、圧をかけすぎない自然な言い回しで整理した現場カンペです。
+          まず共感し、確認・比較へつなげることを共通の型とします。
+        </p>
+        <dl class="meta-grid">
+          <div>
+            <dt>対象</dt>
+            <dd>訪問営業・現場スタッフ</dd>
+          </div>
+          <div>
+            <dt>用途</dt>
+            <dd>研修／同行／現地カンペ</dd>
+          </div>
+          <div>
+            <dt>収録</dt>
+            <dd>よくあるアウト 6 パターン</dd>
+          </div>
+          <div>
+            <dt>体裁</dt>
+            <dd>A4横・全5頁</dd>
+          </div>
+        </dl>
+      </div>
+      <p class="lead" style="font-size:11.5px; margin-top:18px;">
+        ※「最大3倍」「5万円相当」などの数値は、実際の提供条件・機種仕様を確認できた場合にのみ使用してください。
+      </p>
+    </div>
+    <div class="cover-visual">
+      <img src="assets/nuro-cover.png" alt="光回線と宅内モデムのイメージイラスト" />
+    </div>
+    <div class="footer-bar">
+      <span>NURO光 訪問営業トレーニング資料（社内用）</span>
+      <span class="page-num">01 / 05</span>
+    </div>
+  </section>
+
+  <!-- ========== 2. 使い方・共通の流れ ========== -->
+  <section class="sheet" aria-label="使い方と共通の流れ">
+    <div class="inner">
+      <header class="page-head">
+        <h2>使い方と共通の流れ</h2>
+        <div class="sub">共感 → 確認 → ご案内／比較<br />押し売りではなく「判断材料」を渡す</div>
+      </header>
+
+      <div class="guide-grid">
+        <div class="panel">
+          <h3>現場での使い方</h3>
+          <ol>
+            <li>お客様の一言に近い番号のカードを開く</li>
+            <li>まず「狙い」を頭に置き、本文を自然な口調で伝える</li>
+            <li>最後は必ず<strong>確認・比較の許可</strong>で着地する（契約の強要はしない）</li>
+          </ol>
+          <img class="flow-img" src="assets/nuro-flow.png" alt="共通トークフローのイラスト" />
+          <div class="steps">
+            <div class="step"><div class="n">STEP 1</div><p>共感する<br />否定しない</p></div>
+            <div class="step"><div class="n">STEP 2</div><p>利用年数・状況を伺う</p></div>
+            <div class="step"><div class="n">STEP 3</div><p>型式確認／条件比較へ</p></div>
+            <div class="step"><div class="n">STEP 4</div><p>無償案内 or 判断材料</p></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>伝えるときの安全柵</h3>
+          <ul class="warn-list">
+            <li>「絶対に穴を開けません」など<strong>断定表現は避ける</strong>（「基本的に」「新たに開ける必要はありません」）</li>
+            <li>知り合い・既存契約は<strong>否定せず</strong>、条件比較へ移す</li>
+            <li>SONY来訪の理由は「SONYだから」ではなく、<strong>外＝NTT／宅内機器＝確認・案内</strong>の役割分担で説明</li>
+            <li>数値訴求（3倍・5万円相当など）は<strong>実条件確認後のみ</strong></li>
+          </ul>
+          <div class="note-banner">
+            この資料は訪問時の話し方の整理用です。実際の工事内容・交換可否・料金条件は、都度の案内基準と現地確認に従ってください。
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bar" style="position:static; margin-top:auto; border:0; border-top:1px solid var(--line);">
+        <span>NURO光 訪問営業トレーニング資料（社内用）</span>
+        <span class="page-num">02 / 05</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 3. アウト 1・2 ========== -->
+  <section class="sheet" aria-label="アウト1と2">
+    <div class="inner">
+      <header class="page-head">
+        <h2>アウト返し ①②</h2>
+        <div class="sub">速度に困っていない ／ モデムを変えたばかり</div>
+      </header>
+
+      <div class="two-col">
+        <article class="card">
+          <div class="card-visual">
+            <img src="assets/nuro-out-01-speed.png" alt="速度に困っていないお客様への対応イメージ" />
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="num">1</span>
+              <h3 class="customer-line">「今のネット速度で特に困ってない」</h3>
+            </div>
+            <p class="aim"><strong>狙い：</strong>無理に変えなくてよいと同意 → 耐久年数 → 無償交換の機会へ</p>
+            <p class="label">トーク本文</p>
+            <p class="script">そうですよね、今の速度で困っていなければ、わざわざ変える必要はないと思います。
+
+ただ、モデムも家電製品と同じで、一般的に4〜5年ほどが耐久年数と言われています。もし3年近くお使いでしたら、そろそろ交換を考えてもいい時期です。
+
+今回ご案内しているモデムは、今お使いのものより最大3倍ほど高速なタイプで、購入すると5万円相当のものですが、今回は無償で交換できます。
+
+せっかくなので、周りの皆さんと一緒にこの機会に交換しておきませんか？</p>
+            <p class="label">ポイント</p>
+            <ul class="points">
+              <li>まず「変えなくてよい」に同意し、防衛反応を下げる</li>
+              <li>家電の耐久年数で“交換時期”の感覚を共有する</li>
+              <li>数値は実条件確認後のみ。最後は「一緒にこの機会に」で柔らかく着地</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-visual">
+            <img src="assets/nuro-out-02-modem.png" alt="モデム型式確認のイメージ" />
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="num">2</span>
+              <h3 class="customer-line">「モデム、変えたばかりなんです」</h3>
+            </div>
+            <p class="aim"><strong>狙い：</strong>新しさ≠最新性能 → まず型式確認の許可をもらう</p>
+            <p class="label">トーク本文</p>
+            <p class="script">そうなんですね。実は、モデムを最近交換された場合でも、必ずしも新しい性能のものが届いているとは限らないんです。
+
+というのも、現在お使いのモデムは型式によって性能が違っていて、場合によっては製造からかなり年数が経っている機種が届いているケースもあります。
+
+なので、まず今お使いのモデムの型式だけ確認させてください。
+
+もし対象の機種でしたら、今より3倍近い性能の新しいモデムに無償で交換できる場合があります。確認するだけですので、よかったら一度見せていただいてもいいですか？</p>
+            <p class="label">ポイント</p>
+            <ul class="points">
+              <li>「交換したばかり」を否定せず、型式差の事実へ橋渡し</li>
+              <li>ゴールは契約ではなく「見せてもらう／確認する」許可</li>
+              <li>圧をかけず、“確認するだけ”を繰り返し伝える</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="footer-bar" style="position:static; margin-top:6mm; border:0; border-top:1px solid var(--line);">
+        <span>NURO光 訪問営業トレーニング資料（社内用）</span>
+        <span class="page-num">03 / 05</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 4. アウト 3・4 ========== -->
+  <section class="sheet" aria-label="アウト3と4">
+    <div class="inner">
+      <header class="page-head">
+        <h2>アウト返し ③④</h2>
+        <div class="sub">SONY来訪の理由 ／ 壁の穴あけへの不安</div>
+      </header>
+
+      <div class="two-col">
+        <article class="card">
+          <div class="card-visual">
+            <img src="assets/nuro-out-03-roles.png" alt="屋外設備と宅内機器の役割分担イメージ" />
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="num">3</span>
+              <h3 class="customer-line">「なんでSONYの人が来るの？うちと関係ない」</h3>
+            </div>
+            <p class="aim"><strong>狙い：</strong>外＝NTT／宅内機器＝確認・案内、の役割分担を明確にする</p>
+            <p class="label">トーク本文</p>
+            <p class="script">おっしゃる通り、SONYさんと直接契約されているわけではないので、そこは分かりづらいですよね。
+
+今回、NTTさん側の光回線設備に関係する増設があり、外の電線や設備についてはNTTさんの管轄で進められています。
+
+一方で、今回ご案内しているモデムはSONY製の機器になるため、お客様のお宅の中にある機器については、こちらから勝手に交換することができません。
+
+そのため、対象のお宅かどうかを一軒ずつ確認して、対象であれば交換についてご案内するために訪問しています。
+
+まずは今お使いの機器を確認して、対象になるかだけ見させていただいてもよろしいでしょうか？</p>
+            <p class="label">ポイント</p>
+            <ul class="points">
+              <li>「SONYだから来た」ではなく役割分担で説明する</li>
+              <li>勝手に交換できない＝確認訪問である、と位置づける</li>
+              <li>着地は「対象かだけ見せてください」</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-visual">
+            <img src="assets/nuro-out-04-wall.png" alt="既存引き込み口を利用する安心イメージ" />
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="num">4</span>
+              <h3 class="customer-line">「回線工事で壁に穴、開けたくない」</h3>
+            </div>
+            <p class="aim"><strong>狙い：</strong>新規穴あけ工事ではないと安心 → 既存引き込みの現地確認へ</p>
+            <p class="label">トーク本文</p>
+            <p class="script">そこはご安心ください。今回、新しく壁に穴を開ける工事ではありません。
+
+すでにNTTさんの光回線がこちらのお宅まで引き込まれているので、基本的には今ある引き込み口をそのまま利用します。
+
+ですので、今回の工事のために新たに壁へ穴を開ける必要はありません。
+
+今ある設備を利用して進められるか、まず現地で確認させていただきますね。</p>
+            <p class="label">ポイント</p>
+            <ul class="points">
+              <li>「絶対に開けません」とは言わない（トラブル防止）</li>
+              <li>「基本的に」「新たに開ける必要はない」で伝える</li>
+              <li>最後は現地確認で合意形成する</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="footer-bar" style="position:static; margin-top:6mm; border:0; border-top:1px solid var(--line);">
+        <span>NURO光 訪問営業トレーニング資料（社内用）</span>
+        <span class="page-num">04 / 05</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 5. アウト 5・6 + 索引 ========== -->
+  <section class="sheet" aria-label="アウト5と6">
+    <div class="inner">
+      <header class="page-head">
+        <h2>アウト返し ⑤⑥</h2>
+        <div class="sub">知り合い紹介の義理 ／ 新規契約・工事待ち</div>
+      </header>
+
+      <div class="two-col">
+        <article class="card">
+          <div class="card-visual">
+            <img src="assets/nuro-out-05-referral.png" alt="紹介の義理から条件比較へ移すイメージ" />
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="num">5</span>
+              <h3 class="customer-line">「知り合いがドコモ光／ソフトバンク光だから変えられない」</h3>
+            </div>
+            <p class="aim"><strong>狙い：</strong>義理を否定せず → 利用年数 → 条件比較の気持ちへ</p>
+            <p class="label">トーク本文</p>
+            <p class="script">そうなんですね。お知り合いから紹介してもらっていると、なかなか変えづらいですよね。
+
+ちなみに、今の回線は何年くらいお使いですか？
+
+もし5年くらいお使いでしたら、十分長く使われていますし、一度ほかの回線と比較してみてもいいと思います。
+
+今は回線や通信機器もどんどん新しくなっていますので、“知り合いだから”という理由だけで、今の回線をずっと使い続ける必要はありません。
+
+もちろん、今の回線の方が条件が良ければ、そのままお使いいただいて大丈夫です。
+
+せっかくなので、一度NUROと今の回線を比較して、条件が良ければ切り替える、くらいの気持ちで見てみませんか？</p>
+            <p class="label">ポイント</p>
+            <ul class="points">
+              <li>知り合い・義理を否定しない</li>
+              <li>年数質問で「比較してよい時期」を一緒に作る</li>
+              <li>「良ければ切替／良くなければ現状維持」で安心感を残す</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-visual">
+            <img src="assets/nuro-out-06-pending.png" alt="工事前に比較するイメージ" />
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="num">6</span>
+              <h3 class="customer-line">「新しい回線を契約したばかりで、今工事待ち」</h3>
+            </div>
+            <p class="aim"><strong>狙い：</strong>工事前だからこそ比較材料として説明の許可をもらう</p>
+            <p class="label">トーク本文</p>
+            <p class="script">そうなんですね。でしたら、むしろ今のタイミングで一度比較してみるのがいいかもしれません。
+
+まだ工事前でしたら、実際に新しい回線を使い始める前ですよね。
+
+せっかくこれから使うものなので、月額料金や通信速度、サービス内容などをNURO光と一度比べてみてください。
+
+もし比較してNURO光の方が条件が良ければ、その時点でご検討いただければ大丈夫です。
+
+今の契約を否定するつもりはないので、まずは比較材料として、簡単にご説明だけさせてもらってもいいですか？</p>
+            <p class="label">ポイント</p>
+            <ul class="points">
+              <li>「せっかく契約した」気持ちに配慮する</li>
+              <li>“工事前＝使い始め前”を比較の好機として提示</li>
+              <li>着地は「説明だけ／比較材料」の許可取り</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="footer-bar" style="position:static; margin-top:6mm; border:0; border-top:1px solid var(--line);">
+        <span>NURO光 訪問営業トレーニング資料（社内用）</span>
+        <span class="page-num">05 / 05</span>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
